@@ -51,6 +51,15 @@ class UnitTestsContext extends YiiContext
 
     private string $password;
 
+    /** @var int */
+    protected $timePasswordSaved;
+
+    /** @var Password */
+    protected $previousPassword;
+
+    /** @var string */
+    protected $plainTextPassword;
+
     /**
      * @afterScenario @database
      */
@@ -539,5 +548,99 @@ class UnitTestsContext extends YiiContext
         $hash = $currentPassword->hash;
         $bad = password_needs_rehash($hash, Password::HASH_ALGORITHM, ["cost" => Password::HASH_COST]);
         Assert::false($bad);
+    }
+
+    /**
+     * @Given I have a user that does not already have a password
+     */
+    public function iHaveAUserThatDoesNotAlreadyHaveAPassword()
+    {
+        $this->tempUser = $this->createNewUserInDatabase('tester');
+        Assert::null($this->tempUser->currentPassword);
+    }
+
+    /**
+     * @When I create/save a (new) password for that user
+     */
+    public function iCreateAPasswordForThatUser()
+    {
+        Assert::notNull($this->tempUser);
+
+        $this->previousPassword = $this->tempUser->currentPassword;
+
+        $this->tempUser->scenario = User::SCENARIO_UPDATE_PASSWORD;
+
+        $this->plainTextPassword = 'password' . microtime();
+        $this->tempUser->password = $this->plainTextPassword;
+
+        $this->timePasswordSaved = time();
+
+        Assert::true($this->tempUser->save());
+    }
+
+    /**
+     * @Then the last changed date should be stored as the instant it was stored
+     */
+    public function theLastChangedDateShouldBeStoredAsTheInstantItWasStored()
+    {
+        Assert::lessThan(
+            strtotime($this->tempUser->last_changed_utc),
+            $this->timePasswordSaved + 2,
+            'last_changed_utc is not correct'
+        );
+
+        Assert::greaterThan(
+            strtotime($this->tempUser->last_changed_utc),
+            $this->timePasswordSaved - 2,
+            'last_changed_utc is not correct'
+        );
+    }
+
+    /**
+     * @Then the last synced date should be stored as the instant it was stored
+     */
+    public function theLastSyncedDateShouldBeStoredAsTheInstantItWasStored()
+    {
+        Assert::lessThan(
+            strtotime($this->tempUser->last_synced_utc),
+            $this->timePasswordSaved + 2,
+            'last_synced_utc is not correct'
+        );
+
+        Assert::greaterThan(
+            strtotime($this->tempUser->last_synced_utc),
+            $this->timePasswordSaved - 2,
+            'last_synced_utc is not correct'
+        );
+    }
+
+    /**
+     * @Given I have a user that already has a password
+     */
+    public function iHaveAUserThatAlreadyHasAPassword()
+    {
+        $this->tempUser = $this->createNewUserInDatabase('tester');
+        Assert::null($this->tempUser->currentPassword);
+
+        $this->iCreateAPasswordForThatUser();
+    }
+
+    /**
+     * @Then the previous password hash should be saved in history
+     */
+    public function thePreviousPasswordHashShouldBeSavedInHistory()
+    {
+        $passwordsForUser = Password::findAll(['user_id' => $this->tempUser->id]);
+
+        $foundOldPassword = false;
+        foreach ($passwordsForUser as $password) {
+            echo $password->id . ' ';
+            if ($this->previousPassword->id === $password->id) {
+                $foundOldPassword = true;
+                break;
+            }
+        }
+
+        Assert::true($foundOldPassword, 'previous password not found in database');
     }
 }
