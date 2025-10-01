@@ -6,7 +6,10 @@ ENV GITHUB_REF_NAME=$GITHUB_REF_NAME
 RUN apt-get update && apt-get install -y --no-install-recommends \
   cron \
   make \
-  && rm -rf /var/lib/apt/lists/*
+  ssl-cert \
+  && rm -rf /var/lib/apt/lists/* \
+  && make-ssl-cert generate-default-snakeoil \
+  && a2enmod ssl
 
 WORKDIR /data
 
