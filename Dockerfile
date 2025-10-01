@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   make \
   ssl-cert \
   && rm -rf /var/lib/apt/lists/* \
-  make-ssl-cert generate-default-snakeoil
+  && make-ssl-cert generate-default-snakeoil \
+  && a2enmod ssl
 
 WORKDIR /data
 
@@ -28,8 +29,6 @@ COPY dockerbuild/vhost.conf /etc/apache2/sites-enabled/
 
 # ErrorLog inside a VirtualHost block is ineffective for unknown reasons
 RUN sed -i -E 's@ErrorLog .*@ErrorLog /proc/self/fd/2@i' /etc/apache2/apache2.conf
-
-RUN a2enmod ssl
 
 EXPOSE 80
 CMD ["/data/run.sh"]
