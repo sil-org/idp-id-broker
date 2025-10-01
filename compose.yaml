@@ -17,6 +17,7 @@ services:
       - ./auth.json:/root/.composer/auth.json
     ports:
       - "51140:80"
+      - "51143:443"
     mem_limit: 200m
     depends_on:
       - db
