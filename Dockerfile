@@ -6,7 +6,9 @@ ENV GITHUB_REF_NAME=$GITHUB_REF_NAME
 RUN apt-get update && apt-get install -y --no-install-recommends \
   cron \
   make \
-  && rm -rf /var/lib/apt/lists/*
+  ssl-cert \
+  && rm -rf /var/lib/apt/lists/* \
+  make-ssl-cert generate-default-snakeoil
 
 WORKDIR /data
 
@@ -28,9 +30,6 @@ COPY dockerbuild/vhost.conf /etc/apache2/sites-enabled/
 RUN sed -i -E 's@ErrorLog .*@ErrorLog /proc/self/fd/2@i' /etc/apache2/apache2.conf
 
 RUN a2enmod ssl
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -nodes \
-    -subj "/C=US/ST=NC/L=Waxhaw/O=SIL/CN=localhost" \
-    -keyout /etc/ssl/private/localhost.key -out /etc/ssl/certs/localhost.crt
 
 EXPOSE 80
 CMD ["/data/run.sh"]
