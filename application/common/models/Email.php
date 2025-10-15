@@ -10,7 +10,7 @@ use yii\web\ServerErrorHttpException;
 /*
  * Email is a Yii2 model for a database email queue
  *
- * Copied from silinternational/email-service
+ * Copied from sil-org/email-service
  */
 class Email extends EmailBase
 {

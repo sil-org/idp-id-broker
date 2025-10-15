@@ -10,7 +10,7 @@ use yii\log\Target;
 /*
  * EmailLogTarget is a Yii2 log target for alerting by email
  *
- * Derived from EmailServiceTarget in silinternational/yii2-json-log-targets
+ * Derived from EmailServiceTarget in sil-org/yii2-json-log-targets
  */
 class EmailLogTarget extends Target
 {
