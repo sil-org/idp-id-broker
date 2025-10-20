@@ -8,7 +8,7 @@ use yii\mail\BaseMessage;
 /*
  * SesMessage is a Yii2 message component to send email messages using AWS Simple Email Service
  *
- * Copied from silinternational/email-service
+ * Copied from sil-org/email-service
  */
 class SesMessage extends BaseMessage
 {

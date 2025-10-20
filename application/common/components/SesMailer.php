@@ -8,7 +8,7 @@ use yii\mail\BaseMailer;
 /*
  * SesMailer is a Yii2 mailer component to send email using AWS Simple Email Service
  *
- * Copied from silinternational/email-service
+ * Copied from sil-org/email-service
  */
 class SesMailer extends BaseMailer
 {

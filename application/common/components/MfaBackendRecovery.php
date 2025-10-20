@@ -2,15 +2,12 @@
 
 namespace common\components;
 
-use common\components\Emailer;
 use common\models\EmailLog;
 use common\models\Mfa;
 use common\models\MfaBackupcode;
-use Sil\EmailService\Client\EmailServiceClientException;
 use yii\base\Component;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
-use yii\web\NotFoundHttpException;
 use yii\web\ServerErrorHttpException;
 
 class MfaBackendRecovery extends Component implements MfaBackendInterface
@@ -36,7 +33,6 @@ class MfaBackendRecovery extends Component implements MfaBackendInterface
 
     /**
      * Send a email message to the recovery contact with the code, and to the user with instructions
-     * @throws EmailServiceClientException
      */
     protected function sendRecoveryEmail($mfa, $code, string $recoveryEmail): void
     {

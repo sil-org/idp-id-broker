@@ -11,7 +11,7 @@ use yii\db\Exception;
 /*
  * EmailClient is a Yii2 component to send email via SMTP or AWS Simple Email Service
  *
- * Derived from EmailController in silinternational/email-service
+ * Derived from EmailController in sil-org/email-service
  */
 class EmailClient extends Component
 {
