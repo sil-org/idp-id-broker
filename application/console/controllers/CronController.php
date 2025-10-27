@@ -102,11 +102,12 @@ class CronController extends Controller
                 $this->$action();
             } catch (\Throwable $t) {
                 $msg = sprintf(
-                    'Error running action %s (%s:%d): %s',
+                    'Error running action %s (%s:%d): %s %s',
                     $action,
                     $t->getFile(),
                     $t->getLine(),
-                    $t->getMessage()
+                    $t->getMessage(),
+                    $t->getTraceAsString()
                 );
                 \Yii::error($msg);
             }
