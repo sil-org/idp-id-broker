@@ -88,7 +88,7 @@ class CronController extends Controller
             'actionSendAbandonedUsersEmail',
             'actionSendDelayedMfaRelatedEmails',
             'actionSendMethodReminderEmails',
-//            'actionSyncExternalGroups',
+            'actionSyncExternalGroups',
         ];
 
         if (\Yii::$app->params['google']['enableSheetsExport']) {
