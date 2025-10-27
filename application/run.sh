@@ -45,4 +45,6 @@ if [[ $RUN_TASK ]]; then
   exit $?
 fi
 
+make-ssl-cert generate-default-snakeoil
+
 $config apache2ctl -k start -D FOREGROUND
