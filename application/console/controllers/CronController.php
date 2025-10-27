@@ -100,6 +100,7 @@ class CronController extends Controller
         foreach ($actions as $action) {
             try {
                 $this->$action();
+                sleep(2); // pause to add a bit of time between log messages
             } catch (\Throwable $e) {
                 \Yii::error($e->getMessage());
             }
