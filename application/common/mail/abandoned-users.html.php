@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html as yHtml;
 
 /**
@@ -19,21 +20,21 @@ use yii\helpers\Html as yHtml;
 </p>
 <p>
     Identity accounts are used to gain access to Workday, REAP, and Gateway. Often, when an account is not used,
-    the staff member uses the Identity from their sending organization. 
+    the staff member uses the Identity from their sending organization.
 </p>
 <p>
-    <?= yHtml::a(yHtml::encode($bestPracticeUrl), "Link to Best Practice") ?>
+    <?= yHtml::a("Link to Best Practice", $bestPracticeUrl) ?>
 </p>
 <p>
     Go here for instructions on how to change access and deactivate email accounts:
 </p>
 <p>
-    <?= yHtml::a(yHtml::encode($deactivateInstructionsUrl), yHtml::encode($deactivateInstructionsUrl)) ?>
+    <?= yHtml::a(yHtml::encode($deactivateInstructionsUrl), $deactivateInstructionsUrl) ?>
 </p>
 <p>
     Here is a list of Staff IDs, Usernames and/or Email Addresses, and last login date. Please deactivate those
     you decide are unreasonable. If, in the future, they need to be reactivated, you can do so by re-checking the
-    box in the System Access area of the person's profile in Workday. 
+    box in the System Access area of the person's profile in Workday.
 </p>
 <h1>Unused <?= yHtml::encode($idpDisplayName) ?> Identity Accounts</h1>
 <table>
