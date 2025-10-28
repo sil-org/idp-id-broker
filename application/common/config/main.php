@@ -239,6 +239,7 @@ return [
                         'yii\web\HttpException:401', // Unauthorized
                         'yii\web\HttpException:404', // NotFound
                         'yii\web\HttpException:409', // Conflict
+                        'yii\web\HttpException:422', // UnprocessableEntityHttpException
                     ],
                     'context' => true,
                     'tagCallback' => function ($tags) use ($idpName): array {
