@@ -2918,20 +2918,20 @@
 		},
 		{
 			"name": "sil-org/yii2-json-log-targets",
-			"version": "2.2.1",
+			"version": "2.3.1",
 			"source": {
 				"type": "git",
 				"url": "https://github.com/sil-org/yii2-json-log-targets.git",
-				"reference": "5ad3a59f16e3b73c3878b261a583a213dd20a3e5"
+				"reference": "c8aa98a5c8fa63b9a750c3d146a52d72cd56bcd4"
 			},
 			"dist": {
 				"type": "zip",
-				"url": "https://api.github.com/repos/sil-org/yii2-json-log-targets/zipball/5ad3a59f16e3b73c3878b261a583a213dd20a3e5",
-				"reference": "5ad3a59f16e3b73c3878b261a583a213dd20a3e5",
+				"url": "https://api.github.com/repos/sil-org/yii2-json-log-targets/zipball/c8aa98a5c8fa63b9a750c3d146a52d72cd56bcd4",
+				"reference": "c8aa98a5c8fa63b9a750c3d146a52d72cd56bcd4",
 				"shasum": ""
 			},
 			"require": {
-				"php": ">=5.6",
+				"php": ">=7.0",
 				"yiisoft/yii2": "^2.0"
 			},
 			"require-dev": {
@@ -2939,11 +2939,11 @@
 				"codemix/yii2-streamlog": "^1.3",
 				"phpunit/phpunit": "^8.0",
 				"roave/security-advisories": "dev-master",
-				"silinternational/email-service-php-client": "^2.0.0"
+				"sil-org/idp-id-broker-php-client": "^4.9.0"
 			},
 			"suggest": {
 				"codemix/yii2-streamlog": "To send log to a stream such as stdout using JsonStreamTarget",
-				"silinternational/email-service-php-client": "To send log via email using EmailServiceTarget"
+				"sil-org/idp-id-broker-php-client": "To send log via email using EmailServiceTarget"
 			},
 			"type": "library",
 			"autoload": {
@@ -2966,9 +2966,9 @@
 			],
 			"support": {
 				"issues": "https://github.com/sil-org/yii2-json-log-targets/issues",
-				"source": "https://github.com/sil-org/yii2-json-log-targets/tree/2.2.1"
+				"source": "https://github.com/sil-org/yii2-json-log-targets/tree/2.3.1"
 			},
-			"time": "2025-09-15T18:27:16+00:00"
+			"time": "2025-10-24T21:44:40+00:00"
 		},
 		{
 			"name": "sil-org/yii2-sentry",
