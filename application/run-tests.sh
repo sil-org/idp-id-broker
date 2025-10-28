@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
+# print script lines as they are executed
+set -x
+
 # exit if any line in the script fails
 set -e
 
 # Try to install composer dev dependencies
 cd /data
 composer install --no-interaction --no-scripts --no-progress
-
-# If that failed, exit.
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # avoid having issues locally due to the random sleep on the appfortests container
 testServer=${TEST_SERVER_HOSTNAME}
@@ -31,17 +31,10 @@ fi
 # Try to run database migrations
 whenavail testdb 3306 100 ./yii migrate --interactive=0
 
-# If they failed, exit.
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+make-ssl-cert generate-default-snakeoil
 
 # start apache
 apachectl start
 
-# If they failed, exit.
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-
 # Run the feature tests
 ./vendor/bin/behat --strict --stop-on-failure
-
-# If they failed, exit.
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
