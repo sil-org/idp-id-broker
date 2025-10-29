@@ -8,10 +8,12 @@ set -e
 
 echo "starting idp-id-broker version $GITHUB_REF_NAME"
 
-if [[ $APP_ENV == "dev" ]]; then
-    export XDEBUG_CONFIG="remote_enable=1 remote_host="$REMOTE_DEBUG_IP
-    apt-get -y -q install php-xdebug
-fi
+# uncomment these lines to enable xdebug
+#if [[ $APP_ENV == "dev" ]]; then
+#    export XDEBUG_CONFIG="remote_enable=1 remote_host="$REMOTE_DEBUG_IP
+#    apt-get update
+#    apt-get -y -q install php-xdebug
+#fi
 
 # fix folder permissions
 chown -R www-data:www-data \
