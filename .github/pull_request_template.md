@@ -1,4 +1,4 @@
-(Backlog issue's ID and title)
+paste_backlog_issue_link_here
 
 ---
 
@@ -26,7 +26,6 @@
 ---
 
 ### PR Checklist
-- [ ] Put version number in PR title (e.g. `Release x.y.z - Summary of changes`)
 - [ ] Documentation (README, local.env.dist, api.raml, etc.)
 - [ ] Tests created or updated
 - [ ] Run `make composershow`
