@@ -19,7 +19,7 @@ class MfaBackendWebAuthn extends Component implements MfaBackendInterface
 {
     /**
      * @var string
-     * This and most of the following attributes are hydrated by application/common/config/main.php
+     * This and most of the following attributes are hydrated by app/common/config/main.php
      *   based on the entry: 'webauthn' => ArrayHelper::merge(...
      *   which pulls in the environment variables with the prefix `MFA_WEBAUTHN_`,
      *   e.g. MFA_WEBAUTHN_apiBaseUrl
