@@ -10,15 +10,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/* \
   && a2enmod ssl
 
-WORKDIR /data
+ENV APP_HOME=/app
+WORKDIR $APP_HOME
 
 # Install/cleanup composer dependencies
-COPY application/composer.json /data/
-COPY application/composer.lock /data/
+COPY app/composer.json $APP_HOME
+COPY app/composer.lock $APP_HOME
 RUN composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader --no-progress
 
-# It is expected that /data is = application/ in project folder
-COPY application/ /data/
+COPY app/ $APP_HOME
 
 # Fix folder permissions
 RUN chown -R www-data:www-data \
@@ -29,5 +29,10 @@ COPY dockerbuild/vhost.conf /etc/apache2/sites-enabled/
 # ErrorLog inside a VirtualHost block is ineffective for unknown reasons
 RUN sed -i -E 's@ErrorLog .*@ErrorLog /proc/self/fd/2@i' /etc/apache2/apache2.conf
 
+# Add links to the run scripts to maintain backward compatibility
+RUN mkdir /data
+RUN ln -s /app/run.sh /data/run.sh
+RUN ln -s /app/run-cron.sh /data/run-cron.sh
+
 EXPOSE 80
-CMD ["/data/run.sh"]
+CMD ["/app/run.sh"]

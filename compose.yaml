@@ -13,7 +13,7 @@ services:
   app:
     build: ./
     volumes:
-      - ./application:/data
+      - ./app:/app
       - ./auth.json:/root/.composer/auth.json
     ports:
       - "51140:80"
@@ -33,7 +33,7 @@ services:
   appfortests:
     build: ./
     volumes:
-      - ./application:/data
+      - ./app:/app
       - ./auth.json:/root/.composer/auth.json
     mem_limit: 200m
     ports:
@@ -79,9 +79,9 @@ services:
     platform: linux/amd64
     volumes:
       - composer-cache:/composer
-      - ./application:/data
+      - ./app:/app
       - ./auth.json:/root/.composer/auth.json
-    working_dir: /data
+    working_dir: /app
     environment:
       COMPOSER_CACHE_DIR: /composer
     env_file:
@@ -155,10 +155,10 @@ services:
     image: silintl/php8:8.3
     platform: linux/amd64
     volumes:
-      - ./application:/data
+      - ./app:/app
       - ./auth.json:/root/.composer/auth.json
     mem_limit: 200m
-    working_dir: /data
+    working_dir: /app
     depends_on:
       - appfortests
       - mfaapi

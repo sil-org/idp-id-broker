@@ -16,8 +16,7 @@ echo "starting idp-id-broker version $GITHUB_REF_NAME"
 #fi
 
 # fix folder permissions
-chown -R www-data:www-data \
-  /data/console/runtime/
+chown -R www-data:www-data "$APP_HOME"/console/runtime/
 
 echo 'sleeping a random number of seconds up to 9 to avoid migration runs clash'
 sleep $[ ( $RANDOM % 10 ) ]s
@@ -32,7 +31,7 @@ fi
 
 if [[ -n "$SSL_CA_BASE64" ]]; then
     # Decode the base64 and write to the file
-    caFile="/data/console/runtime/ca.pem"
+    caFile="$APP_HOME/console/runtime/ca.pem"
     echo "$SSL_CA_BASE64" | base64 -d > "$caFile"
     if [[ $? -ne 0 || ! -s "$caFile" ]]; then
         echo "Failed to write database SSL certificate file: $caFile" >&2
@@ -40,7 +39,7 @@ if [[ -n "$SSL_CA_BASE64" ]]; then
     fi
 fi
 
-$config /data/yii migrate --interactive=0
+$config "$APP_HOME"/yii migrate --interactive=0
 
 if [[ $RUN_TASK ]]; then
   $config ./yii $RUN_TASK
