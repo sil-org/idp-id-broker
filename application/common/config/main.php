@@ -91,8 +91,7 @@ $logPrefix = function () use ($version) {
 };
 
 $dbAttributes = [];
-$appHome = Env::get('APP_HOME', '/app');
-$caFile = $appHome . '/console/runtime/ca.pem';
+$caFile = '/data/console/runtime/ca.pem';
 if (file_exists($caFile)) {
     $dbAttributes = [
         PDO::MYSQL_ATTR_SSL_CA => $caFile,

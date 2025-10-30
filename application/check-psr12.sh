@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Try to install composer dev dependencies
-cd "$APP_HOME"
+cd /data
 composer install --no-interaction --no-scripts --no-progress
 
 # Check the code against PSR-12.
