@@ -10,15 +10,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/* \
   && a2enmod ssl
 
-ENV APP_HOME=/app
-WORKDIR $APP_HOME
+WORKDIR /data
 
 # Install/cleanup composer dependencies
-COPY app/composer.json $APP_HOME
-COPY app/composer.lock $APP_HOME
+COPY application/composer.json /data/
+COPY application/composer.lock /data/
 RUN composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader --no-progress
 
-COPY app/ $APP_HOME
+# It is expected that /data is = application/ in project folder
+COPY application/ /data/
 
 # Fix folder permissions
 RUN chown -R www-data:www-data \
@@ -30,4 +30,4 @@ COPY dockerbuild/vhost.conf /etc/apache2/sites-enabled/
 RUN sed -i -E 's@ErrorLog .*@ErrorLog /proc/self/fd/2@i' /etc/apache2/apache2.conf
 
 EXPOSE 80
-CMD ["/app/run.sh"]
+CMD ["/data/run.sh"]
