@@ -42,7 +42,7 @@ provide a GitHub auth. token.
 
 ## Customizing Email Content
 There are various emails that ID Broker can send, such as when a user's password
-has been changed. The templates for those are in `application/common/mail/`. When
+has been changed. The templates for those are in `/app/common/mail/`. When
 running this yourself, you can certainly replace those template files with
 modified versions.
 

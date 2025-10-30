@@ -16,7 +16,7 @@ $config env >> /etc/environment
 
 if [[ -n "$SSL_CA_BASE64" ]]; then
     # Decode the base64 and write to the file
-    caFile="/data/console/runtime/ca.pem"
+    caFile="$APP_HOME/console/runtime/ca.pem"
     echo "$SSL_CA_BASE64" | base64 -d > "$caFile"
     if [[ $? -ne 0 || ! -s "$caFile" ]]; then
         echo "Failed to write database SSL certificate file: $caFile" >&2
@@ -24,7 +24,7 @@ if [[ -n "$SSL_CA_BASE64" ]]; then
     fi
 fi
 
-echo '* * * * * root /data/yii send/send-queued-email > /proc/1/fd/1 2>&1' > /etc/crontab
+echo '* * * * * root '"$APP_HOME"'/yii send/send-queued-email > /proc/1/fd/1 2>&1' > /etc/crontab
 chmod 0644 /etc/crontab
 
 # run cron in foreground so output is logged

@@ -7,7 +7,7 @@ set -x
 set -e
 
 # Try to install composer dev dependencies
-cd /data
+cd /app
 composer install --no-interaction --no-scripts --no-progress
 
 # avoid having issues locally due to the random sleep on the appfortests container
@@ -20,7 +20,7 @@ fi
 
 if [[ -n "$SSL_CA_BASE64" ]]; then
     # Decode the base64 and write to the file
-    caFile="/data/console/runtime/ca.pem"
+    caFile="/app/console/runtime/ca.pem"
     echo "$SSL_CA_BASE64" | base64 -d > "$caFile"
     if [[ $? -ne 0 || ! -s "$caFile" ]]; then
         echo "Failed to write database SSL certificate file: $caFile" >&2
