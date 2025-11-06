@@ -1,4 +1,4 @@
-FROM silintl/serverless-mfa-api-go:v2.1.0
+FROM silintl/serverless-mfa-api-go:3
 WORKDIR /src
 
 RUN mkdir override
