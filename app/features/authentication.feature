@@ -30,13 +30,13 @@ Feature: Authentication
         | email        | shep_clark@example.org|
       And I request "/user" be created
       And a record exists with an employee_id of "123"
-      And the user has a password of "govols!!!"
+      And the user has a password of "89ao7kah09o8u7akh098eu7hka089eu7"
 
   Scenario: Authenticate a known user with a matching password
     Given I provide the following valid data:
-        | property  | value       |
-        | username  | shep_clark  |
-        | password  | govols!!!   |
+        | property  | value                              |
+        | username  | shep_clark                         |
+        | password  | 89ao7kah09o8u7akh098eu7hka089eu7   |
     When I request "/authentication" be created
     Then the response status code should be 200
       And the following data is returned:
@@ -119,11 +119,11 @@ Feature: Authentication
 
   Scenario Outline: Attempt to authenticate a user who's account is not in a good account status
     Given I provide the following valid data:
-        | property  | value       |
-        | username  | shep_clark  |
-        | password  | govols!!!   |
-        | active    | yes         |
-        | locked    | no          |
+        | property  | value                              |
+        | username  | shep_clark                         |
+        | password  | 89ao7kah09o8u7akh098eu7hka089eu7   |
+        | active    | yes                                |
+        | locked    | no                                 |
       And the <property> is stored as <value>
     When I request "/authentication" be created
     Then the authentication is not successful
@@ -176,9 +176,9 @@ Feature: Authentication
       And that user has a nag_for_mfa_after in the <mfaTense>
       And that user has a nag_for_method_after in the <methodTense>
       And I provide the following valid data:
-      | property  | value       |
-      | username  | shep_clark  |
-      | password  | govols!!!   |
+      | property  | value                              |
+      | username  | shep_clark                         |
+      | password  | 89ao7kah09o8u7akh098eu7hka089eu7   |
     When I request "/authentication" be created
     Then the following data is returned:
       | property       | value        |
@@ -276,9 +276,9 @@ Feature: Authentication
 
   Scenario: Attempt to authenticate a user with not pwned password
     Given I provide the following valid data:
-      | property  | value        |
-      | username  | shep_clark   |
-      | password  | govols!!!    |
+      | property  | value                               |
+      | username  | shep_clark                          |
+      | password  | 89ao7kah09o8u7akh098eu7hka089eu7    |
     When I request "/authentication" be created
     Then the response status code should be 200
     And The user's current password should not be marked as pwned
@@ -299,7 +299,7 @@ Feature: Authentication
       And I provide the following valid data:
         | property  | value        |
         | username  | shep_clark   |
-        | password  | govols!!!    |
+        | password  | 89ao7kah09o8u7akh098eu7hka089eu7    |
       And we have the <rightOrWrongPassword> for the WebAuthn MFA API
     When I request "/authentication" be created
     Then the response status code should be 200
