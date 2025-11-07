@@ -104,10 +104,10 @@ class DynamoRestart
                     'S' => ApiKeyValue,
                 ],
                 'encryptedAppId' => [
-                    'S' => 'SomeEncryptedAppId',
+                    'S' => 'g8L+JzG7BQASRoJ9XBrQiQ==:SFzmvY4BgVkwGaPa0cGJ4YDYekM/u8bTd0yPDt8U8RcPE6h32A==',
                 ],
                 'encryptedKeyHandle' => [
-                    'S' => 'SomeEncryptedKeyHandle',
+                    'S' => 'yV1s23Hol6N2HugP2wFBkQ==:pjzLEivECDVbuE5Iv9VJ0+ETwnKJcgA+bZEq9fziqqZN3bUMAJn87XA/avNHzTU5R3HeIHuEc2r+ZFBJKw7cBNjpuKawDFozlLc/uWwZx/5HjTbvheM=',
                 ],
                 // This is from a serverless-mfa-api-go test user
                 'encryptedCredentials' => [
