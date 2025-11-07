@@ -158,6 +158,7 @@ class FeatureContext extends YiiContext
             'http_errors' => false, // don't throw exceptions on 4xx/5xx so responses can be inspected.
             'headers' => $this->reqHeaders,
             'json' => $this->reqBody,
+            'query' => $this->queryParams,
         ]);
     }
 

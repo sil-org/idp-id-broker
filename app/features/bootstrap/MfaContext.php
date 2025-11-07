@@ -3,7 +3,6 @@
 namespace Sil\SilIdBroker\Behat\Context;
 
 use Behat\Gherkin\Node\TableNode;
-use common\models\EmailLog;
 use common\models\Mfa;
 use common\models\MfaBackupcode;
 use common\models\MfaWebauthn;
@@ -234,6 +233,8 @@ class MfaContext extends \FeatureContext
      */
     public function iUpdateTheMfaWebauthn()
     {
+        $rpId = getenv('MFA_WEBAUTHN_rpId');
+        $this->iProvideAFieldQueryPropertyOfValue('rpOrigin', $rpId);
         $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/webauthn/' . $this->mfaWebauthn->id, self::UPDATED);
     }
 
@@ -257,6 +258,8 @@ class MfaContext extends \FeatureContext
      */
     public function iRequestToVerifyTheWebauthnMfaRegistration()
     {
+        $rpId = getenv('MFA_WEBAUTHN_rpId');
+        $this->iProvideAFieldQueryPropertyOfValue('rpOrigin', $rpId);
         $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify/registration', self::CREATED);
     }
 
@@ -265,6 +268,8 @@ class MfaContext extends \FeatureContext
      */
     public function iRequestToVerifyTheWebauthnMfaRegistrationWithALabelOf($label)
     {
+        $rpId = getenv('MFA_WEBAUTHN_rpId');
+        $this->iProvideAFieldQueryPropertyOfValue('rpOrigin', $rpId);
         $this->setRequestBody('label', $label);
         $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify/registration', self::CREATED);
     }
@@ -287,6 +292,8 @@ class MfaContext extends \FeatureContext
             ['employee_id', '123'],
         ];
 
+        $rpId = getenv('MFA_WEBAUTHN_rpId');
+        $this->iProvideAFieldQueryPropertyOfValue('rpOrigin', $rpId);
         $this->iProvideTheFollowingValidData(new TableNode($dataForTableNode));
         $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id, self::DELETED);
     }
