@@ -3,9 +3,10 @@ require './vendor/autoload.php';
 
 use Aws\DynamoDb\DynamoDbClient as DynamoDbClient;
 
-const ApiKeyTable = "ApiKey";
-const ApiKeyValue = "10345678-1234-1234-1234-123456789012";
-const WebauthnTable = "WebAuthn";
+const API_KEY_TABLE = "ApiKey";
+const API_KEY_VALUE = "10345678-1234-1234-1234-123456789012";
+const TOTP_TABLE = "Totp";
+const WEBAUTHN_TABLE = "WebAuthn";
 
 
 class DynamoRestart
@@ -26,7 +27,7 @@ class DynamoRestart
     public function createTables()
     {
 
-        $tables = [WebauthnTable => "uuid", ApiKeyTable => "value"];
+        $tables = [WEBAUTHN_TABLE => "uuid", TOTP_TABLE => "uuid", API_KEY_TABLE => "value"];
 
         print_r(PHP_EOL . "Deleting old dynamodb tables." . PHP_EOL);
         foreach ($tables as $table => $type) {
@@ -42,21 +43,28 @@ class DynamoRestart
         print_r("Creating dynamodb tables." . PHP_EOL);
 
         $this->client->createTable([
-            'TableName' => WebauthnTable,
+            'TableName' => WEBAUTHN_TABLE,
             'KeySchema' => [['AttributeName' => 'uuid', 'KeyType' => 'HASH']],
             'AttributeDefinitions' => [['AttributeName' => 'uuid', 'AttributeType' => 'S']],
             'ProvisionedThroughput' => ['ReadCapacityUnits' => 10, 'WriteCapacityUnits' => 10],
         ]);
 
         $this->client->createTable([
-            'TableName' => ApiKeyTable,
+            'TableName' => TOTP_TABLE,
+            'KeySchema' => [['AttributeName' => 'uuid', 'KeyType' => 'HASH']],
+            'AttributeDefinitions' => [['AttributeName' => 'uuid', 'AttributeType' => 'S']],
+            'ProvisionedThroughput' => ['ReadCapacityUnits' => 10, 'WriteCapacityUnits' => 10],
+        ]);
+
+        $this->client->createTable([
+            'TableName' => API_KEY_TABLE,
             'KeySchema' => [['AttributeName' => 'value', 'KeyType' => 'HASH']],
             'AttributeDefinitions' => [['AttributeName' => 'value', 'AttributeType' => 'S']],
             'ProvisionedThroughput' => ['ReadCapacityUnits' => 10, 'WriteCapacityUnits' => 10],
         ]);
 
         $this->client->waitUntil('TableExists', array(
-            'TableName' => ApiKeyTable
+            'TableName' => API_KEY_TABLE
         ));
         print_r("Finished creating dynamodb tables." . PHP_EOL);
     }
@@ -68,7 +76,7 @@ class DynamoRestart
         $this->client->putItem([
             'Item' => [
                 'value' => [
-                    'S' => ApiKeyValue,
+                    'S' => API_KEY_VALUE,
                 ],
                 // This assumes the MFA_API_SECRET env var is "11345678-1234-1234-1234-12345678"
                 // The value below comes from using this go code to match what happens in serverless-mfa-api-go
@@ -87,7 +95,7 @@ class DynamoRestart
                     'N' => '1590518080000',
                 ],
             ],
-            'TableName' => ApiKeyTable,
+            'TableName' => API_KEY_TABLE,
         ]);
     }
 
@@ -101,7 +109,7 @@ class DynamoRestart
                     'S' => '097791bf-2385-4ab4-8b06-14561a338d8e',
                 ],
                 'apiKey' => [
-                    'S' => ApiKeyValue,
+                    'S' => API_KEY_VALUE,
                 ],
                 'encryptedAppId' => [
                     'S' => 'g8L+JzG7BQASRoJ9XBrQiQ==:SFzmvY4BgVkwGaPa0cGJ4YDYekM/u8bTd0yPDt8U8RcPE6h32A==',
@@ -114,7 +122,7 @@ class DynamoRestart
                     'B' => hex2bin('ed634d2c138412f0e5d0f85ac8bceac9264df24a0bf597e75038caf9bb7cb6363beb7b8e9c660475b730fa4f29222b481cc76231d79ea8f8e8a4b0b2ebca3c315e9309db62c07ef0d4264073f1f6741b600086af6fa2d8657f660a1d415fc65ac907e2828865940fe2bfcc977577df1b35463dd04432dc2a746ca712e326ede06e3fa9d72f0a274d'),
                 ],
             ],
-            'TableName' => WebauthnTable,
+            'TableName' => WEBAUTHN_TABLE,
         ]);
 
         print_r("Finished creating WebauthnEntries." . PHP_EOL);
@@ -123,8 +131,8 @@ class DynamoRestart
     public function verifyData() {
         $result = $this->client->getItem([
             'ConsistentRead' => true,
-            'TableName' => ApiKeyTable,
-            'Key'       => ['value'   => ['S' => ApiKeyValue]],
+            'TableName' => API_KEY_TABLE,
+            'Key'       => ['value'   => ['S' => API_KEY_VALUE]],
         ]);
 
         if (empty($result['Item']['value']['S'])) {

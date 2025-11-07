@@ -3,10 +3,14 @@
 namespace Sil\SilIdBroker\Behat\Context;
 
 use Behat\Gherkin\Node\TableNode;
+use Behat\Step\Given;
+use Behat\Step\When;
+use common\components\Clock;
 use common\models\Mfa;
 use common\models\MfaBackupcode;
 use common\models\MfaWebauthn;
 use common\models\User;
+use OTPHP\TOTP;
 use Webmozart\Assert\Assert;
 
 class MfaContext extends \FeatureContext
@@ -32,6 +36,11 @@ class MfaContext extends \FeatureContext
      * array $backupCodes
      */
     protected $backupCodes;
+
+    /**
+     * int $totpSecret
+     */
+    private $totpSecret;
 
     /**
      * @Given the user has a verified :mfaType MFA
@@ -354,5 +363,28 @@ class MfaContext extends \FeatureContext
     {
         $this->mfa = Mfa::findOne(['id' => $this->mfa->id]);
         Assert::notNull($this->mfa, 'A matching record was not found in the database');
+    }
+
+    #[When('i have requested a new TOTP MFA with label :label')]
+    public function iHaveRequestedANewTotpMfa($label): void
+    {
+        $this->setRequestBody('employee_id', '123');
+        $this->setRequestBody('type', Mfa::TYPE_TOTP);
+        $this->setRequestBody('label', $label);
+        $this->iRequestTheResourceBe('/mfa', self::CREATED);
+
+        $responseBody = $this->getResponseBody();
+        $this->mfa = Mfa::findOne(['id' => $responseBody['id']]);
+        $this->totpSecret = $responseBody['data']['totpKey'];
+    }
+
+    #[Given('I request to verify the TOTP MFA')]
+    public function iRequestToVerifyTheTotpMfa(): void
+    {
+        $otp = TOTP::createFromSecret($this->totpSecret, new Clock());
+
+        $this->setRequestBody('employee_id', '123');
+        $this->setRequestBody('value', $otp->now());
+        $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify', self::CREATED);
     }
 }
