@@ -365,7 +365,7 @@ class MfaContext extends \FeatureContext
         Assert::notNull($this->mfa, 'A matching record was not found in the database');
     }
 
-    #[When('i have requested a new TOTP MFA with label :label')]
+    #[When('I have requested a new TOTP MFA with label :label')]
     public function iHaveRequestedANewTotpMfa($label): void
     {
         $this->setRequestBody('employee_id', '123');
@@ -386,5 +386,7 @@ class MfaContext extends \FeatureContext
         $this->setRequestBody('employee_id', '123');
         $this->setRequestBody('value', $otp->now());
         $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify', self::CREATED);
+
+        $this->mfa = Mfa::findOne(['id' => $this->getResponseBody()['id']]);
     }
 }

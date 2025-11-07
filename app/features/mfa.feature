@@ -147,6 +147,7 @@ Feature: MFA
       | property  | value     |
       | label     | My TOTP   |
       | type      | totp      |
+      | verified  | 1         |
 
   Scenario: Update an MFA label
     Given the user has a verified "backupcode" MFA
