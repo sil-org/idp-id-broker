@@ -140,7 +140,7 @@ Feature: MFA
 
   Scenario: Verify new MFA record of type totp
     Given I have requested a new TOTP MFA with label "My TOTP"
-    And I request to verify the TOTP MFA
+    When I request to verify the TOTP MFA
     Then the response status code should be 200
     And the response body should contain 'data'
     And the following MFA data should be stored:
