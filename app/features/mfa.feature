@@ -129,7 +129,25 @@ Feature: MFA
     And the response body should contain "'label' => 'Yubikey'"
 
   Scenario: Create new MFA record of type totp
-#TODO - create a test double for the totp client
+    When I have requested a new TOTP MFA with label "My TOTP"
+    Then the response status code should be 200
+    And the response body should contain 'data'
+    And an MFA record exists for an employee_id of "123"
+    And the following MFA data should be stored:
+      | property  | value     |
+      | label     | My TOTP   |
+      | type      | totp      |
+
+  Scenario: Verify new MFA record of type totp
+    Given I have requested a new TOTP MFA with label "My TOTP"
+    When I request to verify the TOTP MFA
+    Then the response status code should be 200
+    And the response body should contain 'data'
+    And the following MFA data should be stored:
+      | property  | value     |
+      | label     | My TOTP   |
+      | type      | totp      |
+      | verified  | 1         |
 
   Scenario: Update an MFA label
     Given the user has a verified "backupcode" MFA
@@ -237,15 +255,8 @@ Feature: MFA
     Then the response status code should be 204
       And the MFA record is not stored
 
-  Scenario: Delete the legacy u2f credential of a webauthn MFA option
-    Given the user has a mfaWebauthn with a key_handle_hash of "u2f"
-    When I request to delete the webauthn entry of the MFA
-    Then the response status code should be 204
-      And the MFA record is not stored
-
   Scenario: Exception to delete the credential of a backupcode MFA option
     Given the user has a verified "backupcode" MFA
     When I request to delete the webauthn entry of the MFA with a webauthn_id of 999
     Then the response status code should be 403
       And 10 codes should be stored
-
