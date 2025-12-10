@@ -54,7 +54,7 @@ class Password extends PasswordBase
             ],
             [
                 'hash', 'default', 'value' => function () {
-                    return self::hashPassword($this->password);
+                    return self::hashPassword($this->password ?? '');
                 },
             ],
             [
