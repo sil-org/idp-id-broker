@@ -18,8 +18,8 @@ echo "starting idp-id-broker version $GITHUB_REF_NAME"
 # fix folder permissions
 chown -R www-data:www-data "$APP_HOME"/console/runtime/
 
-echo 'sleeping a random number of seconds up to 9 to avoid migration runs clash'
-sleep $[ ( $RANDOM % 10 ) ]s
+echo 'random sleep to avoid migration runs clash'
+sleep $(( RANDOM % 2 ))
 
 if [[ $PARAMETER_STORE_PATH ]]; then
   config="config-shim -v --path $PARAMETER_STORE_PATH"
