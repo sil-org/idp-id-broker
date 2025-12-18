@@ -4,6 +4,6 @@
     "type": "project",
     "license": "MIT",
     "require": {
-        "aws/aws-sdk-php": "~3.288.1"
+        "aws/aws-sdk-php": "~3.368.0"
     }
 }
