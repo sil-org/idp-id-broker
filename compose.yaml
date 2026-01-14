@@ -40,6 +40,7 @@ services:
       - "80"
     depends_on:
       - testdb
+      - apimock
     env_file:
       - ./db/certs/test.env
     environment:
@@ -242,6 +243,12 @@ services:
       - ./api.html:/api.html
     # The ENTRYPOINT in the Dockerfile is "raml2html"
     command: -i api.raml -o api.html
+
+  apimock:
+    image: mockoon/cli:9
+    command: ["--data", "data", "--port", "80"]
+    volumes:
+      - ./apimock/user-mail-admins.json:/data:readonly
 
 networks:
   default:
