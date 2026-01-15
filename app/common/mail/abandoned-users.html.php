@@ -14,28 +14,36 @@ use yii\helpers\Html as yHtml;
 <p>Dear HR,</p>
 
 <p>
-    As GTIS works towards securing <?= yHtml::encode($idpDisplayName) ?>'s accounts, we are auditing
-    <?= yHtml::encode($idpDisplayName) ?> Identity access and asking HR to consider deactivating accounts that
+    As GTIS works towards securing <?= yHtml::encode($idpDisplayName) ?> accounts, we are auditing
+    <?= yHtml::encode($idpDisplayName) ?> Identity access and asking you to consider deactivating accounts that
     haven't been used in more than <?= yHtml::encode(ltrim($abandonedPeriod, '+')) ?>.
 </p>
+
 <p>
-    Identity accounts are used to gain access to Workday, REAP, and Gateway. Often, when an account is not used,
-    the staff member uses the Identity from their sending organization.
+    Identity accounts are used to gain access to other systems. Often, when an account is not used,
+    the staff member uses their Identity from another organization.
 </p>
+
+<?php if (!empty($bestPracticeUrl)) { ?>
+    <p>
+        <?= yHtml::a("Link to Best Practice", $bestPracticeUrl) ?>
+    </p>
+<?php } ?>
+
+<?php if (!empty($deactivateInstructionsUrl)) { ?>
+    <p>
+          Go here for instructions on how to change access and deactivate email accounts:
+    </p>
+    <p>
+        <?= yHtml::a(yHtml::encode($deactivateInstructionsUrl), $deactivateInstructionsUrl) ?>
+    </p>
+<?php } ?>
+
 <p>
-    <?= yHtml::a("Link to Best Practice", $bestPracticeUrl) ?>
+    Here is a list of Staff IDs, Usernames, and last login time. Please deactivate those
+    you decide are unneeded.
 </p>
-<p>
-    Go here for instructions on how to change access and deactivate email accounts:
-</p>
-<p>
-    <?= yHtml::a(yHtml::encode($deactivateInstructionsUrl), $deactivateInstructionsUrl) ?>
-</p>
-<p>
-    Here is a list of Staff IDs, Usernames and/or Email Addresses, and last login date. Please deactivate those
-    you decide are unreasonable. If, in the future, they need to be reactivated, you can do so by re-checking the
-    box in the System Access area of the person's profile in Workday.
-</p>
+
 <h1>Unused <?= yHtml::encode($idpDisplayName) ?> Identity Accounts</h1>
 <table>
     <tr>
@@ -45,7 +53,7 @@ use yii\helpers\Html as yHtml;
     </tr>
     <?php foreach ($users as $user): ?>
     <tr>
-        <td><?= $user['uuid'] ?></td>
+        <td><?= $user['employee_id'] ?></td>
         <td><?= $user['username'] ?></td>
         <td><?= $user['last_login_utc'] ?></td>
     </tr>
