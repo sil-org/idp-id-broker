@@ -77,7 +77,7 @@ services:
       MYSQL_PASSWORD: appfortests
 
   cli:
-    image: silintl/php8:8.3
+    image: ghcr.io/sil-org/php8:8.3
     platform: linux/amd64
     volumes:
       - composer-cache:/composer
@@ -155,7 +155,7 @@ services:
     command: bash -c "pwd && ls -al && php restart.php"
 
   test:
-    image: silintl/php8:8.3
+    image: ghcr.io/sil-org/php8:8.3
     platform: linux/amd64
     volumes:
       - ./app:/app
