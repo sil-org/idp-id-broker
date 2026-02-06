@@ -1,4 +1,4 @@
-FROM silintl/serverless-mfa-api-go:3
+FROM ghcr.io/sil-org/serverless-mfa-api-go:3
 WORKDIR /src
 
 RUN mkdir override
