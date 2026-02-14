@@ -6,6 +6,7 @@ use Behat\Gherkin\Node\TableNode;
 use common\components\adapters\FakeIdStore;
 use common\components\notify\ConsoleNotifier;
 use common\components\notify\NotifierInterface;
+use common\models\User;
 use common\sync\Synchronizer;
 use common\sync\User as SyncUser;
 use Exception;
@@ -102,7 +103,13 @@ class SyncContext extends UnitTestsContext
     {
         $user = $this->idStore->getActiveUser($this->tempEmployeeId);
 
-        $this->createNewUserInDatabase($user);
+        $properties = $user->toArray();
+
+        // hr_contact_name and hr_contact_email are not valid columns in the ID Broker database
+        unset($properties['hr_contact_name']);
+        unset($properties['hr_contact_email']);
+
+        $this->createNewUserInDatabase($user->getUsername(), $properties);
     }
 
     /**
@@ -123,7 +130,7 @@ class SyncContext extends UnitTestsContext
      */
     public function theUserShouldExistInTheIdBroker()
     {
-        Assert::notNull($this->idBroker->getUser($this->tempEmployeeId));
+        Assert::notNull(User::findOne(['employee_id' => $this->tempEmployeeId]));
     }
 
     /**

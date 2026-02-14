@@ -10,6 +10,7 @@ use Sentry\CheckInStatus;
 use Sil\Psr3Adapters\Psr3Yii2Logger;
 use Yii;
 use yii\console\Controller;
+
 use function Sentry\captureCheckIn;
 
 class BatchController extends Controller
