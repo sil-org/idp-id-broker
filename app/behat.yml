@@ -1,65 +1,92 @@
 default:
-    suites:
-        common_features:
-            paths:
-                - "features/password.feature"
-                - "features/user.feature"
-                - "features/user-unit-tests.feature"
-                - "features/user-search.feature"
-            contexts: [ FeatureContext, Sil\SilIdBroker\Behat\Context\UnitTestsContext ]
-        authentication_features:
-            paths:
-                - "features/authentication.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\AuthenticationContext ]
-        email_features:
-            paths:
-                - "features/email.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\EmailContext ]
-        email_api_features:
-            paths:
-                - "features/email-api.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\EmailApiContext ]
-        email_client_features:
-            paths:
-                - "features/email-client.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\EmailClientContext ]
-        groups_external_features:
-            paths:
-                - "features/groups-external.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\GroupsExternalContext ]
-        groups_external_sync_features:
-            paths:
-                - "features/groups-external-sync.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\GroupsExternalSyncContext ]
-        hibp_unit_tests_features:
-            paths:
-                - "features/hibp-unit-tests.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\HibpUnitTestsContext ]
-        invite_features:
-            paths:
-                - "features/invite.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\UnitTestsContext ]
-        method_features:
-            paths:
-                - "features/method.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\MethodContext ]
-        mfa_features:
-            paths:
-                - "features/mfa.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\MfaContext ]
-        mfa_rate_limit_features:
-            paths:
-                - "features/mfa-rate-limit.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\MfaRateLimitContext ]
-        mfa_unit_tests_features:
-            paths:
-                - "features/mfa-unit-tests.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\MfaUnitTestsContext ]
-        mysql_date_time_features:
-            paths:
-                - "features/mysql-date-time.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\MySqlDateTimeContext ]
-        sheets_unit_tests_features:
-            paths:
-                - "features/sheets-unit-tests.feature"
-            contexts: [ Sil\SilIdBroker\Behat\Context\SheetsUnitTestsContext ]
+  suites:
+    common_features:
+      paths:
+        - "features/password.feature"
+        - "features/user.feature"
+        - "features/user-unit-tests.feature"
+        - "features/user-search.feature"
+      contexts: [FeatureContext, Sil\SilIdBroker\Behat\Context\UnitTestsContext]
+    authentication_features:
+      paths:
+        - "features/authentication.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\AuthenticationContext]
+    email_features:
+      paths:
+        - "features/email.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\EmailContext]
+    email_api_features:
+      paths:
+        - "features/email-api.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\EmailApiContext]
+    email_client_features:
+      paths:
+        - "features/email-client.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\EmailClientContext]
+    groups_external_features:
+      paths:
+        - "features/groups-external.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\GroupsExternalContext]
+    groups_external_sync_features:
+      paths:
+        - "features/groups-external-sync.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\GroupsExternalSyncContext]
+    hibp_unit_tests_features:
+      paths:
+        - "features/hibp-unit-tests.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\HibpUnitTestsContext]
+    invite_features:
+      paths:
+        - "features/invite.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\UnitTestsContext]
+    method_features:
+      paths:
+        - "features/method.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\MethodContext]
+    mfa_features:
+      paths:
+        - "features/mfa.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\MfaContext]
+    mfa_rate_limit_features:
+      paths:
+        - "features/mfa-rate-limit.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\MfaRateLimitContext]
+    mfa_unit_tests_features:
+      paths:
+        - "features/mfa-unit-tests.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\MfaUnitTestsContext]
+    mysql_date_time_features:
+      paths:
+        - "features/mysql-date-time.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\MySqlDateTimeContext]
+    sheets_unit_tests_features:
+      paths:
+        - "features/sheets-unit-tests.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\SheetsUnitTestsContext]
+
+    safety_cutoff_features:
+      paths: ["features/safetyCutoff.feature"]
+      contexts: [Sil\SilIdBroker\Behat\Context\SafetyCutoffContext]
+    sync_features:
+      paths: ["features/sync.feature"]
+      contexts:
+        - Sil\SilIdBroker\Behat\Context\SyncContext
+        - Sil\SilIdBroker\Behat\Context\SafetyCutoffContext
+        - Sil\SilIdBroker\Behat\Context\NotificationContext
+    google_sheets_integration_features:
+      paths: ["features/id-store-integration.feature"]
+      contexts: [Sil\SilIdBroker\Behat\Context\GoogleSheetsIntegrationContext]
+    workday_integration_features:
+      filters:
+        # removing whitespace to silence faulty deprecation warning
+        # see https://github.com/Behat/Gherkin/pull/215#issuecomment-944115733
+        tags: '~@specificUser&&~@usersChangedSince&&~@canUpdateLastSynced'
+      paths: ["features/id-store-integration.feature"]
+      contexts: [Sil\SilIdBroker\Behat\Context\WorkdayIntegrationContext]
+    secure_user_integration_features:
+      filters:
+        # removing whitespace to silence faulty deprecation warning
+        # see https://github.com/Behat/Gherkin/pull/215#issuecomment-944115733
+        tags: '~@usersChangedSince&&~@canUpdateLastSynced'
+      paths: ["features/id-store-integration.feature"]
+      contexts: [Sil\SilIdBroker\Behat\Context\SecureUserIntegrationContext]
