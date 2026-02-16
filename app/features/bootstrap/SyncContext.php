@@ -280,10 +280,10 @@ class SyncContext extends UnitTestsContext
 
         $actualUsers = $this->getIdBrokerUsers($desiredFields);
         Assert::eq(
-            $table,
             array_map(function ($user) {
                 return $user->toArray();
             }, $actualUsers),
+            $table,
             "---\nTo debug this, see if any errors were logged (above) in the test output.\n---"
         );
     }
@@ -395,7 +395,7 @@ class SyncContext extends UnitTestsContext
                 $numActiveUsers += 1;
             }
         }
-        Assert::same((int)$number, $numActiveUsers, sprintf(
+        Assert::same($numActiveUsers, (int)$number, sprintf(
             'Did not expect all of these users to be active: [%s]',
             join(", ", $idBrokerUsers)
         ));
@@ -528,6 +528,6 @@ class SyncContext extends UnitTestsContext
         sort($expected);
         sort($actual);
 
-        Assert::eq($expected, $actual);
+        Assert::eq($actual, $expected);
     }
 }
