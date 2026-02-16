@@ -616,6 +616,8 @@ class Synchronizer
         }
 
         $idStoreUser = $this->idStore->getActiveUser($employeeId);
+
+        /* var ModelUser */
         $idBrokerUser = ModelUser::findOne(['employee_id' => $employeeId]);
 
         $isInIdStore = ($idStoreUser !== null);
@@ -629,7 +631,7 @@ class Synchronizer
             }
         } else {
             if ($isInIdBroker) {
-                $this->deactivateUser($idBrokerUser->getEmployeeId());
+                $this->deactivateUser($idBrokerUser->employee_id);
             } else {
                 $this->logger->error(sprintf(
                     'Cannot find user anywhere: %s. [%s]',

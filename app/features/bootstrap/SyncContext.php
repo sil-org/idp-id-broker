@@ -202,8 +202,8 @@ class SyncContext extends UnitTestsContext
      */
     public function theUserShouldBeInactiveInTheIdBroker()
     {
-        $idBrokerUser = $this->idBroker->getUser($this->tempEmployeeId);
-        Assert::same('no', $idBrokerUser->getActive());
+        $idBrokerUser = $this->findUserByEmployeeId($this->tempEmployeeId);
+        Assert::same($idBrokerUser->active, 'no');
     }
 
     /**
@@ -308,9 +308,7 @@ class SyncContext extends UnitTestsContext
             'username' => 'person_one',
         ];
         $this->tempEmployeeId = $userInfo['employee_id'];
-        $this->idBroker = new FakeIdBroker([
-            $this->tempEmployeeId => $userInfo,
-        ]);
+        $this->createNewUserInDatabase($userInfo['username'], $userInfo);
     }
 
     /**
