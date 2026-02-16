@@ -172,8 +172,9 @@ class SyncContext extends UnitTestsContext
     public function theUserDoesNotExistInTheIdBroker()
     {
         $user = $this->idStore->getActiveUser($this->tempEmployeeId);
-
-        $this->deleteUserInDatabase($user->getUsername());
+        if ($user !== null) {
+            $this->deleteUserInDatabase($user->getUsername());
+        }
     }
 
     /**
@@ -211,7 +212,7 @@ class SyncContext extends UnitTestsContext
      */
     public function theUserShouldNotExistInTheIdBroker()
     {
-        Assert::null($this->idBroker->getUser($this->tempEmployeeId));
+        Assert::null($this->findUserByEmployeeId($this->tempEmployeeId));
     }
 
     /**
