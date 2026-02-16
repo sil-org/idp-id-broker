@@ -60,6 +60,7 @@ class SyncContext extends UnitTestsContext
      */
     public function aSpecificUserExistsInTheIdStore()
     {
+        $this->purgeDatabase();
         $tempIdStoreUserInfo = [
             'employeenumber' => '10001',
             'displayname' => 'Person One',
@@ -282,14 +283,16 @@ class SyncContext extends UnitTestsContext
         $actualUsers = $this->getIdBrokerUsers($desiredFields);
 
         $users = JSON::encode(array_map(function ($user) {
-            return $user->toArray(['employee_id','display_name','username','active']);
+            return $user->toArray(['employee_id','display_name','username','active','email']);
         }, $actualUsers), JSON_PRETTY_PRINT);
         $expected = Json::encode($table, JSON_PRETTY_PRINT);
 
         Assert::eq(
             $users,
             $expected,
-            "---\nTo debug this, see if any errors were logged (above) in the test output.\n---"
+            "---\nTo debug this, see if any errors were logged (above) in the test output.\n---" . PHP_EOL .
+            'users: ' . $users . PHP_EOL .
+            'expected: ' . $expected
         );
     }
 
