@@ -210,7 +210,10 @@ class Synchronizer
         $modelUser = new ModelUser();
         $modelUser->scenario = ModelUser::SCENARIO_NEW_USER;
         $modelUser->attributes = $syncUser->toArray();
-        $modelUser->save();
+        $ok = $modelUser->save();
+        if (!$ok) {
+            throw new Exception(json_encode($modelUser->getErrors()));
+        }
 
         /*
          * Refresh user model to retrieve database default values
@@ -312,7 +315,12 @@ class Synchronizer
         $modelUser->scenario = ModelUser::SCENARIO_UPDATE_USER;
 
         try {
-            $modelUser->save();
+            $ok = $modelUser->save();
+            if (!$ok) {
+                $this->logger->error('error while deactivating user: ' .
+                    json_encode($modelUser->getErrors()));
+                return;
+            }
         } catch (Exception $e) {
             $this->logger->error('exception while deactivating user: ' . $e->getMessage());
             return;

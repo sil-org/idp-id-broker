@@ -385,7 +385,7 @@ class SyncContext extends UnitTestsContext
         Assert::true($idStore instanceof FakeIdStore, 'This test requires a FakeIdStore adapter.');
         $employeeId = 10000 + $number;
         $idStore->changeFakeRecord($employeeId, [
-            'email' => '',
+            'firstname' => '',
         ]);
     }
 
@@ -394,18 +394,17 @@ class SyncContext extends UnitTestsContext
      */
     public function theIdBrokerShouldNowHaveActiveUsers($number)
     {
-
         Assert::true(is_numeric($number), 'Not given a number.');
         $numActiveUsers = 0;
-        $idBrokerUsers = $this->idBroker->listUsers();
+        $idBrokerUsers = $this->getIdBrokerUsers();
         foreach ($idBrokerUsers as $user) {
-            if ($user->getActive() === 'yes') {
+            if ($user->active === 'yes') {
                 $numActiveUsers += 1;
             }
         }
         Assert::same($numActiveUsers, (int)$number, sprintf(
             'Did not expect all of these users to be active: [%s]',
-            join(", ", $idBrokerUsers)
+            json_encode($idBrokerUsers)
         ));
     }
 
@@ -414,7 +413,7 @@ class SyncContext extends UnitTestsContext
      */
     public function noUsersExistInTheIdBroker()
     {
-        $this->idBroker = new FakeIdBroker();
+        $this->purgeDatabase();
     }
 
     /**
