@@ -126,7 +126,14 @@ class Synchronizer
         $modelUser->setAttributes($syncUser->toArray());
         $modelUser->active = 'yes';
         try {
-            $modelUser->save();
+            $ok = $modelUser->save();
+            if (!$ok) {
+                $this->logger->error(
+                    'error while updating user: ' .
+                    json_encode($modelUser->getErrors())
+                );
+                return;
+            }
         } catch (Exception $e) {
             $this->logger->error('exception while updating user: ' . $e->getMessage());
             return;
@@ -247,7 +254,7 @@ class Synchronizer
         foreach ($usersToAdd as $userToAdd) {
             try {
                 $this->createUser($userToAdd);
-                $employeeIdsOfUsersAdded[] = $userToAdd->getEmployeeId();
+                $employeeIdsOfUsersAdded[] = $userToAdd->employee_id;
             } catch (MissingEmailException $e) {
                 $this->logger->info(sprintf(
                     'A User (%s) lacked an email address.',
@@ -357,10 +364,10 @@ class Synchronizer
      */
     protected function getAllIdBrokerUsersByEmployeeId($fields = null)
     {
-        if (is_array($fields) && ! in_array(User::EMPLOYEE_ID, $fields)) {
+        if (is_array($fields) && ! in_array(SyncUser::EMPLOYEE_ID, $fields)) {
             throw new InvalidArgumentException(sprintf(
                 'The list of fields, if provided, must include %s. Given list: %s',
-                User::EMPLOYEE_ID,
+                SyncUser::EMPLOYEE_ID,
                 join(', ', $fields)
             ), 1501181580);
         }
@@ -369,8 +376,8 @@ class Synchronizer
         $usersByEmployeeId = [];
 
         foreach ($rawList as $user) {
-            /* @var $user SyncUser */
-            $employeeId = $user->getEmployeeId();
+            /* @var $user User */
+            $employeeId = $user->employee_id;
 
             // Prevent duplicates.
             if (array_key_exists($employeeId, $usersByEmployeeId)) {

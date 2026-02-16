@@ -53,8 +53,8 @@ Feature: Synchronizing records
 
   Scenario: Update a user in the ID Broker
     Given ONLY the following users are active in the ID Store:
-        | employeenumber | displayname  | username   |
-        | 10001          | Nickname     | first_last |
+        | employeenumber | displayname  | username   | firstname | lastname | locked |
+        | 10001          | Nickname     | first_last | Test      | User     | no     |
       And ONLY the following users exist in the ID Broker:
         | employee_id    | display_name | username   | active |
         | 10001          | First Last   | first_last | yes    |

@@ -6,12 +6,14 @@ use Behat\Gherkin\Node\TableNode;
 use common\components\adapters\FakeIdStore;
 use common\components\notify\ConsoleNotifier;
 use common\components\notify\NotifierInterface;
+use common\models\User;
 use common\sync\Synchronizer;
 use common\sync\User as SyncUser;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Sil\Psr3Adapters\Psr3EchoLogger;
 use Webmozart\Assert\Assert;
+use yii\helpers\Json;
 
 /**
  * Defines application features from the specific context.
@@ -250,11 +252,10 @@ class SyncContext extends UnitTestsContext
      */
     public function onlyTheFollowingUsersExistInTheIdBroker(TableNode $table)
     {
-        $idBrokerUsers = [];
+        $this->purgeDatabase();
         foreach ($table as $row) {
-            $idBrokerUsers[$row['employee_id']] = $row;
+            $this->createNewUserInDatabase($row['username'], $row);
         }
-        $this->idBroker = new FakeIdBroker($idBrokerUsers);
     }
 
     /**
@@ -282,22 +283,26 @@ class SyncContext extends UnitTestsContext
         }
 
         $actualUsers = $this->getIdBrokerUsers($desiredFields);
+
+        $users = JSON::encode(array_map(function ($user) {
+            return $user->toArray(['employee_id','display_name','username','active']);
+        }, $actualUsers), JSON_PRETTY_PRINT);
+        $expected = Json::encode($table, JSON_PRETTY_PRINT);
+
         Assert::eq(
-            array_map(function ($user) {
-                return $user->toArray();
-            }, $actualUsers),
-            $table,
+            $users,
+            $expected,
             "---\nTo debug this, see if any errors were logged (above) in the test output.\n---"
         );
     }
 
     /**
      * @param array $desiredFields
-     * @return SyncUser[]
+     * @return User[]
      */
     protected function getIdBrokerUsers($desiredFields = null)
     {
-        return $this->idBroker->listUsers($desiredFields);
+        return User::search(['fields' => $desiredFields]);
     }
 
     /**
