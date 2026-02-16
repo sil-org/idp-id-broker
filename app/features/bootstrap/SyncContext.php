@@ -221,10 +221,12 @@ class SyncContext extends UnitTestsContext
     public function theUserInfoInTheIdBrokerDoesNotMatchTheUserInfoInTheIdStore()
     {
         $userFromIdStore = $this->idStore->getActiveUser($this->tempEmployeeId);
-        $this->idBroker->updateUser([
-            'employee_id' => $userFromIdStore->getEmployeeId(),
-            'display_name' => $userFromIdStore->getDisplayName() . ' Jr.',
-        ]);
+        $user = $this->findUserByEmployeeId($this->tempEmployeeId);
+        Assert::notNull($user);
+        $this->updateUser(
+            $user,
+            ['display_name' => $userFromIdStore->getDisplayName() . ' Jr.']
+        );
     }
 
     /**

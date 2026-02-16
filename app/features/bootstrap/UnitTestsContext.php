@@ -565,4 +565,14 @@ class UnitTestsContext extends YiiContext
     {
         return User::findOne(['employee_id' => $employeeId]);
     }
+
+    /**
+     * Update a user
+     */
+    public function updateUser($user, $attributes)
+    {
+        $user->scenario = User::SCENARIO_UPDATE_USER;
+        $user->attributes = $attributes;
+        Assert::eq($user->save(), true);
+    }
 }

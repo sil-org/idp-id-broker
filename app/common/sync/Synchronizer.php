@@ -122,10 +122,9 @@ class Synchronizer
             return;
         }
 
-        $modelUser->attributes = $syncUser->toArray();
-        $modelUser->active = 'yes';
         $modelUser->scenario = ModelUser::SCENARIO_UPDATE_USER;
-
+        $modelUser->setAttributes($syncUser->toArray());
+        $modelUser->active = 'yes';
         try {
             $modelUser->save();
         } catch (Exception $e) {
