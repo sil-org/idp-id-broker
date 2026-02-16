@@ -69,9 +69,9 @@ Feature: Synchronizing records
 
   Scenario: Add a user to the ID Broker
     Given ONLY the following users are active in the ID Store:
-        | employeenumber | displayname  | username   |
-        | 10001          | Person One   | person_one |
-        | 10002          | Person Two   | person_two |
+        | employeenumber | displayname  | username   | firstname | lastname | locked |
+        | 10001          | Person One   | person_one | Test1     | User     | no     |
+        | 10002          | Person Two   | person_two | Test2     | User     | no     |
       And ONLY the following users exist in the ID Broker:
         | employee_id    | display_name | username   | active |
         | 10001          | Person One   | person_one | yes    |

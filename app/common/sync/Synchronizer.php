@@ -254,7 +254,7 @@ class Synchronizer
         foreach ($usersToAdd as $userToAdd) {
             try {
                 $this->createUser($userToAdd);
-                $employeeIdsOfUsersAdded[] = $userToAdd->employee_id;
+                $employeeIdsOfUsersAdded[] = $userToAdd->getEmployeeId();
             } catch (MissingEmailException $e) {
                 $this->logger->info(sprintf(
                     'A User (%s) lacked an email address.',
@@ -376,7 +376,7 @@ class Synchronizer
         $usersByEmployeeId = [];
 
         foreach ($rawList as $user) {
-            /* @var $user User */
+            /* @var $user ModelUser */
             $employeeId = $user->employee_id;
 
             // Prevent duplicates.
