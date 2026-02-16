@@ -125,18 +125,12 @@ class Synchronizer
         $modelUser->scenario = ModelUser::SCENARIO_UPDATE_USER;
         $modelUser->setAttributes($syncUser->toArray());
         $modelUser->active = 'yes';
-        try {
-            $ok = $modelUser->save();
-            if (!$ok) {
-                $this->logger->error(
-                    'error while updating user: ' .
-                    json_encode($modelUser->getErrors())
-                );
-                return;
-            }
-        } catch (Exception $e) {
-            $this->logger->error('exception while updating user: ' . $e->getMessage());
-            return;
+        $ok = $modelUser->save();
+        if (!$ok) {
+            throw new Exception(
+                'save error: ' .
+                json_encode($modelUser->getErrors())
+            );
         }
 
         $this->logger->info('Updated/activated user: ' . $syncUser->getEmployeeId());

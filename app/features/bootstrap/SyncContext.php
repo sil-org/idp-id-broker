@@ -23,9 +23,6 @@ class SyncContext extends UnitTestsContext
     /** @var Exception */
     private $exceptionThrown = null;
 
-    /** @var IdBrokerInterface */
-    private $idBroker;
-
     /** @var FakeIdStore */
     protected $idStore;
 
@@ -370,6 +367,7 @@ class SyncContext extends UnitTestsContext
                 'firstname' => 'Person',
                 'lastname' => (string)$i,
                 'email' => 'person_' . $i . '@example.com',
+                'locked' => 'no',
             ];
         }
         $this->idStore = $this->getFakeIdStore($activeIdStoreUsers);
@@ -423,13 +421,14 @@ class SyncContext extends UnitTestsContext
     {
         $this->usersAreActiveInTheIdStore($number);
 
-        $idBrokerUsers = [];
         foreach ($this->idStore->getAllActiveUsers() as $user) {
             $userInfo = $user->toArray();
             $userInfo[SyncUser::ACTIVE] = 'no';
-            $idBrokerUsers[$user->getEmployeeId()] = $userInfo;
+
+            unset($userInfo['hr_contact_email']);
+            unset($userInfo['hr_contact_name']);
+            $this->createNewUserInDatabase($user->getUsername(), $userInfo);
         }
-        $this->idBroker = new FakeIdBroker($idBrokerUsers);
     }
 
     /**
