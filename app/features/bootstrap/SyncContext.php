@@ -447,10 +447,12 @@ class SyncContext extends UnitTestsContext
      */
     public function theUserHasAManagerEmailAddressInTheIdBroker()
     {
-        $this->idBroker->updateUser([
-            SyncUser::EMPLOYEE_ID => $this->tempEmployeeId,
-            SyncUser::MANAGER_EMAIL => 'manager@example.com',
-        ]);
+        $user = $this->findUserByEmployeeId($this->tempEmployeeId);
+        Assert::notNull($user);
+        $this->updateUser(
+            $user,
+            [SyncUser::MANAGER_EMAIL => 'manager@example.com']
+        );
     }
 
     /**
@@ -469,8 +471,8 @@ class SyncContext extends UnitTestsContext
      */
     public function theUserShouldNotHaveAManagerEmailAddressInTheIdBroker()
     {
-        $userFromIdBroker = $this->idBroker->getUser($this->tempEmployeeId);
-        Assert::isEmpty($userFromIdBroker->getManagerEmail());
+        $userFromIdBroker = $this->findUserByEmployeeId($this->tempEmployeeId);
+        Assert::isEmpty($userFromIdBroker->manager_email);
     }
 
     /**
