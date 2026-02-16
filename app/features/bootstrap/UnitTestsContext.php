@@ -76,7 +76,7 @@ class UnitTestsContext extends YiiContext
     protected function createNewUserInDatabase($username, $properties = [])
     {
         Assert::false(
-            array_key_exists('username', $properties),
+            array_key_exists('username', $properties) && $properties['username'] !== $username,
             'properties array cannot override username'
         );
 
@@ -101,6 +101,20 @@ class UnitTestsContext extends YiiContext
         );
         Assert::notNull($user);
         return $user;
+    }
+
+    /**
+     * Delete a user in the database with the given username. If a user doesn't exist with that
+     * username, no exception is thrown.
+     *
+     * @param string $username
+     */
+    protected function deleteUserInDatabase($username)
+    {
+        $existingUser = User::findByUsername($username);
+        if ($existingUser !== null) {
+            Assert::notSame($existingUser->delete(), false);
+        }
     }
 
     protected function createMfa($type, $verified = 1, $user = null)
@@ -539,5 +553,16 @@ class UnitTestsContext extends YiiContext
         $hash = $currentPassword->hash;
         $bad = password_needs_rehash($hash, Password::HASH_ALGORITHM, ["cost" => Password::HASH_COST]);
         Assert::false($bad);
+    }
+
+    /**
+     *  Find a User by the employee_id field.
+     *
+     * @param $employeeId
+     * @return User|null
+     */
+    public function findUserByEmployeeId($employeeId)
+    {
+        return User::findOne(['employee_id' => $employeeId]);
     }
 }

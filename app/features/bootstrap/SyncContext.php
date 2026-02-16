@@ -6,7 +6,6 @@ use Behat\Gherkin\Node\TableNode;
 use common\components\adapters\FakeIdStore;
 use common\components\notify\ConsoleNotifier;
 use common\components\notify\NotifierInterface;
-use common\models\User;
 use common\sync\Synchronizer;
 use common\sync\User as SyncUser;
 use Exception;
@@ -69,6 +68,9 @@ class SyncContext extends UnitTestsContext
             'firstname' => 'Person',
             'lastname' => 'One',
             'email' => 'person_one@example.com',
+            'locked' => 'no',
+            'requires2sv' => 'no',
+            'supervisoremail' => 'supervisor@example.com',
             'hrname' => 'HR Person',
             'hremail' => 'hr@example.com',
         ];
@@ -130,7 +132,7 @@ class SyncContext extends UnitTestsContext
      */
     public function theUserShouldExistInTheIdBroker()
     {
-        Assert::notNull(User::findOne(['employee_id' => $this->tempEmployeeId]));
+        Assert::notNull($this->findUserByEmployeeId($this->tempEmployeeId));
     }
 
     /**
@@ -138,16 +140,28 @@ class SyncContext extends UnitTestsContext
      */
     public function theUserInfoInTheIdBrokerAndTheIdStoreShouldMatch()
     {
-        $userFromIdBroker = $this->idBroker->getUser($this->tempEmployeeId);
+        $userFromIdBroker = $this->findUserByEmployeeId($this->tempEmployeeId);
         $userInfoFromIdBroker = $userFromIdBroker->toArray();
         $userFromIdStore = $this->idStore->getActiveUser($this->tempEmployeeId);
         $userInfoFromIdStore = $userFromIdStore->toArray();
 
-        foreach ($userInfoFromIdStore as $attribute => $value) {
-            Assert::same($value, $userInfoFromIdBroker[$attribute], sprintf(
-                "Expected the ID Broker data...\n%s\n... to match the ID Store data...\n%s",
-                var_export($userInfoFromIdBroker, true),
-                var_export($userInfoFromIdStore, true)
+        $attributesToCompare = [
+            'display_name',
+            'email',
+            'employee_id',
+            'first_name',
+            'last_name',
+            'locked',
+            'manager_email',
+            'require_mfa',
+            'username',
+        ];
+        foreach ($attributesToCompare as $attribute) {
+            Assert::same($userInfoFromIdStore[$attribute], $userInfoFromIdBroker[$attribute], sprintf(
+                "Expected the ID Broker attribute '%s' (%s) to match the ID Store data (%s)",
+                $attribute,
+                $userInfoFromIdBroker[$attribute],
+                $userInfoFromIdStore[$attribute]
             ));
         }
     }
@@ -157,7 +171,9 @@ class SyncContext extends UnitTestsContext
      */
     public function theUserDoesNotExistInTheIdBroker()
     {
-        $this->idBroker = new FakeIdBroker();
+        $user = $this->idStore->getActiveUser($this->tempEmployeeId);
+
+        $this->deleteUserInDatabase($user->getUsername());
     }
 
     /**
