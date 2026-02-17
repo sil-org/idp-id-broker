@@ -56,13 +56,13 @@ Feature: Synchronizing records
         | employeenumber | displayname  | username   | email                  | firstname | lastname | locked |
         | 10001          | Nickname     | first_last | first_last@example.com | Test      | User     | no     |
       And ONLY the following users exist in the ID Broker:
-        | employee_id    | display_name | username   | email                  | active |
-        | 10001          | First Last   | first_last | first_last@example.com | yes    |
+        | employee_id    | display_name | username   | active |
+        | 10001          | First Last   | first_last | yes    |
     When I sync all the users from the ID Store to the ID Broker
     Then an exception should NOT have been thrown
       And ONLY the following users should exist in the ID Broker:
-        | employee_id    | display_name | username   | email                  | active |
-        | 10001          | Nickname     | first_last | first_last@example.com | yes    |
+        | employee_id    | display_name | username   | active |
+        | 10001          | Nickname     | first_last | yes    |
       And we tried to update the last-synced date in the ID Store for:
         | employeenumber |
         | 10001          |
@@ -73,14 +73,14 @@ Feature: Synchronizing records
         | 10001          | Person One   | person_one | person_one@example.com | Test1     | User     | no     |
         | 10002          | Person Two   | person_two | person_two@example.com | Test2     | User     | no     |
       And ONLY the following users exist in the ID Broker:
-        | employee_id    | display_name | username   | email                  | active |
-        | 10001          | Person One   | person_one | first_last@example.com | yes    |
+        | employee_id    | display_name | username   | active |
+        | 10001          | Person One   | person_one | yes    |
     When I sync all the users from the ID Store to the ID Broker
     Then an exception should NOT have been thrown
       And ONLY the following users should exist in the ID Broker:
-        | employee_id    | display_name | username   | email                  | active |
-        | 10001          | Person One   | person_one | person_one@example.com | yes    |
-        | 10002          | Person Two   | person_two | person_two@example.com | yes    |
+        | employee_id    | display_name | username   | active |
+        | 10001          | Person One   | person_one | yes    |
+        | 10002          | Person Two   | person_two | yes    |
       And we tried to update the last-synced date in the ID Store for:
         | employeenumber |
         | 10001          |
@@ -132,15 +132,15 @@ Feature: Synchronizing records
         | 10001          | Person One   | person_one | person_one@example.com | Test1     | User     | no     |
         | 10002          | Person Two   | person_two | person_two@example.com | Test2     | User     | no     |
       And ONLY the following users exist in the ID Broker:
-        | employee_id    | display_name | username   | email                  | active |
-        | 10001          | Person One   | person_one | person_one@example.com | yes    |
-        | 10002          | Person Two   | person_two | person_two@example.com | no     |
+        | employee_id    | display_name | username   | active |
+        | 10001          | Person One   | person_one | yes    |
+        | 10002          | Person Two   | person_two | no     |
     When I sync all the users from the ID Store to the ID Broker
     Then an exception should NOT have been thrown
       And ONLY the following users should exist in the ID Broker:
-        | employee_id    | display_name | username   | email                  | active |
-        | 10001          | Person One   | person_one | person_one@example.com | yes    |
-        | 10002          | Person Two   | person_two | person_two@example.com | yes    |
+        | employee_id    | display_name | username   | active |
+        | 10001          | Person One   | person_one | yes    |
+        | 10002          | Person Two   | person_two | yes    |
       And we tried to update the last-synced date in the ID Store for:
         | employeenumber |
         | 10001          |
@@ -151,17 +151,17 @@ Feature: Synchronizing records
         | employeenumber | displayname  | username     | email                  | firstname | lastname | locked |
         | 10002          | Person Two   | person_two   | person_two@example.com | Test1     | User     | no     |
       And ONLY the following users exist in the ID Broker:
-        | employee_id    | display_name | username     | email                    | active |
-        | 10001          | Person One   | person_one   | person_one@example.com   | yes    |
-        | 10002          | Person Two   | person_two   | person_two@example.com   | yes    |
-        | 10003          | Person Three | person_three | person_three@example.com | no     |
+        | employee_id    | display_name | username     | active |
+        | 10001          | Person One   | person_one   | yes    |
+        | 10002          | Person Two   | person_two   | yes    |
+        | 10003          | Person Three | person_three | no     |
     When I sync all the users from the ID Store to the ID Broker
     Then an exception should NOT have been thrown
       And ONLY the following users should exist in the ID Broker:
-        | employee_id    | display_name | username     | email                    | active |
-        | 10001          | Person One   | person_one   | person_one@example.com   | no     |
-        | 10002          | Person Two   | person_two   | person_two@example.com   | yes    |
-        | 10003          | Person Three | person_three | person_three@example.com | no     |
+        | employee_id    | display_name | username     | active |
+        | 10001          | Person One   | person_one   | no     |
+        | 10002          | Person Two   | person_two   | yes    |
+        | 10003          | Person Three | person_three | no     |
       And we tried to update the last-synced date in the ID Store for:
         | employeenumber |
         | 10001          |
@@ -184,17 +184,17 @@ Feature: Synchronizing records
         | 10004          | Added User     | person_four  | person_4@example.com | Test4     | User     | no     |
         | 10005          | Missed User    | person_five  | person_5@example.com | Test5     | User     | no     |
       And ONLY the following users exist in the ID Broker:
-        | employee_id    | display_name   | username     | email                | active |
-        | 10001          | Unchanged User | person_one   | person_1@example.com | yes    |
-        | 10002          | User To Change | person_two   | person_2@example.com | yes    |
-        | 10003          | Removed User   | person_three | person_3@example.com | yes    |
+        | employee_id    | display_name   | username     | active |
+        | 10001          | Unchanged User | person_one   | yes    |
+        | 10002          | User To Change | person_two   | yes    |
+        | 10003          | Removed User   | person_three | yes    |
     When I ask the ID Store for the list of users changed since 1491400600 and sync them
     Then ONLY the following users should exist in the ID Broker:
-        | employee_id    | display_name   | username     | email                | active |
-        | 10001          | Unchanged User | person_one   | person_1@example.com | yes    |
-        | 10002          | Changed User   | person_two   | person_2@example.com | yes    |
-        | 10003          | Removed User   | person_three | person_3@example.com | no     |
-        | 10004          | Added User     | person_four  | person_4@example.com | yes    |
+        | employee_id    | display_name   | username     | active |
+        | 10001          | Unchanged User | person_one   | yes    |
+        | 10002          | Changed User   | person_two   | yes    |
+        | 10003          | Removed User   | person_three | no     |
+        | 10004          | Added User     | person_four  | yes    |
       And we tried to update the last-synced date in the ID Store for:
         | employeenumber |
         | 10002          |
@@ -233,13 +233,13 @@ Feature: Synchronizing records
       | employeenumber | displayname  | username     | email          | firstname | lastname | locked |
       | 10001          | Person One   | person_one   | p1@example.com | Test1     | User     | no     |
     And ONLY the following users exist in the ID Broker:
-      | employee_id    | display_name | username   | manager_email     | email          | active |
-      | 10001          | Person One   | person_one | boss1@example.org | p1@example.com | yes    |
+      | employee_id    | display_name | username   | manager_email     | active |
+      | 10001          | Person One   | person_one | boss1@example.org | yes    |
     When I sync all the users from the ID Store to the ID Broker
     Then an exception should NOT have been thrown
     And ONLY the following users should exist in the ID Broker:
-      | employee_id    | display_name | username     | manager_email | email          | active |
-      | 10001          | Person One   | person_one   |               | p1@example.com | yes    |
+      | employee_id    | display_name | username     | manager_email | active |
+      | 10001          | Person One   | person_one   |               | yes    |
 
   Scenario: Sending a notification
     Given at least one user has no email address
