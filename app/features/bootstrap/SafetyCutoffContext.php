@@ -95,6 +95,7 @@ class SafetyCutoffContext extends SyncContext
                 'firstname' => $user->first_name,
                 'lastname' => $user->last_name,
                 'email' => $user->email,
+                'locked' => $user->locked,
             ];
         }
         $this->idStore = new FakeIdStore($activeIdStoreUsers);
@@ -131,6 +132,7 @@ class SafetyCutoffContext extends SyncContext
                 'firstname' => $user->first_name,
                 'lastname' => $user->last_name,
                 'email' => $user->email,
+                'locked' => $user->locked,
             ];
         }
 
@@ -146,6 +148,7 @@ class SafetyCutoffContext extends SyncContext
                 'firstname' => 'Person',
                 'lastname' => (string)$i,
                 'email' => 'person_' . $i . '@example.com',
+                'locked' => 'no',
             ];
         }
 
@@ -192,11 +195,12 @@ class SafetyCutoffContext extends SyncContext
             $tempEmployeeId = 30000 + $i;
             $activeIdStoreUsers[$tempEmployeeId] = [
                 'employeenumber' => (string)$tempEmployeeId,
-                'displayname' => 'Person ' . $i,
-                'username' => 'person_' . $i,
-                'firstname' => 'Person',
+                'displayname' => 'New Person ' . $i,
+                'username' => 'new_person_' . $i,
+                'firstname' => 'New Person',
                 'lastname' => (string)$i,
-                'email' => 'person_' . $i . '@example.com',
+                'email' => 'new_person_' . $i . '@example.com',
+                'locked' => 'no',
             ];
             $idStoreUserChanges[] = [
                 'changedat' => $this->tempTimestamp + $i,
@@ -229,6 +233,7 @@ class SafetyCutoffContext extends SyncContext
                     'firstname' => $user->first_name,
                     'lastname' => $user->last_name,
                     'email' => $user->email,
+                    'locked' => $user->locked,
                 ];
             } else {
                 $idStoreUserChanges[] = [
