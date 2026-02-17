@@ -21,7 +21,7 @@ use yii\helpers\Json;
 class SyncContext extends UnitTestsContext
 {
     /** @var Exception */
-    private $exceptionThrown = null;
+    protected $exceptionThrown = null;
 
     /** @var FakeIdStore */
     protected $idStore;

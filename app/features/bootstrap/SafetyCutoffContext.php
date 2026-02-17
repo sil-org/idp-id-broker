@@ -2,38 +2,19 @@
 
 namespace Sil\SilIdBroker\Behat\Context;
 
-use Behat\Behat\Context\Context;
 use common\components\adapters\FakeIdStore;
-use common\components\adapters\IdStoreInterface;
 use common\components\notify\ConsoleNotifier;
-use common\components\notify\NotifierInterface;
+use common\models\User;
 use common\sync\Synchronizer;
-use common\sync\User as SyncUser;
 use Exception;
-use Psr\Log\LoggerInterface;
 use Sil\Psr3Adapters\Psr3ConsoleLogger;
 use Webmozart\Assert\Assert;
 
 /**
  * Defines application features from the specific context.
  */
-class SafetyCutoffContext implements Context
+class SafetyCutoffContext extends SyncContext
 {
-    /** @var Exception */
-    private $exceptionThrown = null;
-
-    /** @var IdBrokerInterface */
-    private $idBroker;
-
-    /** @var IdStoreInterface */
-    private $idStore;
-
-    /** @var LoggerInterface */
-    protected $logger;
-
-    /** @var NotifierInterface */
-    protected $notifier;
-
     /** @var float|null */
     private $safetyCutoff = null;
 
@@ -42,6 +23,7 @@ class SafetyCutoffContext implements Context
 
     public function __construct()
     {
+        parent::__construct();
         $this->logger = new Psr3ConsoleLogger();
         $this->notifier = new ConsoleNotifier();
     }
@@ -72,21 +54,20 @@ class SafetyCutoffContext implements Context
      */
     public function usersAreActiveInTheIdBroker($number)
     {
-        $idBrokerUsers = [];
+        $this->purgeDatabase();
         for ($i = 1; $i <= $number; $i++) {
             $tempEmployeeId = 10000 + $i;
-            $idBrokerUsers[$tempEmployeeId] = [
-                SyncUser::EMPLOYEE_ID => (string)$tempEmployeeId,
-                SyncUser::DISPLAY_NAME => 'Person ' . $i,
-                SyncUser::USERNAME => 'person_' . $i,
-                SyncUser::FIRST_NAME => 'Person',
-                SyncUser::LAST_NAME => (string)$i,
-                SyncUser::EMAIL => 'person_' . $i . '@example.com',
-                SyncUser::ACTIVE => 'yes',
+            $properties = [
+                'employee_id' => (string)$tempEmployeeId,
+                'display_name' => 'Person ' . $i,
+                'username' => 'person_' . $i,
+                'first_name' => 'Person',
+                'last_name' => (string)$i,
+                'email' => 'person_' . $i . '@example.com',
+                'active' => 'yes',
             ];
+            $this->createNewUserInDatabase($properties['username'], $properties);
         }
-
-        $this->idBroker = new FakeIdBroker($idBrokerUsers);
     }
 
     /**
@@ -94,27 +75,26 @@ class SafetyCutoffContext implements Context
      */
     public function runningAFullSyncWouldDeactivateUsers($numToDeactivate)
     {
+        /* @var $usersFromBroker User[] */
+        $usersFromBroker = User::search([]);
         Assert::notEmpty(
-            $this->idBroker,
+            $usersFromBroker,
             'Set up the ID Broker before using this step.'
         );
-
-        $usersFromBroker = $this->idBroker->listUsers();
 
         $numInBroker = count($usersFromBroker);
         $numToHaveInStore = $numInBroker - $numToDeactivate;
 
         $activeIdStoreUsers = [];
         for ($i = 0; $i < $numToHaveInStore; $i++) {
-            /* @var $user SyncUser */
             $user = $usersFromBroker[$i];
-            $activeIdStoreUsers[$user->getEmployeeId()] = [
-                'employeenumber' => (string)$user->getEmployeeId(),
-                'displayname' => $user->getDisplayName(),
-                'username' => $user->getUsername(),
-                'firstname' => $user->getFirstName(),
-                'lastname' => $user->getLastName(),
-                'email' => $user->getEmail(),
+            $activeIdStoreUsers[$user->employee_id] = [
+                'employeenumber' => $user->employee_id,
+                'displayname' => $user->display_name,
+                'username' => $user->username,
+                'firstname' => $user->first_name,
+                'lastname' => $user->last_name,
+                'email' => $user->email,
             ];
         }
         $this->idStore = new FakeIdStore($activeIdStoreUsers);
@@ -133,23 +113,24 @@ class SafetyCutoffContext implements Context
      */
     public function runningAFullSyncWouldCreateUsers($numToCreate)
     {
+        /* @var $usersFromBroker User[] */
+        $usersFromBroker = User::search([]);
         Assert::notEmpty(
-            $this->idBroker,
+            $usersFromBroker,
             'Set up the ID Broker before using this step.'
         );
 
-        $usersFromBroker = $this->idBroker->listUsers();
         $activeIdStoreUsers = [];
 
         // Add all users from ID Broker to ID Store.
         foreach ($usersFromBroker as $user) {
-            $activeIdStoreUsers[$user->getEmployeeId()] = [
-                'employeenumber' => (string)$user->getEmployeeId(),
-                'displayname' => $user->getDisplayName(),
-                'username' => $user->getUsername(),
-                'firstname' => $user->getFirstName(),
-                'lastname' => $user->getLastName(),
-                'email' => $user->getEmail(),
+            $activeIdStoreUsers[$user->employee_id] = [
+                'employeenumber' => $user->employee_id,
+                'displayname' => $user->display_name,
+                'username' => $user->username,
+                'firstname' => $user->first_name,
+                'lastname' => $user->last_name,
+                'email' => $user->email,
             ];
         }
 
@@ -192,12 +173,13 @@ class SafetyCutoffContext implements Context
         $numToUpdate,
         $numToDeactivate
     ) {
+        /* @var $usersFromBroker User[] */
+        $usersFromBroker = User::search([]);
         Assert::notEmpty(
-            $this->idBroker,
+            $usersFromBroker,
             'Set up the ID Broker before using this step.'
         );
 
-        $usersFromBroker = $this->idBroker->listUsers();
         $numInBroker = count($usersFromBroker);
 
         $activeIdStoreUsers = [];
@@ -225,8 +207,6 @@ class SafetyCutoffContext implements Context
         // Set up for Store to SOME of the users that are in Broker.
         $numInBrokerToHaveInStore = $numInBroker - $numToDeactivate;
         for ($i = 0; $i < $numInBroker; $i++) {
-
-            /* @var $user SyncUser */
             $user = $usersFromBroker[$i];
 
             // Make a note that the first $numToUpdate were changed recently
@@ -234,7 +214,7 @@ class SafetyCutoffContext implements Context
             if ($i < $numToUpdate) {
                 $idStoreUserChanges[] = [
                     'changedat' => $this->tempTimestamp + $i,
-                    'employeenumber' => (string)$user->getEmployeeId(),
+                    'employeenumber' => $user->employee_id,
                 ];
             }
 
@@ -242,18 +222,18 @@ class SafetyCutoffContext implements Context
             // that those were changed recently enough to be included in our
             // incremental sync.
             if ($i < $numInBrokerToHaveInStore) {
-                $activeIdStoreUsers[$user->getEmployeeId()] = [
-                    'employeenumber' => (string)$user->getEmployeeId(),
-                    'displayname' => $user->getDisplayName(),
-                    'username' => $user->getUsername(),
-                    'firstname' => $user->getFirstName(),
-                    'lastname' => $user->getLastName(),
-                    'email' => $user->getEmail(),
+                $activeIdStoreUsers[$user->employee_id] = [
+                    'employeenumber' => $user->employee_id,
+                    'displayname' => $user->display_name,
+                    'username' => $user->username,
+                    'firstname' => $user->first_name,
+                    'lastname' => $user->last_name,
+                    'email' => $user->email,
                 ];
             } else {
                 $idStoreUserChanges[] = [
                     'changedat' => $this->tempTimestamp + $i,
-                    'employeenumber' => (string)$user->getEmployeeId(),
+                    'employeenumber' => $user->employee_id,
                 ];
             }
         }
