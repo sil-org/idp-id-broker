@@ -285,14 +285,16 @@ class SyncContext extends UnitTestsContext
 
         $actualUsers = $this->getIdBrokerUsers($desiredFields);
 
-        $users = JSON::encode(array_map(function ($user) {
-            return $user->toArray(['employee_id','display_name','username','active','email']);
+        // encode to flatten, and pretty-print for an easy-to-read error message
+        $users = JSON::encode(array_map(function ($user) use ($table) {
+            return $user->toArray($table->getRow(0));
         }, $actualUsers), JSON_PRETTY_PRINT);
         $expected = Json::encode($table, JSON_PRETTY_PRINT);
 
+        // decode to ignore column order
         Assert::eq(
-            $users,
-            $expected,
+            Json::decode($users),
+            Json::decode($expected),
             "---\nTo debug this, see if any errors were logged (above) in the test output.\n---" . PHP_EOL .
             'users: ' . $users . PHP_EOL .
             'expected: ' . $expected
