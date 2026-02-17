@@ -171,35 +171,30 @@ other words, you can wait to delete the previous Key from that Service Account
 until you have deployed the new credentials, if desired, to avoid service
 interruption.
 
-# ID Sync
-
-Synchronizing user records between the ID Broker and an ID Store
-
-## Configuration
-
-By default, configuration is read from environment variables documented in the `local.env.dist`
-file. Optionally, you can define configuration in AWS Systems Manager. See above for details on this.
-
 ## Testing
 
 ### Run all except integration tests
 
-Run `make testci`
+Run `make test`
 
 ### Run a single test suite
 
 **Note:** Before running an individual test, you might need to bring up various other containers
-needed (like "broker"), depending on which test you will run. An easy way to do that is to simply
-run `make testci` first, then use one of the following to run just a specific test.
+needed (like "db"), depending on which test you will run. An easy way to do that is to simply
+run `make test` first, then use one of the following to run just a specific test.
 
 - `make bash`
-- `vendor/bin/behat --config=features/behat.yml --suite=notification_features`
+- `vendor/bin/behat --config=features/behat.yml --suite=sync_features`
 
 OR
 
-- `docker compose run --rm cli bash -c "vendor/bin/behat --config=features/behat.yml --suite=notification_features"`
+- `docker compose run --rm cli bash -c "vendor/bin/behat --config=features/behat.yml --suite=sync_features"`
 
-Substitute `notification_features` with any of the suites defined in `behat.yml`
+Substitute `sync_features` with any of the suites defined in `behat.yml`
+
+## ID Sync
+
+Synchronizing user records between the ID Broker and an ID Store
 
 ### Integration tests
 
@@ -223,7 +218,7 @@ Set the `TEST_WORKDAY_CONFIG_*****` variables in `local.env` using `local.env.di
 ## User properties
 
 ### Employee Number (`employee_number`)
-This is the primary key that uniquely identifies each user record. It can consist of any alph-numeric characters. Required.
+This is the primary key that uniquely identifies each user record. It can consist of any alphanumeric characters. Required.
 
 ### First Name (`first_name`)
 A user’s first name. Required.
@@ -244,7 +239,7 @@ A user’s username. The user can use either their username or their email addre
 Flag to identify a temporarily disabled account. Must be one of: ‘yes’, ‘true’, 1, ‘no’, ‘false’, 0. Note that this is in addition to the “active” property that is implicitly set (or cleared) by the user’s inclusion in (or later exclusion from) the list of users provided to the IdP.
 
 ### Require MFA (`requireMfa`)
-Flag to enforce the use of multi-factor authentication. Must be one of: ‘yes’, ‘true’, 1, ‘no’, ‘false’, 0
+Flag to enforce the use of multifactor authentication. Must be one of: ‘yes’, ‘true’, 1, ‘no’, ‘false’, 0
 
 ### Manager Email (`manager_email`)
 Email address of the user’s manager. This can be used in a situation where a user loses access to their multi-factor authentication and needs assistance. In such a situation, they can request assistance from their manager, who will receive a temporary code that can be given to the user once they have positively identified the person.
@@ -260,4 +255,3 @@ Name of Human Resources contact person, used for notifications such as "New User
 
 ### HR Contact Email (`hr_contact_email`)
 Email address of Human Resources contact person, used for notifications such as "New User" notification.
-
