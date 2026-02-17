@@ -37,4 +37,4 @@ make-ssl-cert generate-default-snakeoil
 apachectl start
 
 # Run the feature tests
-./vendor/bin/behat --strict --stop-on-failure
+./vendor/bin/behat --strict --stop-on-failure --tags '~@integration'

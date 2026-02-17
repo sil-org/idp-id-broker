@@ -1,5 +1,6 @@
 <?php
 
+use common\components\adapters\IdStoreBase;
 use common\components\Emailer;
 use common\components\EmailLogTarget;
 use common\components\MfaBackendBackupcode;
@@ -7,6 +8,8 @@ use common\components\MfaBackendManager;
 use common\components\MfaBackendRecovery;
 use common\components\MfaBackendTotp;
 use common\components\MfaBackendWebAuthn;
+use common\components\Monitor;
+use common\components\notify\FakeEmailNotifier;
 use common\components\SesMailer;
 use Sentry\Event;
 use Sil\JsonLog\target\JsonStreamTarget;
@@ -68,6 +71,16 @@ if (!empty($mailerHost) || $mailerConfig['useFileTransport'] === true) {
 $fromEmail           = Env::get('FROM_EMAIL', '');
 $fromName            = Env::get('FROM_NAME', '');
 $emailQueueBatchSize = Env::get('EMAIL_QUEUE_BATCH_SIZE', 10);
+
+$idStoreOptionalConfig = Env::getArrayFromPrefix('ID_STORE_CONFIG_');
+
+/* Configure the notifier, used to send notifications to HR (such as
+ * when users lack an email address):  */
+$notifierConfig = [
+    'class' => FakeEmailNotifier::class,
+    'emailTo' => Env::get('NOTIFIER_EMAIL_TO'),
+    'organizationName' => $idpDisplayName,
+];
 
 $version = Env::get('GITHUB_REF_NAME', 'unknown');
 
@@ -189,6 +202,11 @@ return [
             ['class' => MfaBackendWebAuthn::class],
             $mfaWebAuthnConfig
         ),
+        'idStore' => ArrayHelper::merge([
+            'class' => IdStoreBase::getAdapterClassFor(
+                Env::get('ID_STORE_ADAPTER')
+            ),
+        ], $idStoreOptionalConfig),
         'manager' => ['class' => MfaBackendManager::class],
         'recovery' => ['class' => MfaBackendRecovery::class],
         // http://www.yiiframework.com/doc-2.0/guide-runtime-logging.html
@@ -265,6 +283,15 @@ return [
             ],
         ],
         'mailer' => $mailerConfig,
+
+        // ID Sync Notifier // TODO: replace this with mailer
+        'notifier' => $notifierConfig,
+
+        'monitor' => [
+            'class' => Monitor::class,
+            'heartbeatUrl' => Env::get('HEARTBEAT_URL'),
+            'heartbeatMethod' => Env::get('HEARTBEAT_METHOD'),
+        ]
     ],
     'params' => [
         'authorizedTokens'              => Env::getArray('API_ACCESS_KEYS'),
@@ -327,5 +354,10 @@ return [
             ],
             Env::getArrayFromPrefix('GOOGLE_')
         ),
+
+        // sync params
+        'syncSafetyCutoff' => Env::get('SYNC_SAFETY_CUTOFF'),
+        'allowEmptyEmail' => Env::get('ALLOW_EMPTY_EMAIL', false),
+        'enableNewUserNotification' => Env::get('ENABLE_NEW_USER_NOTIFICATION', false),
     ],
 ];

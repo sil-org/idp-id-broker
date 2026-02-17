@@ -275,7 +275,8 @@ class User extends UserBase
             ],
             [
                 'email', 'required', 'when' => function ($model) {
-                    return $model->personal_email === null;
+                    $allowEmptyEmail = \Yii::$app->params['allowEmptyEmail'] ?? false;
+                    return !$allowEmptyEmail || $model->personal_email === null;
                 }
             ],
             [

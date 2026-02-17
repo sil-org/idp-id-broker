@@ -62,6 +62,8 @@ services:
       MFA_WEBAUTHN_rpId: http://app99
       RP_ORIGINS: http://app99
       SUPPORT_EMAIL: support@example.com
+      ID_STORE_ADAPTER: fake
+      ALLOW_EMPTY_EMAIL: true
 
   testdb:
     image: mariadb:10
@@ -199,6 +201,8 @@ services:
       ABANDONED_USER_bestPracticeUrl: http://www.example.com/best-practices.html
       ABANDONED_USER_deactivateInstructionsUrl: http://www.example.com/deactivate-instructions.html
       U2F_SIM_HOST_AND_PORT: u2fsim:8080
+      ID_STORE_ADAPTER: fake
+      ALLOW_EMPTY_EMAIL: true
     command: ./run-tests.sh
     # running isolated tests
     # docker compose run --rm test vendor/bin/behat --stop-on-failure features/user.feature
