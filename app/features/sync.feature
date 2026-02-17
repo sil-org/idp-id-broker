@@ -178,23 +178,23 @@ Feature: Synchronizing records
         | 1491400800  | 10002          |
         | 1491400900  | 10004          |
       And ONLY the following users are active in the ID Store:
-        | employeenumber | displayname    | username     |
-        | 10001          | Unchanged User | person_one   |
-        | 10002          | Changed User   | person_two   |
-        | 10004          | Added User     | person_four  |
-        | 10005          | Missed User    | person_five  |
+        | employeenumber | displayname    | username     | email                | firstname | lastname | locked |
+        | 10001          | Unchanged User | person_one   | person_1@example.com | Test1     | User     | no     |
+        | 10002          | Changed User   | person_two   | person_2@example.com | Test2     | User     | no     |
+        | 10004          | Added User     | person_four  | person_4@example.com | Test4     | User     | no     |
+        | 10005          | Missed User    | person_five  | person_5@example.com | Test5     | User     | no     |
       And ONLY the following users exist in the ID Broker:
-        | employee_id    | display_name   | username     | active |
-        | 10001          | Unchanged User | person_one   | yes    |
-        | 10002          | User To Change | person_two   | yes    |
-        | 10003          | Removed User   | person_three | yes    |
+        | employee_id    | display_name   | username     | email                | active |
+        | 10001          | Unchanged User | person_one   | person_1@example.com | yes    |
+        | 10002          | User To Change | person_two   | person_2@example.com | yes    |
+        | 10003          | Removed User   | person_three | person_3@example.com | yes    |
     When I ask the ID Store for the list of users changed since 1491400600 and sync them
     Then ONLY the following users should exist in the ID Broker:
-        | employee_id    | display_name   | username     | active |
-        | 10001          | Unchanged User | person_one   | yes    |
-        | 10002          | Changed User   | person_two   | yes    |
-        | 10003          | Removed User   | person_three | no     |
-        | 10004          | Added User     | person_four  | yes    |
+        | employee_id    | display_name   | username     | email                | active |
+        | 10001          | Unchanged User | person_one   | person_1@example.com | yes    |
+        | 10002          | Changed User   | person_two   | person_2@example.com | yes    |
+        | 10003          | Removed User   | person_three | person_3@example.com | no     |
+        | 10004          | Added User     | person_four  | person_4@example.com | yes    |
       And we tried to update the last-synced date in the ID Store for:
         | employeenumber |
         | 10002          |
@@ -208,10 +208,10 @@ Feature: Synchronizing records
         | 1491402000  | 10002          |
         | 1491403000  | 10003          |
       And ONLY the following users are active in the ID Store:
-        | employeenumber | displayname    | username     | email          |
-        | 10001          | Unchanged 1    | person_one   | p1@example.com |
-        | 10002          | Changed 2      | person_two   |                |
-        | 10003          | Changed 3      | person_three | p3@example.com |
+        | employeenumber | displayname    | username     | email          | firstname | lastname | locked |
+        | 10001          | Unchanged 1    | person_one   | p1@example.com | Test1     | User     | no     |
+        | 10002          | Changed 2      | person_two   |                | Test2     | User     | no     |
+        | 10003          | Changed 3      | person_three | p3@example.com | Test3     | User     | no     |
       And ONLY the following users exist in the ID Broker:
         | employee_id    | display_name   | username     | email          | active |
         | 10001          | Unchanged 1    | person_one   | p1@example.com | yes    |
@@ -230,16 +230,16 @@ Feature: Synchronizing records
 
   Scenario: User has a manager email address in ID Broker but ID Store does not provide it
     Given ONLY the following users are active in the ID Store:
-      | employeenumber | displayname  | username     |
-      | 10001          | Person One   | person_one   |
+      | employeenumber | displayname  | username     | email          | firstname | lastname | locked |
+      | 10001          | Person One   | person_one   | p1@example.com | Test1     | User     | no     |
     And ONLY the following users exist in the ID Broker:
-      | employee_id    | display_name | username   | manager_email     | active |
-      | 10001          | Person One   | person_one | boss1@example.org | yes    |
+      | employee_id    | display_name | username   | manager_email     | email          | active |
+      | 10001          | Person One   | person_one | boss1@example.org | p1@example.com | yes    |
     When I sync all the users from the ID Store to the ID Broker
     Then an exception should NOT have been thrown
     And ONLY the following users should exist in the ID Broker:
-      | employee_id    | display_name | username     | manager_email | active |
-      | 10001          | Person One   | person_one   |               | yes    |
+      | employee_id    | display_name | username     | manager_email | email          | active |
+      | 10001          | Person One   | person_one   |               | p1@example.com | yes    |
 
   Scenario: Sending a notification
     Given at least one user has no email address
