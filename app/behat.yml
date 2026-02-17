@@ -72,7 +72,6 @@ default:
       contexts:
         - Sil\SilIdBroker\Behat\Context\SyncContext
         - Sil\SilIdBroker\Behat\Context\SafetyCutoffContext
-        - Sil\SilIdBroker\Behat\Context\NotificationContext
     google_sheets_integration_features:
       paths: ["features/id-store-integration.feature"]
       contexts: [Sil\SilIdBroker\Behat\Context\GoogleSheetsIntegrationContext]

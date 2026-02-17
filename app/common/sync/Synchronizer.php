@@ -114,6 +114,8 @@ class Synchronizer
      * Update the given user in the ID Broker database, setting it to be active.
      *
      * @param SyncUser $syncUser The user's information.
+     * @throws Exception
+     * @throws MissingEmailException
      */
     protected function activateAndUpdateUser(SyncUser $syncUser)
     {
@@ -127,10 +129,12 @@ class Synchronizer
         $modelUser->active = 'yes';
         $ok = $modelUser->save();
         if (!$ok) {
-            throw new Exception(
-                'save error: ' .
-                json_encode($modelUser->getErrors())
-            );
+            $emailErrors = $modelUser->getErrors('email');
+            if (in_array('Email cannot be blank.', $emailErrors)) {
+                throw new MissingEmailException();
+            } else {
+                throw new Exception(json_encode($modelUser->getErrors()));
+            }
         }
 
         $this->logger->info('Updated/activated user: ' . $syncUser->getEmployeeId());
@@ -198,6 +202,7 @@ class Synchronizer
      *
      * @param SyncUser $syncUser The user's information.
      * @throws MissingEmailException
+     * @throws Exception
      */
     protected function createUser(SyncUser $syncUser)
     {
@@ -206,7 +211,12 @@ class Synchronizer
         $modelUser->attributes = $syncUser->toArray();
         $ok = $modelUser->save();
         if (!$ok) {
-            throw new Exception(json_encode($modelUser->getErrors()));
+            $emailErrors = $modelUser->getErrors('email');
+            if (in_array('Email cannot be blank.', $emailErrors)) {
+                throw new MissingEmailException();
+            } else {
+                throw new Exception(json_encode($modelUser->getErrors()));
+            }
         }
 
         /*
