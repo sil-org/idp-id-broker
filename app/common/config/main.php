@@ -105,6 +105,10 @@ return [
     'id' => 'app-common',
     'bootstrap' => ['log'],
     'components' => [
+        'backupcode' => [
+            'class' => MfaBackendBackupcode::class,
+            'numBackupCodes' => $mfaNumBackupCodes,
+        ],
         'db' => [
             'class' => Connection::class,
             'dsn' => "mysql:host=$mysqlHost;dbname=$mysqlDatabase",
@@ -178,20 +182,6 @@ return [
 
             'hrNotificationsEmail' => Env::get('HR_NOTIFICATIONS_EMAIL'),
         ],
-        'backupcode' => [
-            'class' => MfaBackendBackupcode::class,
-            'numBackupCodes' => $mfaNumBackupCodes,
-        ],
-        'totp' => ArrayHelper::merge(
-            ['class' => MfaBackendTotp::class],
-            $mfaTotpConfig
-        ),
-        'webauthn' => ArrayHelper::merge(
-            ['class' => MfaBackendWebAuthn::class],
-            $mfaWebAuthnConfig
-        ),
-        'manager' => ['class' => MfaBackendManager::class],
-        'recovery' => ['class' => MfaBackendRecovery::class],
         // http://www.yiiframework.com/doc-2.0/guide-runtime-logging.html
         'log' => [
             'targets' => [
@@ -266,35 +256,23 @@ return [
             ],
         ],
         'mailer' => $mailerConfig,
-
+        'manager' => ['class' => MfaBackendManager::class],
         'monitor' => [
             'class' => Monitor::class,
             'heartbeatUrl' => Env::get('HEARTBEAT_URL'),
             'heartbeatMethod' => Env::get('HEARTBEAT_METHOD'),
-        ]
+        ],
+        'recovery' => ['class' => MfaBackendRecovery::class],
+        'totp' => ArrayHelper::merge(
+            ['class' => MfaBackendTotp::class],
+            $mfaTotpConfig
+        ),
+        'webauthn' => ArrayHelper::merge(
+            ['class' => MfaBackendWebAuthn::class],
+            $mfaWebAuthnConfig
+        ),
     ],
     'params' => [
-        'authorizedTokens'              => Env::getArray('API_ACCESS_KEYS'),
-        'authorizedRPOrigins'           => Env::getArray('RP_ORIGINS'),
-        'fromEmail'                     => $fromEmail,
-        'fromName'                      => $fromName,
-        'emailQueueBatchSize'           => $emailQueueBatchSize,
-        'idpName'                       => $idpName,
-        'idpDisplayName'                => $idpDisplayName,
-        'mfaAddInterval'                => Env::get('MFA_ADD_INTERVAL', '+30 days'),
-        'mfaRequiredForNewUsers'        => Env::get('MFA_REQUIRED_FOR_NEW_USERS', false),
-        'mfaAllowDisable'               => Env::get('MFA_ALLOW_DISABLE', true),
-        'methodAddInterval'             => Env::get('METHOD_ADD_INTERVAL', '+6 months'),
-        'profileReviewInterval'         => Env::get('PROFILE_REVIEW_INTERVAL', '+6 months'),
-        'passwordReuseLimit'            => Env::get('PASSWORD_REUSE_LIMIT', 10),
-        'passwordLifespan'              => Env::get('PASSWORD_LIFESPAN', '+1 year'),
-        'passwordMfaLifespanExtension'  => Env::get('PASSWORD_MFA_LIFESPAN_EXTENSION', '+4 years'),
-        'passwordExpirationGracePeriod' => Env::get('PASSWORD_EXPIRATION_GRACE_PERIOD', '+30 days'),
-        'passwordGracePeriodExtension'  => '+7 days',
-        'inviteLifespan'                => Env::get('INVITE_LIFESPAN', '+1 month'),
-        'inviteGracePeriod'             => Env::get('INVITE_GRACE_PERIOD', '+3 months'),
-        'inactiveUserDeletionEnable'    => Env::get('INACTIVE_USER_DELETION_ENABLE', false),
-        'inactiveUserPeriod'            => Env::get('INACTIVE_USER_PERIOD', '+18 months'),
         'abandonedUser'                 => ArrayHelper::merge(
             [
                 'abandonedPeriod'           => '+6 months',
@@ -303,26 +281,13 @@ return [
             ],
             Env::getArrayFromPrefix('ABANDONED_USER_')
         ),
-        'externalGroupsSyncSets' => Env::getArrayFromPrefix('EXTERNAL_GROUPS_SYNC_'),
-        'method'                        => ArrayHelper::merge(
-            [
-                'lifetime' => '+5 days',
-                'gracePeriod' => '+15 days',
-                'codeLength' => 6,
-                'maxAttempts' => 10,
-            ],
-            Env::getArrayFromPrefix('METHOD_')
-        ),
-        'mfaLifetime'                   => Env::get('MFA_LIFETIME', '+2 hours'),
-        'mfaManagerBcc'                 => Env::get('MFA_MANAGER_BCC', ''),
-        'mfaManagerHelpBcc'             => Env::get('MFA_MANAGER_HELP_BCC', ''),
+        'authorizedRPOrigins'           => Env::getArray('RP_ORIGINS'),
+        'authorizedTokens'              => Env::getArray('API_ACCESS_KEYS'),
         'contingentUserDuration'        => Env::get('CONTINGENT_USER_DURATION', '+4 weeks'),
-        'inviteEmailDelaySeconds'       => Env::get('INVITE_EMAIL_DELAY_SECONDS', 0),
-        'hibpCheckOnLogin'              => Env::get('HIBP_CHECK_ON_LOGIN', true),
-        'hibpCheckInterval'             => Env::get('HIBP_CHECK_INTERVAL', '+1 week'),
-        'hibpGracePeriod'               => Env::get('HIBP_GRACE_PERIOD', '+1 week'),
-        'hibpTrackingOnly'              => Env::get('HIBP_TRACKING_ONLY', false),
-        'hibpNotificationBcc'           => Env::get('HIBP_NOTIFICATION_BCC', ''),
+        'emailQueueBatchSize'           => $emailQueueBatchSize,
+        'externalGroupsSyncSets'        => Env::getArrayFromPrefix('EXTERNAL_GROUPS_SYNC_'),
+        'fromEmail'                     => $fromEmail,
+        'fromName'                      => $fromName,
         'google' => ArrayHelper::merge(
             [
                 'enableSheetsExport'  => false,
@@ -334,5 +299,39 @@ return [
             ],
             Env::getArrayFromPrefix('GOOGLE_')
         ),
+        'hibpCheckInterval'             => Env::get('HIBP_CHECK_INTERVAL', '+1 week'),
+        'hibpCheckOnLogin'              => Env::get('HIBP_CHECK_ON_LOGIN', true),
+        'hibpGracePeriod'               => Env::get('HIBP_GRACE_PERIOD', '+1 week'),
+        'hibpNotificationBcc'           => Env::get('HIBP_NOTIFICATION_BCC', ''),
+        'hibpTrackingOnly'              => Env::get('HIBP_TRACKING_ONLY', false),
+        'idpDisplayName'                => $idpDisplayName,
+        'idpName'                       => $idpName,
+        'inactiveUserDeletionEnable'    => Env::get('INACTIVE_USER_DELETION_ENABLE', false),
+        'inactiveUserPeriod'            => Env::get('INACTIVE_USER_PERIOD', '+18 months'),
+        'inviteEmailDelaySeconds'       => Env::get('INVITE_EMAIL_DELAY_SECONDS', 0),
+        'inviteGracePeriod'             => Env::get('INVITE_GRACE_PERIOD', '+3 months'),
+        'inviteLifespan'                => Env::get('INVITE_LIFESPAN', '+1 month'),
+        'method'                        => ArrayHelper::merge(
+            [
+                'lifetime' => '+5 days',
+                'gracePeriod' => '+15 days',
+                'codeLength' => 6,
+                'maxAttempts' => 10,
+            ],
+            Env::getArrayFromPrefix('METHOD_')
+        ),
+        'methodAddInterval'             => Env::get('METHOD_ADD_INTERVAL', '+6 months'),
+        'mfaAddInterval'                => Env::get('MFA_ADD_INTERVAL', '+30 days'),
+        'mfaAllowDisable'               => Env::get('MFA_ALLOW_DISABLE', true),
+        'mfaLifetime'                   => Env::get('MFA_LIFETIME', '+2 hours'),
+        'mfaManagerBcc'                 => Env::get('MFA_MANAGER_BCC', ''),
+        'mfaManagerHelpBcc'             => Env::get('MFA_MANAGER_HELP_BCC', ''),
+        'mfaRequiredForNewUsers'        => Env::get('MFA_REQUIRED_FOR_NEW_USERS', false),
+        'passwordExpirationGracePeriod' => Env::get('PASSWORD_EXPIRATION_GRACE_PERIOD', '+30 days'),
+        'passwordGracePeriodExtension'  => '+7 days',
+        'passwordLifespan'              => Env::get('PASSWORD_LIFESPAN', '+1 year'),
+        'passwordMfaLifespanExtension'  => Env::get('PASSWORD_MFA_LIFESPAN_EXTENSION', '+4 years'),
+        'passwordReuseLimit'            => Env::get('PASSWORD_REUSE_LIMIT', 10),
+        'profileReviewInterval'         => Env::get('PROFILE_REVIEW_INTERVAL', '+6 months'),
     ],
 ];
