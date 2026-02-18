@@ -4,10 +4,12 @@ namespace console\controllers;
 
 use common\components\Emailer;
 use common\components\ExternalGroupsSync;
+use common\components\Monitor;
 use common\models\Invite;
 use common\models\Method;
 use common\models\Mfa;
 use common\models\User;
+use Yii;
 use yii\console\Controller;
 
 class CronController extends Controller
@@ -112,5 +114,9 @@ class CronController extends Controller
                 \Yii::error($msg);
             }
         }
+
+        /* @var $monitor Monitor */
+        $monitor = Yii::$app->monitor;
+        $monitor->Heartbeat();
     }
 }
