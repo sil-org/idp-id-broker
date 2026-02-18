@@ -2,7 +2,7 @@
 
 namespace common\components\adapters;
 
-use common\sync\User;
+use common\sync\SyncUser;
 
 interface IdStoreInterface
 {
@@ -11,7 +11,7 @@ interface IdStoreInterface
      * treated as non-existent users.
      *
      * @param string $employeeId The Employee ID.
-     * @return User|null Information about the specified user, or null if no
+     * @return SyncUser|null Information about the specified user, or null if no
      *     such active user was found.
      */
     public function getActiveUser(string $employeeId);
@@ -19,7 +19,7 @@ interface IdStoreInterface
     /**
      * Get information about each of the (active) users.
      *
-     * @return User[] A list of Users.
+     * @return SyncUser[] A list of Users.
      */
     public function getAllActiveUsers();
 
@@ -35,7 +35,7 @@ interface IdStoreInterface
      * activated, added) since the given Unix timestamp.
      *
      * @param int $unixTimestamp The date/time, as a Unix timestamp.
-     * @return User[] A list of Users.
+     * @return SyncUser[] A list of Users.
      */
     public function getUsersChangedSince(int $unixTimestamp);
 

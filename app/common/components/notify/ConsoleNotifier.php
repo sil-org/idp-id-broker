@@ -2,7 +2,7 @@
 
 namespace common\components\notify;
 
-use common\sync\User;
+use common\sync\SyncUser;
 
 /**
  * NOTE: If you add methods to this class, first add them to NotifierInterface.
@@ -12,7 +12,7 @@ class ConsoleNotifier implements NotifierInterface
     /**
      * Get a plain text string that is a list identifying the given Users.
      *
-     * @param User[] $users
+     * @param SyncUser[] $users
      * @return string
      */
     protected function getBasicInfoAsTextList($users)
@@ -41,7 +41,7 @@ class ConsoleNotifier implements NotifierInterface
         ) . PHP_EOL;
     }
 
-    public function sendNewUserNotice(User $user)
+    public function sendNewUserNotice(SyncUser $user)
     {
         $userInfo = sprintf('Employee ID %s', $user->getEmployeeId());
         if ($user->getUsername() !== null) {

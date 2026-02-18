@@ -5,8 +5,7 @@ namespace common\sync;
 use common\components\adapters\IdStoreInterface;
 use common\components\notify\NotifierInterface;
 use common\components\notify\NullNotifier;
-use common\models\User as ModelUser;
-use common\sync\User as SyncUser;
+use common\models\User;
 use Exception;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -119,21 +118,21 @@ class Synchronizer
      */
     protected function activateAndUpdateUser(SyncUser $syncUser)
     {
-        $modelUser = ModelUser::findOne(['employee_id' => $syncUser->getEmployeeId()]);
-        if ($modelUser === null) {
+        $user = User::findOne(['employee_id' => $syncUser->getEmployeeId()]);
+        if ($user === null) {
             return;
         }
 
-        $modelUser->scenario = ModelUser::SCENARIO_UPDATE_USER;
-        $modelUser->setAttributes($syncUser->toArray());
-        $modelUser->active = 'yes';
-        $ok = $modelUser->save();
+        $user->scenario = User::SCENARIO_UPDATE_USER;
+        $user->setAttributes($syncUser->toArray());
+        $user->active = 'yes';
+        $ok = $user->save();
         if (!$ok) {
-            $emailErrors = $modelUser->getErrors('email');
+            $emailErrors = $user->getErrors('email');
             if (in_array('Email cannot be blank.', $emailErrors)) {
                 throw new MissingEmailException();
             } else {
-                throw new Exception(json_encode($modelUser->getErrors()));
+                throw new Exception(json_encode($user->getErrors()));
             }
         }
 
@@ -143,7 +142,7 @@ class Synchronizer
     /**
      * Update the given Users in the ID Broker, setting them to be active.
      *
-     * @param User[] $usersToUpdateAndActivate The user's information.
+     * @param SyncUser[] $usersToUpdateAndActivate The user's information.
      */
     protected function activateAndUpdateUsers(array $usersToUpdateAndActivate)
     {
@@ -206,31 +205,31 @@ class Synchronizer
      */
     protected function createUser(SyncUser $syncUser)
     {
-        $modelUser = new ModelUser();
-        $modelUser->scenario = ModelUser::SCENARIO_NEW_USER;
-        $modelUser->attributes = $syncUser->toArray();
-        $ok = $modelUser->save();
+        $user = new User();
+        $user->scenario = User::SCENARIO_NEW_USER;
+        $user->attributes = $syncUser->toArray();
+        $ok = $user->save();
         if (!$ok) {
-            $emailErrors = $modelUser->getErrors('email');
+            $emailErrors = $user->getErrors('email');
             if (in_array('Email cannot be blank.', $emailErrors)) {
                 throw new MissingEmailException();
             } else {
-                throw new Exception(json_encode($modelUser->getErrors()));
+                throw new Exception(json_encode($user->getErrors()));
             }
         }
 
         /*
          * Refresh user model to retrieve database default values
          */
-        $modelUser->refresh();
+        $user->refresh();
 
         Yii::info([
             'action' => 'user/create',
             'status' => 'created',
-            'id' => $modelUser->id,
-            'employeeId' => $modelUser->employee_id,
-            'scenario' => $modelUser->scenario,
-            'email' => $modelUser->email,
+            'id' => $user->id,
+            'employeeId' => $user->employee_id,
+            'scenario' => $user->scenario,
+            'email' => $user->email,
         ], 'application');
 
         if ($this->enableNewUserNotification) {
@@ -252,7 +251,7 @@ class Synchronizer
     /**
      * Create the given Users in the ID Broker.
      *
-     * @param User[] $usersToAdd The list of Users to be added.
+     * @param SyncUser[] $usersToAdd The list of Users to be added.
      */
     protected function createUsers(array $usersToAdd)
     {
@@ -310,19 +309,19 @@ class Synchronizer
      */
     protected function deactivateUser($employeeId)
     {
-        $modelUser = ModelUser::findOne(['employee_id' => $employeeId]);
-        if ($modelUser === null) {
+        $user = User::findOne(['employee_id' => $employeeId]);
+        if ($user === null) {
             return;
         }
 
-        $modelUser->active = 'no';
-        $modelUser->scenario = ModelUser::SCENARIO_UPDATE_USER;
+        $user->active = 'no';
+        $user->scenario = User::SCENARIO_UPDATE_USER;
 
         try {
-            $ok = $modelUser->save();
+            $ok = $user->save();
             if (!$ok) {
                 $this->logger->error('error while deactivating user: ' .
-                    json_encode($modelUser->getErrors()));
+                    json_encode($user->getErrors()));
                 return;
             }
         } catch (Exception $e) {
@@ -384,11 +383,11 @@ class Synchronizer
             ), 1501181580);
         }
 
-        $rawList = ModelUser::search(['fields' => $fields]);
+        $rawList = User::search(['fields' => $fields]);
         $usersByEmployeeId = [];
 
         foreach ($rawList as $user) {
-            /* @var $user ModelUser */
+            /* @var $user User */
             $employeeId = $user->employee_id;
 
             // Prevent duplicates.
@@ -605,7 +604,7 @@ class Synchronizer
                 'That User (Employee ID: %s) lacked an email address.',
                 $employeeId
             ));
-            $user = new User([User::EMPLOYEE_ID => $employeeId]);
+            $user = new SyncUser([SyncUser::EMPLOYEE_ID => $employeeId]);
             $this->notifier->sendMissingEmailNotice([$user]);
         } catch (Exception $e) {
             $this->logger->error(sprintf(
@@ -635,8 +634,8 @@ class Synchronizer
 
         $idStoreUser = $this->idStore->getActiveUser($employeeId);
 
-        /* var ModelUser */
-        $idBrokerUser = ModelUser::findOne(['employee_id' => $employeeId]);
+        /* var User */
+        $idBrokerUser = User::findOne(['employee_id' => $employeeId]);
 
         $isInIdStore = ($idStoreUser !== null);
         $isInIdBroker = ($idBrokerUser !== null);
@@ -695,8 +694,8 @@ class Synchronizer
                     'A User (Employee ID: %s) lacked an email address.',
                     $employeeId
                 ));
-                $usersWithoutEmail[] = new User([
-                    User::EMPLOYEE_ID => $employeeId,
+                $usersWithoutEmail[] = new SyncUser([
+                    SyncUser::EMPLOYEE_ID => $employeeId,
                 ]);
             } catch (Exception $e) {
                 $code = $e->getCode();

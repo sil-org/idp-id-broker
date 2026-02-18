@@ -2,7 +2,7 @@
 
 namespace common\components\notify;
 
-use common\sync\User;
+use common\sync\SyncUser;
 
 /**
  * This Notifier can be used to avoid conditional log calls.
@@ -14,7 +14,7 @@ class NullNotifier implements NotifierInterface
         // noop
     }
 
-    public function sendNewUserNotice(User $user)
+    public function sendNewUserNotice(SyncUser $user)
     {
         // noop
     }

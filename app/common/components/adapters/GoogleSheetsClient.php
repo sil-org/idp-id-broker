@@ -2,7 +2,7 @@
 
 namespace common\components\adapters;
 
-use common\sync\User;
+use common\sync\SyncUser;
 use InvalidArgumentException;
 use yii\base\Component;
 use yii\helpers\Json;
@@ -144,21 +144,21 @@ class GoogleSheetsClient extends Component
                 // empty column could be absent or "". Handle both situations.
 
                 $users[] = [
-                    User::EMPLOYEE_ID => $user[0],
-                    User::FIRST_NAME => $this->getValueIfNonEmpty($user, 1),
-                    User::LAST_NAME => $this->getValueIfNonEmpty($user, 2),
-                    User::DISPLAY_NAME => $this->getValueIfNonEmpty($user, 3),
-                    User::USERNAME => $this->getValueIfNonEmpty($user, 4),
-                    User::EMAIL => $this->getValueIfNonEmpty($user, 5),
-                    User::ACTIVE => $user[6] ?? 'yes',
-                    User::LOCKED => $user[7] ?? 'no',
+                    SyncUser::EMPLOYEE_ID => $user[0],
+                    SyncUser::FIRST_NAME => $this->getValueIfNonEmpty($user, 1),
+                    SyncUser::LAST_NAME => $this->getValueIfNonEmpty($user, 2),
+                    SyncUser::DISPLAY_NAME => $this->getValueIfNonEmpty($user, 3),
+                    SyncUser::USERNAME => $this->getValueIfNonEmpty($user, 4),
+                    SyncUser::EMAIL => $this->getValueIfNonEmpty($user, 5),
+                    SyncUser::ACTIVE => $user[6] ?? 'yes',
+                    SyncUser::LOCKED => $user[7] ?? 'no',
                     'last_synced' => $this->getValueIfNonEmpty($user, 8),
-                    User::REQUIRE_MFA => $user[9] ?? 'no',
-                    User::MANAGER_EMAIL => $this->getValueIfNonEmpty($user, 10),
-                    User::PERSONAL_EMAIL => $this->getValueIfNonEmpty($user, 11),
-                    User::GROUPS => $this->getValueIfNonEmpty($user, 12),
-                    User::HR_CONTACT_NAME => $this->getValueIfNonEmpty($user, 13),
-                    User::HR_CONTACT_EMAIL => $this->getValueIfNonEmpty($user, 14),
+                    SyncUser::REQUIRE_MFA => $user[9] ?? 'no',
+                    SyncUser::MANAGER_EMAIL => $this->getValueIfNonEmpty($user, 10),
+                    SyncUser::PERSONAL_EMAIL => $this->getValueIfNonEmpty($user, 11),
+                    SyncUser::GROUPS => $this->getValueIfNonEmpty($user, 12),
+                    SyncUser::HR_CONTACT_NAME => $this->getValueIfNonEmpty($user, 13),
+                    SyncUser::HR_CONTACT_EMAIL => $this->getValueIfNonEmpty($user, 14),
                 ];
             }
         }
@@ -208,7 +208,7 @@ class GoogleSheetsClient extends Component
             for ($rowOffset = 0; $rowOffset < count($users); $rowOffset++) {
                 $user = $users[$rowOffset];
 
-                if (in_array($user[User::EMPLOYEE_ID], $employeeIdsAsStrings, true)) {
+                if (in_array($user[SyncUser::EMPLOYEE_ID], $employeeIdsAsStrings, true)) {
                     $updatedSyncDates[] = $nowAsADateString;
                 } else {
                     $updatedSyncDates[] = $user['last_synced'] ?: '0000-00-00T00:00:00+00:00';

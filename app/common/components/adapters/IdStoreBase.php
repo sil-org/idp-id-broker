@@ -2,7 +2,7 @@
 
 namespace common\components\adapters;
 
-use common\sync\User;
+use common\sync\SyncUser;
 use yii\base\Component;
 
 abstract class IdStoreBase extends Component implements IdStoreInterface
@@ -33,22 +33,22 @@ abstract class IdStoreBase extends Component implements IdStoreInterface
     }
 
     /**
-     * Convert user information keyed on ID Store field names into a User object.
+     * Convert user information keyed on ID Store field names into a SyncUser object.
      *
-     * @param array $idStoreUserInfo User info from ID Store.
-     * @return User An object representing that user info in a standard way.
+     * @param array $idStoreUserInfo SyncUser info from ID Store.
+     * @return SyncUser An object representing that user info in a standard way.
      */
     protected static function getAsUser($idStoreUserInfo)
     {
-        return new User(self::translateToInternalFieldNames($idStoreUserInfo));
+        return new SyncUser(self::translateToInternalFieldNames($idStoreUserInfo));
     }
 
     /**
      * Convert information about a list of users (each being an array of user
-     * information keyed on ID Store field names) into a list of User objects.
+     * information keyed on ID Store field names) into a list of SyncUser objects.
      *
      * @param array[] $idStoreUserInfoList A list of users' info from ID Store.
-     * @return User[] A list of objects representing those users' info in a
+     * @return SyncUser[] A list of objects representing those users' info in a
      *     standard way.
      */
     protected static function getAsUsers($idStoreUserInfoList)

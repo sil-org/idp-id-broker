@@ -5,7 +5,10 @@ namespace common\sync;
 use Exception;
 use InvalidArgumentException;
 
-class User
+/*
+ * SyncUser is a user model representing ID Store user records using normalized field names.
+ */
+class SyncUser
 {
     public const ACTIVE = 'active';
     public const DISPLAY_NAME = 'display_name';

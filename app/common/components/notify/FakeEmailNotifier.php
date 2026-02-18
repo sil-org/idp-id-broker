@@ -2,7 +2,7 @@
 
 namespace common\components\notify;
 
-use common\sync\User;
+use common\sync\SyncUser;
 
 class FakeEmailNotifier implements NotifierInterface
 {
@@ -32,7 +32,7 @@ class FakeEmailNotifier implements NotifierInterface
     /**
      * {@inheritdoc}
      */
-    public function sendNewUserNotice(User $user)
+    public function sendNewUserNotice(SyncUser $user)
     {
         $this->emailsSent[] = [
             'to_address' => $user->getHRContactEmail(),

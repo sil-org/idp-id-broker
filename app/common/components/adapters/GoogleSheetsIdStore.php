@@ -2,7 +2,7 @@
 
 namespace common\components\adapters;
 
-use common\sync\User;
+use common\sync\SyncUser;
 
 class GoogleSheetsIdStore extends IdStoreBase
 {
@@ -58,7 +58,7 @@ class GoogleSheetsIdStore extends IdStoreBase
      * treated as non-existent users.
      *
      * @param string $employeeId The Employee ID.
-     * @return User|null Information about the specified user, or null if no
+     * @return SyncUser|null Information about the specified user, or null if no
      *     such active user was found.
      */
     public function getActiveUser(string $employeeId)
@@ -75,7 +75,7 @@ class GoogleSheetsIdStore extends IdStoreBase
     /**
      * Get information about each of the (active) users.
      *
-     * @return User[] A list of Users.
+     * @return SyncUser[] A list of Users.
      */
     public function getAllActiveUsers(): array
     {
@@ -84,16 +84,16 @@ class GoogleSheetsIdStore extends IdStoreBase
         $allActiveUsersInfo = array_filter(
             $allUsersInfo,
             function ($user) {
-                return ($user[User::ACTIVE] === 'yes');
+                return ($user[SyncUser::ACTIVE] === 'yes');
             }
         );
 
         return array_map(
             function ($entry) {
                 // Unset 'active', since ID Stores only return active users.
-                unset($entry[User::ACTIVE]);
+                unset($entry[SyncUser::ACTIVE]);
 
-                // Convert the resulting user info to a User.
+                // Convert the resulting user info to a SyncUser.
                 return self::getAsUser($entry);
             },
             $allActiveUsersInfo
@@ -104,20 +104,20 @@ class GoogleSheetsIdStore extends IdStoreBase
     {
         return [
             // No 'active' needed, since all ID Store records returned are active.
-            'employee_id' => User::EMPLOYEE_ID,
-            'first_name' => User::FIRST_NAME,
-            'last_name' => User::LAST_NAME,
-            'display_name' => User::DISPLAY_NAME,
-            'email' => User::EMAIL,
-            'username' => User::USERNAME,
-            'locked' => User::LOCKED,
-            'require_mfa' => User::REQUIRE_MFA,
-            'manager_email' => User::MANAGER_EMAIL,
-            'personal_email' => User::PERSONAL_EMAIL,
-            'groups' => User::GROUPS,
+            'employee_id' => SyncUser::EMPLOYEE_ID,
+            'first_name' => SyncUser::FIRST_NAME,
+            'last_name' => SyncUser::LAST_NAME,
+            'display_name' => SyncUser::DISPLAY_NAME,
+            'email' => SyncUser::EMAIL,
+            'username' => SyncUser::USERNAME,
+            'locked' => SyncUser::LOCKED,
+            'require_mfa' => SyncUser::REQUIRE_MFA,
+            'manager_email' => SyncUser::MANAGER_EMAIL,
+            'personal_email' => SyncUser::PERSONAL_EMAIL,
+            'groups' => SyncUser::GROUPS,
 
-            User::HR_CONTACT_NAME => User::HR_CONTACT_NAME,
-            User::HR_CONTACT_EMAIL => User::HR_CONTACT_EMAIL,
+            SyncUser::HR_CONTACT_NAME => SyncUser::HR_CONTACT_NAME,
+            SyncUser::HR_CONTACT_EMAIL => SyncUser::HR_CONTACT_EMAIL,
         ];
     }
 
@@ -136,7 +136,7 @@ class GoogleSheetsIdStore extends IdStoreBase
      * activated, added) since the given Unix timestamp.
      *
      * @param int $unixTimestamp The date/time, as a Unix timestamp.
-     * @return User[] A list of Users.
+     * @return SyncUser[] A list of Users.
      */
     public function getUsersChangedSince(int $unixTimestamp): array
     {

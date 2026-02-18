@@ -2,7 +2,7 @@
 
 namespace common\components\adapters;
 
-use common\sync\User;
+use common\sync\SyncUser;
 use yii\helpers\ArrayHelper;
 
 class FakeIdStore extends IdStoreBase
@@ -93,18 +93,18 @@ class FakeIdStore extends IdStoreBase
     {
         return [
             // No 'active' needed, since all ID Store records returned are active.
-            'employeenumber' => User::EMPLOYEE_ID,
-            'firstname' => User::FIRST_NAME,
-            'lastname' => User::LAST_NAME,
-            'displayname' => User::DISPLAY_NAME,
-            'email' => User::EMAIL,
-            'username' => User::USERNAME,
-            'locked' => User::LOCKED,
-            'requires2sv' => User::REQUIRE_MFA,
-            'supervisoremail' => User::MANAGER_EMAIL,
+            'employeenumber' => SyncUser::EMPLOYEE_ID,
+            'firstname' => SyncUser::FIRST_NAME,
+            'lastname' => SyncUser::LAST_NAME,
+            'displayname' => SyncUser::DISPLAY_NAME,
+            'email' => SyncUser::EMAIL,
+            'username' => SyncUser::USERNAME,
+            'locked' => SyncUser::LOCKED,
+            'requires2sv' => SyncUser::REQUIRE_MFA,
+            'supervisoremail' => SyncUser::MANAGER_EMAIL,
 
-            'hrname' => User::HR_CONTACT_NAME,
-            'hremail' => User::HR_CONTACT_EMAIL,
+            'hrname' => SyncUser::HR_CONTACT_NAME,
+            'hremail' => SyncUser::HR_CONTACT_EMAIL,
         ];
     }
 

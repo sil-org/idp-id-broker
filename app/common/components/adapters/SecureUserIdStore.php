@@ -2,7 +2,7 @@
 
 namespace common\components\adapters;
 
-use common\sync\User;
+use common\sync\SyncUser;
 use Exception;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
@@ -40,14 +40,14 @@ class SecureUserIdStore extends IdStoreBase
     public static function getFieldNameMap(): array
     {
         return [
-            'employee_number' => User::EMPLOYEE_ID,
-            'first_name' => User::FIRST_NAME,
-            'last_name' => User::LAST_NAME,
-            'display_name' => User::DISPLAY_NAME,
-            'email' => User::EMAIL,
-            'username' => User::USERNAME,
-            'locked' => User::LOCKED,
-            'manager_email' => User::MANAGER_EMAIL,
+            'employee_number' => SyncUser::EMPLOYEE_ID,
+            'first_name' => SyncUser::FIRST_NAME,
+            'last_name' => SyncUser::LAST_NAME,
+            'display_name' => SyncUser::DISPLAY_NAME,
+            'email' => SyncUser::EMAIL,
+            'username' => SyncUser::USERNAME,
+            'locked' => SyncUser::LOCKED,
+            'manager_email' => SyncUser::MANAGER_EMAIL,
         ];
     }
 
@@ -56,7 +56,7 @@ class SecureUserIdStore extends IdStoreBase
      * treated as non-existent users.
      *
      * @param string $employeeId The Employee ID.
-     * @return User|null Information about the specified user, or null if no
+     * @return SyncUser|null Information about the specified user, or null if no
      *     such active user was found.
      * @throws Exception
      */
@@ -76,7 +76,7 @@ class SecureUserIdStore extends IdStoreBase
      * all users changed since the specified time.
      *
      * @param int $unixTimestamp The time (as a UNIX timestamp).
-     * @return User[]
+     * @return SyncUser[]
      * @throws Exception
      */
     public function getUsersChangedSince(int $unixTimestamp)
@@ -87,7 +87,7 @@ class SecureUserIdStore extends IdStoreBase
     /**
      * Get information about each of the (active) users.
      *
-     * @return User[] A list of Users.
+     * @return SyncUser[] A list of Users.
      * @throws Exception
      */
     public function getAllActiveUsers()
@@ -128,16 +128,16 @@ class SecureUserIdStore extends IdStoreBase
         $allActiveUsersInfo = array_filter(
             $allUsersInfo,
             function ($user) {
-                return ($user[User::ACTIVE] === true);
+                return ($user[SyncUser::ACTIVE] === true);
             }
         );
 
         return array_map(
             function ($entry) {
                 // Unset 'active', since ID Stores only return active users.
-                unset($entry[User::ACTIVE]);
+                unset($entry[SyncUser::ACTIVE]);
 
-                // Convert the resulting user info to a User.
+                // Convert the resulting user info to a SyncUser.
                 return self::getAsUser($entry);
             },
             $allActiveUsersInfo

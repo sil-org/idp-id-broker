@@ -4,7 +4,7 @@ namespace Sil\SilIdBroker\Behat\Context;
 
 use Behat\Behat\Context\Context;
 use common\components\adapters\IdStoreInterface;
-use common\sync\User as SyncUser;
+use common\sync\SyncUser;
 use Webmozart\Assert\Assert;
 
 /**
@@ -74,7 +74,7 @@ class IdStoreIntegrationContextBase implements Context
         Assert::notEmpty($this->result);
         Assert::true(is_array($this->result));
         foreach ($this->result as $user) {
-            Assert::true($user instanceof  SyncUser);
+            Assert::true($user instanceof SyncUser);
         }
     }
 

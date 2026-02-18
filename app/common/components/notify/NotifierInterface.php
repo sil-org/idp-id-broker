@@ -2,21 +2,21 @@
 
 namespace common\components\notify;
 
-use common\sync\User;
+use common\sync\SyncUser;
 
 interface NotifierInterface
 {
     /**
      * Send a notification that there are Users that lack an email address.
      *
-     * @param User[] $users The list of Users.
+     * @param SyncUser[] $users The list of Users.
      */
     public function sendMissingEmailNotice(array $users);
 
     /**
      * Send a notification when a user is created.
      *
-     * @param User $user The new User.
+     * @param SyncUser $user The new SyncUser.
      */
-    public function sendNewUserNotice(User $user);
+    public function sendNewUserNotice(SyncUser $user);
 }

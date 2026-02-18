@@ -3,7 +3,7 @@
 namespace common\components\notify;
 
 use common\components\EmailClient;
-use common\sync\User;
+use common\sync\SyncUser;
 use InvalidArgumentException;
 use yii\base\Component;
 
@@ -107,7 +107,7 @@ class EmailServiceNotifier extends Component implements NotifierInterface
      * {@inheritdoc}
      * @throws \Exception if no email address is available
      */
-    public function sendNewUserNotice(User $user)
+    public function sendNewUserNotice(SyncUser $user)
     {
         $templateVars = [
             'organizationName' => $this->organizationName,
@@ -140,7 +140,7 @@ class EmailServiceNotifier extends Component implements NotifierInterface
     /**
      * @throws \Exception if no email address is available
      */
-    protected function getEmailTo(User $user): string
+    protected function getEmailTo(SyncUser $user): string
     {
         try {
             return $user->getHRContactEmail();

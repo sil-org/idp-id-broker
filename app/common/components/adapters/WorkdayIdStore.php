@@ -2,7 +2,7 @@
 
 namespace common\components\adapters;
 
-use common\sync\User;
+use common\sync\SyncUser;
 use Exception;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
@@ -44,20 +44,20 @@ class WorkdayIdStore extends IdStoreBase
     {
         return [
             // 'active' field isn't needed, since all Workday records returned are active.
-            'Employee_Number' => User::EMPLOYEE_ID,
-            'First_Name' => User::FIRST_NAME,
-            'Last_Name' => User::LAST_NAME,
-            'Display_Name' => User::DISPLAY_NAME,
-            'Email' => User::EMAIL,
-            'Username' => User::USERNAME,
-            'Account_Locked__Disabled_or_Expired' => User::LOCKED,
-            'requireMfa' => User::REQUIRE_MFA,
-            self::ManagerEmail => User::MANAGER_EMAIL,
-            'Personal_Email' => User::PERSONAL_EMAIL,
-            'Groups' => User::GROUPS,
+            'Employee_Number' => SyncUser::EMPLOYEE_ID,
+            'First_Name' => SyncUser::FIRST_NAME,
+            'Last_Name' => SyncUser::LAST_NAME,
+            'Display_Name' => SyncUser::DISPLAY_NAME,
+            'Email' => SyncUser::EMAIL,
+            'Username' => SyncUser::USERNAME,
+            'Account_Locked__Disabled_or_Expired' => SyncUser::LOCKED,
+            'requireMfa' => SyncUser::REQUIRE_MFA,
+            self::ManagerEmail => SyncUser::MANAGER_EMAIL,
+            'Personal_Email' => SyncUser::PERSONAL_EMAIL,
+            'Groups' => SyncUser::GROUPS,
 
-            'HR_Contact_Name' => User::HR_CONTACT_NAME,
-            'HR_Contact_Email' => User::HR_CONTACT_EMAIL,
+            'HR_Contact_Name' => SyncUser::HR_CONTACT_NAME,
+            'HR_Contact_Email' => SyncUser::HR_CONTACT_EMAIL,
         ];
     }
 
@@ -66,7 +66,7 @@ class WorkdayIdStore extends IdStoreBase
      * treated as non-existent users.
      *
      * @param string $employeeId The Employee ID.
-     * @return User|null Information about the specified user, or null if no
+     * @return SyncUser|null Information about the specified user, or null if no
      *     such active user was found.
      * @throws Exception
      */
@@ -80,7 +80,7 @@ class WorkdayIdStore extends IdStoreBase
      * all users changed since the specified time.
      *
      * @param int $unixTimestamp The time (as a UNIX timestamp).
-     * @return User[]
+     * @return SyncUser[]
      * @throws Exception
      */
     public function getUsersChangedSince(int $unixTimestamp)
@@ -91,7 +91,7 @@ class WorkdayIdStore extends IdStoreBase
     /**
      * Get information about each of the (active) users.
      *
-     * @return User[] A list of Users.
+     * @return SyncUser[] A list of Users.
      * @throws Exception
      */
     public function getAllActiveUsers()

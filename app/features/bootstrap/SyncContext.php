@@ -8,7 +8,7 @@ use common\components\notify\FakeEmailNotifier;
 use common\components\notify\NotifierInterface;
 use common\models\User;
 use common\sync\Synchronizer;
-use common\sync\User as SyncUser;
+use common\sync\SyncUser;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Sil\Psr3Adapters\Psr3EchoLogger;
@@ -568,7 +568,7 @@ class SyncContext extends UnitTestsContext
      */
     public function atLeastOneUserHasNoEmailAddress()
     {
-        $this->users[] = new \common\sync\User(['employee_id' => 1]);
+        $this->users[] = new SyncUser(['employee_id' => 1]);
     }
 
     /**
