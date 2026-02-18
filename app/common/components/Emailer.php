@@ -23,20 +23,20 @@ class Emailer extends Component
     public const SUBJ_GET_BACKUP_CODES = 'Get printable codes for your {idpDisplayName} Identity account';
     public const SUBJ_INVITE = 'Your new {idpDisplayName} Identity account';
     public const SUBJ_LOST_SECURITY_KEY = 'Do you still have the security key you use with your {idpDisplayName}'
-    . ' Identity account?';
+        . ' Identity account?';
     public const SUBJ_METHOD_PURGED = 'An unverified password recovery method has been removed from your {idpDisplayName}'
-    . ' Identity account';
+        . ' Identity account';
     public const SUBJ_METHOD_REMINDER = 'REMINDER: Please verify your new password recovery method';
     public const SUBJ_METHOD_VERIFY = 'Please verify your new password recovery method';
     public const SUBJ_MFA_DISABLED = '2-Step Verification was disabled on your {idpDisplayName} Identity account';
     public const SUBJ_MFA_ENABLED = '2-Step Verification was enabled on your {idpDisplayName} Identity account';
     public const SUBJ_MFA_OPTION_ADDED = 'A 2-Step Verification option was added to your {idpDisplayName} Identity account';
     public const SUBJ_MFA_OPTION_REMOVED = 'A 2-Step Verification option was removed from your {idpDisplayName}'
-    . ' Identity account';
+        . ' Identity account';
     public const SUBJ_MFA_RATE_LIMIT = 'Too many 2-Step Verification attempts on your {idpDisplayName} Identity account';
     public const SUBJ_MFA_RECOVERY = '{displayName} has sent you a login code for their {idpDisplayName} Identity account';
     public const SUBJ_MFA_RECOVERY_HELP = 'An access code for your {idpDisplayName} Identity account has been sent to'
-    . ' your recovery contact';
+        . ' your recovery contact';
     public const SUBJ_PASSWORD_CHANGED = 'Your {idpDisplayName} Identity account password has been changed';
     public const SUBJ_PASSWORD_EXPIRED = 'The password for your {idpDisplayName} Identity account has expired';
     public const SUBJ_PASSWORD_EXPIRING = 'The password for your {idpDisplayName} Identity account is about to expire';
