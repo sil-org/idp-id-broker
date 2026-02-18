@@ -136,7 +136,7 @@ class Synchronizer
             }
         }
 
-        $this->logger->info('Updated/activated user: ' . $syncUser->getEmployeeId());
+        $this->logger->debug('Updated/activated user: ' . $syncUser->getEmployeeId());
     }
 
     /**
