@@ -7,6 +7,7 @@ use common\components\MfaBackendManager;
 use common\components\MfaBackendRecovery;
 use common\components\MfaBackendTotp;
 use common\components\MfaBackendWebAuthn;
+use common\components\Monitor;
 use common\components\SesMailer;
 use Sentry\Event;
 use Sil\JsonLog\target\JsonStreamTarget;
@@ -265,6 +266,12 @@ return [
             ],
         ],
         'mailer' => $mailerConfig,
+
+        'monitor' => [
+            'class' => Monitor::class,
+            'heartbeatUrl' => Env::get('HEARTBEAT_URL'),
+            'heartbeatMethod' => Env::get('HEARTBEAT_METHOD'),
+        ]
     ],
     'params' => [
         'authorizedTokens'              => Env::getArray('API_ACCESS_KEYS'),
