@@ -70,7 +70,7 @@ default:
       paths: ["features/sync.feature"]
       contexts: [Sil\SilIdBroker\Behat\Context\SyncContext]
     workday_features:
-      path: ["features/workday.feature"]
+      paths: ["features/workday.feature"]
       contexts: [Sil\SilIdBroker\Behat\Context\WorkdayContext]
     google_sheets_integration_features:
       paths: ["features/id-store-integration.feature"]
