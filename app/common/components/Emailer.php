@@ -18,36 +18,31 @@ use yii\helpers\Inflector;
 
 class Emailer extends Component
 {
-    public const SUBJ_INVITE = 'Your new {idpDisplayName} Identity account';
-    public const SUBJ_MFA_RATE_LIMIT = 'Too many 2-Step Verification attempts on your {idpDisplayName} Identity account';
-    public const SUBJ_PASSWORD_CHANGED = 'Your {idpDisplayName} Identity account password has been changed';
-    public const SUBJ_WELCOME = 'Important information about your {idpDisplayName} Identity account';
-
+    public const SUBJ_ABANDONED_USER_ACCOUNTS = 'Unused {idpDisplayName} Identity Accounts';
+    public const SUBJ_EXT_GROUP_SYNC_ERRORS = "Errors while syncing '{appPrefix}' external-groups to the {idpDisplayName} IDP";
     public const SUBJ_GET_BACKUP_CODES = 'Get printable codes for your {idpDisplayName} Identity account';
-    public const SUBJ_REFRESH_BACKUP_CODES = 'Get a new set of printable codes for your {idpDisplayName} Identity account';
+    public const SUBJ_INVITE = 'Your new {idpDisplayName} Identity account';
     public const SUBJ_LOST_SECURITY_KEY = 'Do you still have the security key you use with your {idpDisplayName}'
         . ' Identity account?';
-
+    public const SUBJ_METHOD_PURGED = 'An unverified password recovery method has been removed from your {idpDisplayName}'
+        . ' Identity account';
+    public const SUBJ_METHOD_REMINDER = 'REMINDER: Please verify your new password recovery method';
+    public const SUBJ_METHOD_VERIFY = 'Please verify your new password recovery method';
+    public const SUBJ_MFA_DISABLED = '2-Step Verification was disabled on your {idpDisplayName} Identity account';
+    public const SUBJ_MFA_ENABLED = '2-Step Verification was enabled on your {idpDisplayName} Identity account';
     public const SUBJ_MFA_OPTION_ADDED = 'A 2-Step Verification option was added to your {idpDisplayName} Identity account';
     public const SUBJ_MFA_OPTION_REMOVED = 'A 2-Step Verification option was removed from your {idpDisplayName}'
         . ' Identity account';
-    public const SUBJ_MFA_ENABLED = '2-Step Verification was enabled on your {idpDisplayName} Identity account';
-    public const SUBJ_MFA_DISABLED = '2-Step Verification was disabled on your {idpDisplayName} Identity account';
+    public const SUBJ_MFA_RATE_LIMIT = 'Too many 2-Step Verification attempts on your {idpDisplayName} Identity account';
     public const SUBJ_MFA_RECOVERY = '{displayName} has sent you a login code for their {idpDisplayName} Identity account';
     public const SUBJ_MFA_RECOVERY_HELP = 'An access code for your {idpDisplayName} Identity account has been sent to'
         . ' your recovery contact';
-    public const SUBJ_METHOD_VERIFY = 'Please verify your new password recovery method';
-    public const SUBJ_METHOD_REMINDER = 'REMINDER: Please verify your new password recovery method';
-    public const SUBJ_METHOD_PURGED = 'An unverified password recovery method has been removed from your {idpDisplayName}'
-        . ' Identity account';
-
-    public const SUBJ_PASSWORD_EXPIRING = 'The password for your {idpDisplayName} Identity account is about to expire';
+    public const SUBJ_PASSWORD_CHANGED = 'Your {idpDisplayName} Identity account password has been changed';
     public const SUBJ_PASSWORD_EXPIRED = 'The password for your {idpDisplayName} Identity account has expired';
+    public const SUBJ_PASSWORD_EXPIRING = 'The password for your {idpDisplayName} Identity account is about to expire';
     public const SUBJ_PASSWORD_PWNED = 'ALERT: The password for your {idpDisplayName} Identity account has been exposed';
-
-    public const SUBJ_ABANDONED_USER_ACCOUNTS = 'Unused {idpDisplayName} Identity Accounts';
-
-    public const SUBJ_EXT_GROUP_SYNC_ERRORS = "Errors while syncing '{appPrefix}' external-groups to the {idpDisplayName} IDP";
+    public const SUBJ_REFRESH_BACKUP_CODES = 'Get a new set of printable codes for your {idpDisplayName} Identity account';
+    public const SUBJ_WELCOME = 'Important information about your {idpDisplayName} Identity account';
 
     public const PROP_SUBJECT = 'subject';
     public const PROP_TO_ADDRESS = 'to_address';
@@ -80,25 +75,21 @@ class Emailer extends Component
      * Configs to say whether we should ever send certain emails
      * These get loaded automatically from common/config/main.php ['components']['emailer']
      */
-    public $sendInviteEmails = false;
-    public $sendMfaRateLimitEmails = true;
-    public $sendPasswordChangedEmails = true;
-    public $sendWelcomeEmails = true;
-
     public $sendGetBackupCodesEmails = true;
-    public $sendRefreshBackupCodesEmails = true;
+    public $sendInviteEmails = false;
     public $sendLostSecurityKeyEmails = true;
-
+    public $sendMethodPurgedEmails = true;
+    public $sendMethodReminderEmails = true;
+    public $sendMfaDisabledEmails = true;
+    public $sendMfaEnabledEmails = true;
     public $sendMfaOptionAddedEmails = true;
     public $sendMfaOptionRemovedEmails = true;
-    public $sendMfaEnabledEmails = true;
-    public $sendMfaDisabledEmails = true;
-
-    public $sendMethodReminderEmails = true;
-    public $sendMethodPurgedEmails = true;
-
-    public $sendPasswordExpiringEmails = true;
+    public $sendMfaRateLimitEmails = true;
+    public $sendPasswordChangedEmails = true;
     public $sendPasswordExpiredEmails = true;
+    public $sendPasswordExpiringEmails = true;
+    public $sendRefreshBackupCodesEmails = true;
+    public $sendWelcomeEmails = true;
 
     /**
      * The list of subjects, keyed on message type. This is initialized during
@@ -108,32 +99,27 @@ class Emailer extends Component
      */
     protected $subjects;
 
-    public $subjectForInvite;
-    public $subjectForMfaRateLimit;
-    public $subjectForPasswordChanged;
-    public $subjectForWelcome;
-
+    public $subjectForAbandonedUsers;
+    public $subjectForExtGroupSyncErrors;
     public $subjectForGetBackupCodes;
-    public $subjectForRefreshBackupCodes;
+    public $subjectForInvite;
     public $subjectForLostSecurityKey;
-
+    public $subjectForMethodPurged;
+    public $subjectForMethodReminder;
+    public $subjectForMethodVerify;
+    public $subjectForMfaDisabled;
+    public $subjectForMfaEnabled;
     public $subjectForMfaOptionAdded;
     public $subjectForMfaOptionRemoved;
-    public $subjectForMfaEnabled;
-    public $subjectForMfaDisabled;
+    public $subjectForMfaRateLimit;
     public $subjectForMfaRecovery;
     public $subjectForMfaRecoveryHelp;
-    public $subjectForMethodVerify;
-    public $subjectForMethodReminder;
-    public $subjectForMethodPurged;
-
-    public $subjectForPasswordExpiring;
+    public $subjectForPasswordChanged;
     public $subjectForPasswordExpired;
+    public $subjectForPasswordExpiring;
     public $subjectForPasswordPwned;
-
-    public $subjectForAbandonedUsers;
-
-    public $subjectForExtGroupSyncErrors;
+    public $subjectForRefreshBackupCodes;
+    public $subjectForWelcome;
 
     /* The email to contact for HR notifications */
     public $hrNotificationsEmail;
@@ -258,56 +244,50 @@ class Emailer extends Component
             $this->logger = new Psr3Yii2Logger();
         }
 
-        $this->subjectForInvite = $this->subjectForInvite ?? self::SUBJ_INVITE;
-        $this->subjectForMfaRateLimit = $this->subjectForMfaRateLimit ?? self::SUBJ_MFA_RATE_LIMIT;
-        $this->subjectForPasswordChanged = $this->subjectForPasswordChanged ?? self::SUBJ_PASSWORD_CHANGED;
-        $this->subjectForWelcome = $this->subjectForWelcome ?? self::SUBJ_WELCOME;
-
+        $this->subjectForAbandonedUsers = $this->subjectForAbandonedUsers ?? self::SUBJ_ABANDONED_USER_ACCOUNTS;
+        $this->subjectForExtGroupSyncErrors = $this->subjectForExtGroupSyncErrors ?? self::SUBJ_EXT_GROUP_SYNC_ERRORS;
         $this->subjectForGetBackupCodes = $this->subjectForGetBackupCodes ?? self::SUBJ_GET_BACKUP_CODES;
-        $this->subjectForRefreshBackupCodes = $this->subjectForRefreshBackupCodes ?? self::SUBJ_REFRESH_BACKUP_CODES;
+        $this->subjectForInvite = $this->subjectForInvite ?? self::SUBJ_INVITE;
         $this->subjectForLostSecurityKey = $this->subjectForLostSecurityKey ?? self::SUBJ_LOST_SECURITY_KEY;
-
+        $this->subjectForMethodPurged = $this->subjectForMethodPurged ?? self::SUBJ_METHOD_PURGED;
+        $this->subjectForMethodReminder = $this->subjectForMethodReminder ?? self::SUBJ_METHOD_REMINDER;
+        $this->subjectForMethodVerify = $this->subjectForMethodVerify ?? self::SUBJ_METHOD_VERIFY;
+        $this->subjectForMfaDisabled = $this->subjectForMfaDisabled ?? self::SUBJ_MFA_DISABLED;
+        $this->subjectForMfaEnabled = $this->subjectForMfaEnabled ?? self::SUBJ_MFA_ENABLED;
         $this->subjectForMfaOptionAdded = $this->subjectForMfaOptionAdded ?? self::SUBJ_MFA_OPTION_ADDED;
         $this->subjectForMfaOptionRemoved = $this->subjectForMfaOptionRemoved ?? self::SUBJ_MFA_OPTION_REMOVED;
-        $this->subjectForMfaEnabled = $this->subjectForMfaEnabled ?? self::SUBJ_MFA_ENABLED;
-        $this->subjectForMfaDisabled = $this->subjectForMfaDisabled ?? self::SUBJ_MFA_DISABLED;
+        $this->subjectForMfaRateLimit = $this->subjectForMfaRateLimit ?? self::SUBJ_MFA_RATE_LIMIT;
         $this->subjectForMfaRecovery = $this->subjectForMfaRecovery ?? self::SUBJ_MFA_RECOVERY;
         $this->subjectForMfaRecoveryHelp = $this->subjectForMfaRecoveryHelp ?? self::SUBJ_MFA_RECOVERY_HELP;
-
-        $this->subjectForMethodVerify = $this->subjectForMethodVerify ?? self::SUBJ_METHOD_VERIFY;
-        $this->subjectForMethodReminder = $this->subjectForMethodReminder ?? self::SUBJ_METHOD_REMINDER;
-        $this->subjectForMethodPurged = $this->subjectForMethodPurged ?? self::SUBJ_METHOD_PURGED;
-
-        $this->subjectForPasswordExpiring = $this->subjectForPasswordExpiring ?? self::SUBJ_PASSWORD_EXPIRING;
+        $this->subjectForPasswordChanged = $this->subjectForPasswordChanged ?? self::SUBJ_PASSWORD_CHANGED;
         $this->subjectForPasswordExpired = $this->subjectForPasswordExpired ?? self::SUBJ_PASSWORD_EXPIRED;
+        $this->subjectForPasswordExpiring = $this->subjectForPasswordExpiring ?? self::SUBJ_PASSWORD_EXPIRING;
         $this->subjectForPasswordPwned = $this->subjectForPasswordPwned ?? self::SUBJ_PASSWORD_PWNED;
-
-        $this->subjectForAbandonedUsers = $this->subjectForAbandonedUsers ?? self::SUBJ_ABANDONED_USER_ACCOUNTS;
-
-        $this->subjectForExtGroupSyncErrors = $this->subjectForExtGroupSyncErrors ?? self::SUBJ_EXT_GROUP_SYNC_ERRORS;
+        $this->subjectForRefreshBackupCodes = $this->subjectForRefreshBackupCodes ?? self::SUBJ_REFRESH_BACKUP_CODES;
+        $this->subjectForWelcome = $this->subjectForWelcome ?? self::SUBJ_WELCOME;
 
         $this->subjects = [
-            EmailLog::MESSAGE_TYPE_INVITE => $this->subjectForInvite,
-            EmailLog::MESSAGE_TYPE_MFA_RATE_LIMIT => $this->subjectForMfaRateLimit,
-            EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED => $this->subjectForPasswordChanged,
-            EmailLog::MESSAGE_TYPE_WELCOME => $this->subjectForWelcome,
             EmailLog::MESSAGE_TYPE_ABANDONED_USERS => $this->subjectForAbandonedUsers,
             EmailLog::MESSAGE_TYPE_EXT_GROUP_SYNC_ERRORS => $this->subjectForExtGroupSyncErrors,
             EmailLog::MESSAGE_TYPE_GET_BACKUP_CODES => $this->subjectForGetBackupCodes,
-            EmailLog::MESSAGE_TYPE_REFRESH_BACKUP_CODES => $this->subjectForRefreshBackupCodes,
+            EmailLog::MESSAGE_TYPE_INVITE => $this->subjectForInvite,
             EmailLog::MESSAGE_TYPE_LOST_SECURITY_KEY => $this->subjectForLostSecurityKey,
+            EmailLog::MESSAGE_TYPE_METHOD_PURGED => $this->subjectForMethodPurged,
+            EmailLog::MESSAGE_TYPE_METHOD_REMINDER => $this->subjectForMethodReminder,
+            EmailLog::MESSAGE_TYPE_METHOD_VERIFY => $this->subjectForMethodVerify,
+            EmailLog::MESSAGE_TYPE_MFA_DISABLED => $this->subjectForMfaDisabled,
+            EmailLog::MESSAGE_TYPE_MFA_ENABLED => $this->subjectForMfaEnabled,
             EmailLog::MESSAGE_TYPE_MFA_OPTION_ADDED => $this->subjectForMfaOptionAdded,
             EmailLog::MESSAGE_TYPE_MFA_OPTION_REMOVED => $this->subjectForMfaOptionRemoved,
-            EmailLog::MESSAGE_TYPE_MFA_ENABLED => $this->subjectForMfaEnabled,
-            EmailLog::MESSAGE_TYPE_MFA_DISABLED => $this->subjectForMfaDisabled,
-            EmailLog::MESSAGE_TYPE_METHOD_VERIFY => $this->subjectForMethodVerify,
-            EmailLog::MESSAGE_TYPE_METHOD_REMINDER => $this->subjectForMethodReminder,
-            EmailLog::MESSAGE_TYPE_METHOD_PURGED => $this->subjectForMethodPurged,
+            EmailLog::MESSAGE_TYPE_MFA_RATE_LIMIT => $this->subjectForMfaRateLimit,
             EmailLog::MESSAGE_TYPE_MFA_RECOVERY => $this->subjectForMfaRecovery,
             EmailLog::MESSAGE_TYPE_MFA_RECOVERY_HELP => $this->subjectForMfaRecoveryHelp,
-            EmailLog::MESSAGE_TYPE_PASSWORD_EXPIRING => $this->subjectForPasswordExpiring,
+            EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED => $this->subjectForPasswordChanged,
             EmailLog::MESSAGE_TYPE_PASSWORD_EXPIRED => $this->subjectForPasswordExpired,
+            EmailLog::MESSAGE_TYPE_PASSWORD_EXPIRING => $this->subjectForPasswordExpiring,
             EmailLog::MESSAGE_TYPE_PASSWORD_PWNED => $this->subjectForPasswordPwned,
+            EmailLog::MESSAGE_TYPE_REFRESH_BACKUP_CODES => $this->subjectForRefreshBackupCodes,
+            EmailLog::MESSAGE_TYPE_WELCOME => $this->subjectForWelcome,
         ];
 
         $this->hrNotificationsEmail = $this->hrNotificationsEmail ?? '';
