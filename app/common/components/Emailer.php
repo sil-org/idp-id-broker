@@ -700,11 +700,11 @@ class Emailer extends Component
             }
         }
 
-        $this->logger->info([
+        $this->logger->info(json_encode([
             'action' => 'send method reminders',
             'status' => 'finished',
             'number_sent' => $numEmailsSent,
-        ]);
+        ]));
     }
 
     /**
@@ -723,9 +723,9 @@ class Emailer extends Component
 
         $users = User::getUsersForEmail('password-expiring', $this->emailRepeatDelayDays);
 
-        $this->logger->info(array_merge($logData, [
+        $this->logger->info(json_encode(array_merge($logData, [
             'users' => count($users)
-        ]));
+        ])));
 
         $numEmailsSent = 0;
         foreach ($users as $user) {
@@ -742,10 +742,10 @@ class Emailer extends Component
             }
         }
 
-        $this->logger->info(array_merge($logData, [
+        $this->logger->info(json_encode(array_merge($logData, [
             'status' => 'finished',
             'number_sent' => $numEmailsSent,
-        ]));
+        ])));
     }
 
     /**
@@ -764,9 +764,9 @@ class Emailer extends Component
 
         $users = User::getUsersForEmail('password-expired', $this->emailRepeatDelayDays);
 
-        $this->logger->info(array_merge($logData, [
+        $this->logger->info(json_encode(array_merge($logData, [
             'users' => count($users)
-        ]));
+        ])));
 
         $numEmailsSent = 0;
         foreach ($users as $user) {
@@ -783,10 +783,10 @@ class Emailer extends Component
             }
         }
 
-        $this->logger->info(array_merge($logData, [
+        $this->logger->info(json_encode(array_merge($logData, [
             'status' => 'finished',
             'number_sent' => $numEmailsSent,
-        ]));
+        ])));
     }
 
     public function sendExternalGroupSyncErrorsEmail(
@@ -801,17 +801,17 @@ class Emailer extends Component
         ];
 
         if (!$this->shouldSendExternalGroupsSyncErrorsEmailTo($recipient)) {
-            $this->logger->info(array_merge($logData, [
+            $this->logger->info(json_encode(array_merge($logData, [
                 'errors' => count($errors),
                 'recipient' => $recipient,
                 'status' => 'skipping (too soon to resend)',
-            ]));
+            ])));
         } else {
-            $this->logger->info(array_merge($logData, [
+            $this->logger->info(json_encode(array_merge($logData, [
                 'errors' => count($errors),
                 'recipient' => $recipient,
                 'status' => 'starting',
-            ]));
+            ])));
 
             $this->sendMessageTo(
                 EmailLog::MESSAGE_TYPE_EXT_GROUP_SYNC_ERRORS,
@@ -825,9 +825,9 @@ class Emailer extends Component
                 ]
             );
 
-            $this->logger->info(array_merge($logData, [
+            $this->logger->info(json_encode(array_merge($logData, [
                 'status' => 'finished',
-            ]));
+            ])));
         }
     }
 
