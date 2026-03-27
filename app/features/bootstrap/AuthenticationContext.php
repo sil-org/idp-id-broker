@@ -3,6 +3,8 @@
 namespace Sil\SilIdBroker\Behat\Context;
 
 use Aws\DynamoDb\DynamoDbClient;
+use Behat\Behat\Hook\Scope\AfterScenarioScope;
+use Behat\Hook\AfterScenario;
 use common\models\Mfa;
 use common\models\User;
 use FeatureContext;
@@ -12,10 +14,13 @@ use Webmozart\Assert\Assert;
 
 class AuthenticationContext extends FeatureContext
 {
-    public function __destruct()
+    #[AfterScenario]
+    public function resetWebauthnSecret(AfterScenarioScope $scope): void
     {
-        // Ensure the (local) WebAuthn MFA API is left with the correct API Secret.
-        $this->setWebAuthnApiSecretTo(Env::get('MFA_API_SECRET'));
+        if (str_contains($scope->getScenario()->getTitle(), 'wrong password')) {
+            // Ensure the (local) WebAuthn MFA API is left with the correct API Secret.
+            $this->setWebAuthnApiSecretTo(Env::get('MFA_API_SECRET'));
+        }
     }
 
     /**
