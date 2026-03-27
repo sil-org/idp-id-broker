@@ -3,6 +3,7 @@
 namespace Sil\SilIdBroker\Behat\Context;
 
 use Behat\Behat\Context\Context;
+use Behat\Hook\BeforeScenario;
 use Sil\Psr3Adapters\Psr3StdOutLogger;
 use Sil\SilIdBroker\Behat\Context\fakes\FakeEmailer;
 use Sil\SilIdBroker\Behat\Context\fakes\FakeLogTarget;
@@ -20,7 +21,7 @@ class YiiContext implements Context
 
     private static $application;
 
-    /** @BeforeScenario */
+    #[BeforeScenario]
     public function setupLogger()
     {
         $yiiCommonConfig = require __DIR__ . '/../../common/config/main.php';
