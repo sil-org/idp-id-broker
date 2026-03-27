@@ -43,7 +43,7 @@ class GroupsExternalSyncContext extends GroupsExternalContext
             $this->deleteTestUser($emailAddress);
             $this->createTestUser(
                 $emailAddress,
-                (string)$employeeId,
+                (string) $employeeId,
                 $groups
             );
         }

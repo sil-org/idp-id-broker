@@ -4,6 +4,4 @@ namespace console\controllers;
 
 use yii\console\Controller;
 
-class GaController extends Controller
-{
-}
+class GaController extends Controller {}

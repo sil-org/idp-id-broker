@@ -21,9 +21,9 @@ class m190109_173943_add_manager_mfa_type extends Migration
         $this->alterColumn(
             '{{email_log}}',
             'message_type',
-            "enum('invite','welcome','mfa-rate-limit','password-changed','get-backup-codes','refresh-backup-codes'," .
-            "'lost-security-key','mfa-option-added','mfa-option-removed'," .
-            "'mfa-enabled','mfa-disabled','method-verify','mfa-manager') NULL"
+            "enum('invite','welcome','mfa-rate-limit','password-changed','get-backup-codes','refresh-backup-codes',"
+            . "'lost-security-key','mfa-option-added','mfa-option-removed',"
+            . "'mfa-enabled','mfa-disabled','method-verify','mfa-manager') NULL"
         );
     }
 
@@ -35,9 +35,9 @@ class m190109_173943_add_manager_mfa_type extends Migration
         $this->alterColumn(
             '{{email_log}}',
             'message_type',
-            "enum('invite','welcome','mfa-rate-limit','password-changed','get-backup-codes','refresh-backup-codes'," .
-            "'lost-security-key','mfa-option-added','mfa-option-removed'," .
-            "'mfa-enabled','mfa-disabled','method-verify') NULL"
+            "enum('invite','welcome','mfa-rate-limit','password-changed','get-backup-codes','refresh-backup-codes',"
+            . "'lost-security-key','mfa-option-added','mfa-option-removed',"
+            . "'mfa-enabled','mfa-disabled','method-verify') NULL"
         );
 
         $this->alterColumn(

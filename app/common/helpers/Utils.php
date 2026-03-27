@@ -44,7 +44,7 @@ class Utils
      */
     public static function getFriendlyDate($timestamp = null)
     {
-        $timestamp = $timestamp ?? time();
+        $timestamp ??= time();
         $timestamp = is_int($timestamp) ? $timestamp : strtotime($timestamp);
         if ($timestamp === false) {
             throw new \Exception('Unable to parse date to timestamp', 1468865838);
@@ -60,7 +60,7 @@ class Utils
      */
     public static function getIso8601($timestamp = null)
     {
-        $timestamp = $timestamp ?? time();
+        $timestamp ??= time();
         $timestamp = is_int($timestamp) ? $timestamp : strtotime($timestamp);
         if ($timestamp === false) {
             throw new \Exception('Unable to parse date to timestamp', 1546977533);
@@ -90,7 +90,7 @@ class Utils
             throw new BadRequestHttpException('Invalid email address provided.', 1461459797);
         }
 
-        list($part1, $domain) = explode('@', $email);
+        [$part1, $domain] = explode('@', $email);
         $newEmail = '';
         $useRealChar = true;
 

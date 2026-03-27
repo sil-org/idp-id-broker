@@ -28,7 +28,7 @@ class EmailClient extends Component
             throw new Exception(current($email->getFirstErrors()));
         }
 
-        if ((int)$email->send_after <= time() && (int)$email->delay_seconds <= 0) {
+        if ((int) $email->send_after <= time() && (int) $email->delay_seconds <= 0) {
             /*
              * Attempt to send email immediately
              */

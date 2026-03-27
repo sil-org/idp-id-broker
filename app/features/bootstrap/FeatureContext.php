@@ -848,8 +848,8 @@ class FeatureContext extends YiiContext
             $n++;
         }
 
-        Assert::eq(count($property), $n, "unexpected element(s) in property array: " .
-            implode(", ", $property));
+        Assert::eq(count($property), $n, "unexpected element(s) in property array: "
+            . implode(", ", $property));
     }
 
 

@@ -15,7 +15,7 @@
     "ext-pdo": "*",
     "google/apiclient": "^2.4",
     "guzzlehttp/guzzle": "^7.0",
-    "php": ">=7.4",
+    "php": ">=8.3",
     "ramsey/uuid": "^3.6",
     "sil-org/php-array-dot-notation": "0.1.0",
     "sil-org/php-env": "^4.0",

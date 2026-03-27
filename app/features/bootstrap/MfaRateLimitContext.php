@@ -42,7 +42,7 @@ class MfaRateLimitContext extends YiiContext
 
         $user = new User([
             'email' => $username . '@example.com',
-            'employee_id' => (string)uniqid(),
+            'employee_id' => (string) uniqid(),
             'first_name' => 'Test',
             'last_name' => 'User',
             'username' => $username,
@@ -137,8 +137,8 @@ class MfaRateLimitContext extends YiiContext
         $mfa = Mfa::findOne($this->mfaId);
         Assert::notNull($mfa);
         Assert::same(
-            (string)$mfa->countRecentFailures(),
-            (string)$number
+            (string) $mfa->countRecentFailures(),
+            (string) $number
         );
     }
 

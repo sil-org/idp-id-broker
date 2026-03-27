@@ -16,7 +16,7 @@ class SiteController extends BaseRestController
 
         $behaviors['authenticator']['except'] = [
             // bypass authentication, i.e., public API
-            'status'
+            'status',
         ];
 
         return $behaviors;
