@@ -3,7 +3,8 @@
 namespace Sil\SilIdBroker\Behat\Context;
 
 use Behat\Behat\Context\Context;
-use Sil\Psr3Adapters\Psr3ConsoleLogger;
+use Behat\Hook\BeforeScenario;
+use Sil\Psr3Adapters\Psr3StdOutLogger;
 use Sil\SilIdBroker\Behat\Context\fakes\FakeEmailer;
 use Sil\SilIdBroker\Behat\Context\fakes\FakeLogTarget;
 use Yii;
@@ -20,7 +21,8 @@ class YiiContext implements Context
 
     private static $application;
 
-    public function __construct()
+    #[BeforeScenario]
+    public function setupLogger()
     {
         $yiiCommonConfig = require __DIR__ . '/../../common/config/main.php';
         $yiiEmailerConfig = $yiiCommonConfig['components']['emailer'];
@@ -29,7 +31,7 @@ class YiiContext implements Context
         $this->fakeEmailer = new FakeEmailer(ArrayHelper::merge(
             $yiiEmailerConfig,
             [
-                'logger' => new Psr3ConsoleLogger(),
+                'logger' => new Psr3StdOutLogger(),
             ]
         ));
         $this->fakeEmailer->emailRepeatDelayDays = 31;
