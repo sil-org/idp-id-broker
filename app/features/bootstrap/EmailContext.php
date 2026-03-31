@@ -12,6 +12,9 @@ use common\models\MfaBackupcode;
 use common\models\MfaWebauthn;
 use common\models\User;
 use Webmozart\Assert\Assert;
+use Behat\Step\Then;
+use Behat\Step\When;
+use Behat\Step\Given;
 
 class EmailContext extends YiiContext
 {
@@ -67,17 +70,13 @@ class EmailContext extends YiiContext
     public const RECOVERY_EMAIL = 'recovery@example.com';
 
 
-    /**
-     * @Then a(n) :messageType email should have been sent to them
-     */
+    #[Then('a(n) :messageType email should have been sent to them')]
     public function aEmailShouldHaveBeenSentToThem($messageType)
     {
         $this->assertEmailSent($messageType, $this->tempUser->email);
     }
 
-    /**
-     * @Then a(n) :messageType email should NOT have been sent to them
-     */
+    #[Then('a(n) :messageType email should NOT have been sent to them')]
     public function aEmailShouldNotHaveBeenSentToThem($messageType)
     {
         $this->matchingFakeEmails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser(
@@ -88,9 +87,7 @@ class EmailContext extends YiiContext
         Assert::isEmpty($this->matchingFakeEmails);
     }
 
-    /**
-     * @Then a(n) :messageType email to that user should NOT have been logged
-     */
+    #[Then('a(n) :messageType email to that user should NOT have been logged')]
     public function aEmailToThatUserShouldNotHaveBeenLogged($messageType)
     {
         $emailLogs = EmailLog::findAll([
@@ -110,18 +107,14 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @When that user is created
-     */
+    #[When('that user is created')]
     public function thatUserIsCreated()
     {
         Assert::null($this->tempUser, 'The user should not have existed yet.');
         $this->tempUser = $this->createNewUser();
     }
 
-    /**
-     * @When that user is created with a personal email address
-     */
+    #[When('that user is created with a personal email address')]
     public function thatUserIsCreatedWithAPersonalEmailAddress()
     {
         Assert::null($this->tempUser, 'The user should not have existed yet.');
@@ -215,9 +208,7 @@ class EmailContext extends YiiContext
         return null;
     }
 
-    /**
-     * @Then a(n) :messageType email to that user should have been logged
-     */
+    #[Then('a(n) :messageType email to that user should have been logged')]
     public function aEmailToThatUserShouldHaveBeenLogged($messageType)
     {
         $emailLogs = EmailLog::findAll([
@@ -237,49 +228,37 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @Given we are configured to send invite emails
-     */
+    #[Given('we are configured to send invite emails')]
     public function weAreConfiguredToSendInviteEmails()
     {
         $this->fakeEmailer->sendInviteEmails = true;
     }
 
-    /**
-     * @Given we are configured to send password-changed emails
-     */
+    #[Given('we are configured to send password-changed emails')]
     public function weAreConfiguredToSendPasswordChangedEmails()
     {
         $this->fakeEmailer->sendPasswordChangedEmails = true;
     }
 
-    /**
-     * @Given we are configured NOT to send invite emails
-     */
+    #[Given('we are configured NOT to send invite emails')]
     public function weAreConfiguredNotToSendInviteEmails()
     {
         $this->fakeEmailer->sendInviteEmails = false;
     }
 
-    /**
-     * @Given we are configured NOT to send password-changed emails
-     */
+    #[Given('we are configured NOT to send password-changed emails')]
     public function weAreConfiguredNotToSendPasswordChangedEmails()
     {
         $this->fakeEmailer->sendPasswordChangedEmails = false;
     }
 
-    /**
-     * @Given a(nother) (specific) user already exists
-     */
+    #[Given('a(nother) (specific) user already exists')]
     public function aUserAlreadyExists()
     {
         $this->tempUser = $this->createNewUser();
     }
 
-    /**
-     * @Given an(other) inactive user already exists
-     */
+    #[Given('an(other) inactive user already exists')]
     public function anInactiveUserAlreadyExists()
     {
         $this->tempUser = $this->createNewUser();
@@ -293,9 +272,7 @@ class EmailContext extends YiiContext
         $user->save();
     }
 
-    /**
-     * @Given that user does NOT have a password
-     */
+    #[Given('that user does NOT have a password')]
     public function thatUserDoesNotHaveAPassword()
     {
         if ($this->tempUser !== null) {
@@ -307,18 +284,14 @@ class EmailContext extends YiiContext
         }
     }
 
-    /**
-     * @Given a second user exists with a totp mfa option
-     */
+    #[Given('a second user exists with a totp mfa option')]
     public function aSecondUserExistsWithATotpMfaOption()
     {
         $this->tempUser2 = $this->createNewUser();
         $this->createMfa(Mfa::TYPE_TOTP, null, $this->tempUser2);
     }
 
-    /**
-     * @Given a second inactive user exists with a totp mfa option
-     */
+    #[Given('a second inactive user exists with a totp mfa option')]
     public function aSecondInactiveUserExistsWithATotpMfaOption()
     {
         $this->tempUser2 = $this->createNewUser();
@@ -326,9 +299,7 @@ class EmailContext extends YiiContext
         self::deactivateUser($this->tempUser2);
     }
 
-    /**
-     * @Given a :messageType email was sent :daysAgo days ago to that user
-     */
+    #[Given('a :messageType email was sent :daysAgo days ago to that user')]
     public function anEmailWasSentXDaysAgoToThatUser(string $messageType, int $daysAgo)
     {
         if ($daysAgo < 0) {
@@ -350,9 +321,7 @@ class EmailContext extends YiiContext
         Assert::true($emailLog->save(), 'Could not save a new EmailLog for the test');
     }
 
-    /**
-     * @Given a :messageType email has been sent to that user
-     */
+    #[Given('a :messageType email has been sent to that user')]
     public function anEmailHasBeenSentToThatUser(string $messageType)
     {
         $emailLog = new EmailLog([
@@ -363,17 +332,13 @@ class EmailContext extends YiiContext
         Assert::true($emailLog->save(), 'Could not save a new EmailLog for the test');
     }
 
-    /**
-     * @Given a :messageType email has NOT been sent to that user
-     */
+    #[Given('a :messageType email has NOT been sent to that user')]
     public function anEmailHasNotBeenSentToThatUser(string $messageType)
     {
         EmailLog::deleteAll(['user_id' => $this->tempUser->id, 'message_type' => $messageType]);
     }
 
-    /**
-     * @When that user gets a password
-     */
+    #[When('that user gets a password')]
     public function thatUserGetsAPassword()
     {
         $this->setPasswordForUser(
@@ -392,9 +357,7 @@ class EmailContext extends YiiContext
         $user->scenario = $oldScenario;
     }
 
-    /**
-     * @Given that user has a password
-     */
+    #[Given('that user has a password')]
     public function thatUserHasAPassword()
     {
         $this->setPasswordForUser(
@@ -405,9 +368,7 @@ class EmailContext extends YiiContext
         Assert::notNull($this->tempUser->current_password_id);
     }
 
-    /**
-     * @When that user has non-pw changes
-     */
+    #[When('that user has non-pw changes')]
     public function thatUserHasNonPwChanges()
     {
         $this->tempUser->first_name .= ', changed ' . microtime();
@@ -417,154 +378,116 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @Given I remove records of any emails that have been sent
-     */
+    #[Given('I remove records of any emails that have been sent')]
     public function iRemoveRecordsOfAnyEmailsThatHaveBeenSent()
     {
         $this->fakeEmailer->forgetFakeEmailsSent();
         EmailLog::deleteAll();
     }
 
-    /**
-     * @Given a specific user does NOT exist
-     */
+    #[Given('a specific user does NOT exist')]
     public function aSpecificUserDoesNotExist()
     {
         $this->tempUser = null;
     }
 
-    /**
-     * @Given we are configured to send mfa option added emails
-     */
+    #[Given('we are configured to send mfa option added emails')]
     public function weAreConfiguredToSendMfaOptionAddedEmails()
     {
         $this->fakeEmailer->sendMfaOptionAddedEmails = true;
     }
 
-    /**
-     * @Given we are configured NOT to send mfa option added emails
-     */
+    #[Given('we are configured NOT to send mfa option added emails')]
     public function weAreConfiguredNotToSendMfaOptionAddedEmails()
     {
         $this->fakeEmailer->sendMfaOptionAddedEmails = false;
     }
 
-    /**
-     * @Given we are configured to send mfa enabled emails
-     */
+    #[Given('we are configured to send mfa enabled emails')]
     public function weAreConfiguredToSendMfaEnabledEmails()
     {
         $this->fakeEmailer->sendMfaEnabledEmails = true;
     }
 
-    /**
-     * @Given we are configured NOT to send mfa enabled emails
-     */
+    #[Given('we are configured NOT to send mfa enabled emails')]
     public function weAreConfiguredNotToSendMfaEnabledEmails()
     {
         $this->fakeEmailer->sendMfaEnabledEmails = false;
     }
 
-    /**
-     * @Given we are configured to send mfa option removed emails
-     */
+    #[Given('we are configured to send mfa option removed emails')]
     public function weAreConfiguredToSendMfaOptionRemovedEmails()
     {
         $this->fakeEmailer->sendMfaOptionRemovedEmails = true;
     }
 
-    /**
-     * @Given we are configured NOT to send mfa option removed emails
-     */
+    #[Given('we are configured NOT to send mfa option removed emails')]
     public function weAreConfiguredNotToSendMfaOptionRemovedEmails()
     {
         $this->fakeEmailer->sendMfaOptionRemovedEmails = false;
     }
 
-    /**
-     * @Given we are configured to send mfa disabled emails
-     */
+    #[Given('we are configured to send mfa disabled emails')]
     public function weAreConfiguredToSendMfaDisabledEmails()
     {
         $this->fakeEmailer->sendMfaDisabledEmails = true;
     }
 
-    /**
-     * @Given we are configured NOT to send mfa disabled emails
-     */
+    #[Given('we are configured NOT to send mfa disabled emails')]
     public function weAreConfiguredNotToSendMfaDisabledEmails()
     {
         $this->fakeEmailer->sendMfaDisabledEmails = false;
     }
 
-    /**
-     * @Given we are configured to send welcome emails
-     */
+    #[Given('we are configured to send welcome emails')]
     public function weAreConfiguredToSendWelcomeEmails()
     {
         $this->fakeEmailer->sendWelcomeEmails = true;
     }
 
-    /**
-     * @Given we are configured NOT to send welcome emails
-     */
+    #[Given('we are configured NOT to send welcome emails')]
     public function weAreConfiguredNotToSendWelcomeEmails()
     {
         $this->fakeEmailer->sendWelcomeEmails = false;
     }
 
-    /**
-     * @Given we are configured to send lost key emails
-     */
+    #[Given('we are configured to send lost key emails')]
     public function weAreConfiguredToSendLostKeyEmails()
     {
         $this->fakeEmailer->sendLostSecurityKeyEmails = true;
     }
 
-    /**
-     * @Given we are configured NOT to send lost key emails
-     */
+    #[Given('we are configured NOT to send lost key emails')]
     public function weAreConfiguredNotToSendLostKeyEmails()
     {
         $this->fakeEmailer->sendLostSecurityKeyEmails = false;
     }
 
-    /**
-     * @Given we are configured to send get backup codes emails
-     */
+    #[Given('we are configured to send get backup codes emails')]
     public function weAreConfiguredToSendGetBackupCodesEmails()
     {
         $this->fakeEmailer->sendGetBackupCodesEmails = true;
     }
 
-    /**
-     * @Given we are configured NOT to send get backup codes emails
-     */
+    #[Given('we are configured NOT to send get backup codes emails')]
     public function weAreConfiguredNotToSendGetBackupCodesEmails()
     {
         $this->fakeEmailer->sendGetBackupCodesEmails = false;
     }
 
-    /**
-     * @Given we are configured to send refresh backup codes emails
-     */
+    #[Given('we are configured to send refresh backup codes emails')]
     public function weAreConfiguredToSendRefreshBackupCodesEmails()
     {
         $this->fakeEmailer->sendRefreshBackupCodesEmails = true;
     }
 
-    /**
-     * @Given we are configured NOT to send refresh backup codes emails
-     */
+    #[Given('we are configured NOT to send refresh backup codes emails')]
     public function weAreConfiguredNotToSendRefreshBackupCodesEmails()
     {
         $this->fakeEmailer->sendRefreshBackupCodesEmails = false;
     }
 
-    /**
-     * @Given no mfas exist
-     */
+    #[Given('no mfas exist')]
     public function noMfasExist()
     {
         MfaBackupcode::deleteAll();
@@ -572,9 +495,7 @@ class EmailContext extends YiiContext
         Mfa::deleteAll();
     }
 
-    /**
-     * @Given :count verified webauthn mfa option does exist
-     */
+    #[Given(':count verified webauthn mfa option does exist')]
     public function aVerifiedWebAuthnMfaOptionDoesExist($count)
     {
         $this->createMfa(Mfa::TYPE_WEBAUTHN);
@@ -589,75 +510,57 @@ class EmailContext extends YiiContext
     }
 
 
-    /**
-     * @Given a verified webauthn mfa option was just deleted
-     */
+    #[Given('a verified webauthn mfa option was just deleted')]
     public function aVerifiedWebAuthnMfaOptionWasJustDeleted()
     {
         $this->testMfaOption = $this->createTempMfa(Mfa::TYPE_WEBAUTHN, 1);
         $this->mfaEventType = 'delete_mfa';
     }
 
-    /**
-     * @Given an unverified webauthn mfa option was just deleted
-     */
+    #[Given('an unverified webauthn mfa option was just deleted')]
     public function anUnverifiedWebAuthnMfaOptionWasJustDeleted()
     {
         $this->testMfaOption = $this->createTempMfa(Mfa::TYPE_WEBAUTHN, 0);
         $this->mfaEventType = 'delete_mfa';
     }
 
-    /**
-     * @Given an unverified webauthn mfa option does exist
-     */
+    #[Given('an unverified webauthn mfa option does exist')]
     public function anUnverifiedWebAuthnMfaOptionDoesExist()
     {
         $this->createMfa(Mfa::TYPE_WEBAUTHN, null, null, 0);
     }
 
-    /**
-     * @Given a (verified) webauthn mfa option does NOT Exist
-     */
+    #[Given('a (verified) webauthn mfa option does NOT Exist')]
     public function aWebAuthnMfaOptionDoesNotExist()
     {
         $this->deleteMfaOfType(Mfa::TYPE_WEBAUTHN);
     }
 
-    /**
-     * @Given a webauthn mfa option was used :arg1 days ago
-     */
+    #[Given('a webauthn mfa option was used :arg1 days ago')]
     public function aWebAuthnMfaOptionWasXUsedDaysAgo($lastUsedDaysAgo)
     {
         $this->createMfa(Mfa::TYPE_WEBAUTHN, $lastUsedDaysAgo);
     }
 
-    /**
-     * @Given a totp mfa option does exist
-     */
+    #[Given('a totp mfa option does exist')]
     public function aTotpMfaOptionDoesExist()
     {
         $this->createMfa(Mfa::TYPE_TOTP);
     }
 
-    /**
-     * @Given a totp mfa option does NOT exist
-     */
+    #[Given('a totp mfa option does NOT exist')]
     public function aTotpMfaOptionDoesNotExist()
     {
         $this->deleteMfaOfType(Mfa::TYPE_TOTP);
     }
 
-    /**
-     * @Given a totp mfa option was used :arg1 days ago
-     */
+    #[Given('a totp mfa option was used :arg1 days ago')]
     public function aTotpMfaOptionWasUsedDaysAgo($lastUsedDaysAgo)
     {
         $this->createMfa(Mfa::TYPE_TOTP, $lastUsedDaysAgo);
     }
 
-    /**
-     * @Given a backup code mfa option does exist
-     */
+    #[Given('a backup code mfa option does exist')]
     public function aBackupCodeMfaOptionDoesExist()
     {
         $results = Mfa::create($this->tempUser->id, Mfa::TYPE_BACKUPCODE);
@@ -666,17 +569,13 @@ class EmailContext extends YiiContext
         $this->tempUser->refresh();
     }
 
-    /**
-     * @Given a backup code mfa option does NOT exist
-     */
+    #[Given('a backup code mfa option does NOT exist')]
     public function aBackupCodeMfaOptionDoesNotExist()
     {
         $this->deleteMfaOfType(Mfa::TYPE_BACKUPCODE);
     }
 
-    /**
-     * @Given there are :arg1 backup codes
-     */
+    #[Given('there are :arg1 backup codes')]
     public function thereAreXBackupCodes($desiredCount)
     {
         $backupMfa = $this->getMfa(Mfa::TYPE_BACKUPCODE);
@@ -703,26 +602,20 @@ class EmailContext extends YiiContext
         Assert::eq(count($remainingCodes), $desiredCount, 'Could not ensure the desired count of backup codes.');
     }
 
-    /**
-     * @Given the latest mfa event type was :arg1
-     */
+    #[Given('the latest mfa event type was :arg1')]
     public function theLatestMfaEventTypeWas($eventType)
     {
         $this->mfaEventType = $eventType;
     }
 
 
-    /**
-     * @Given a backup code mfa option was used :arg1 days ago
-     */
+    #[Given('a backup code mfa option was used :arg1 days ago')]
     public function aBackupCodeMfaOptionWasXUsedDaysAgo($lastUsedDaysAgo)
     {
         $this->createMfa(Mfa::TYPE_BACKUPCODE, $lastUsedDaysAgo);
     }
 
-    /**
-     * @When a backup code is used up by that user
-     */
+    #[When('a backup code is used up by that user')]
     public function aBackupCodeIsUsedUpByThatUser()
     {
         $backupMfa = $this->getMfa(Mfa::TYPE_BACKUPCODE);
@@ -735,9 +628,7 @@ class EmailContext extends YiiContext
         MfaBackupcode::sendRefreshCodesMessage($backupMfa->id);
     }
 
-    /**
-     * @When I check if a mfa option added email should be sent
-     */
+    #[When('I check if a mfa option added email should be sent')]
     public function iCheckIfAMfaOptionAddedEmailShouldBeSent()
     {
         $this->tempUser->refresh();
@@ -747,9 +638,7 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @When I check if a mfa enabled email should be sent
-     */
+    #[When('I check if a mfa enabled email should be sent')]
     public function iCheckIfAMfaEnabledEmailShouldBeSent()
     {
         $this->mfaEnabledEmailShouldBeSent = $this->fakeEmailer->shouldSendMfaEnabledMessageTo(
@@ -758,9 +647,7 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @When I check if a mfa option removed email should be sent
-     */
+    #[When('I check if a mfa option removed email should be sent')]
     public function iCheckIfAMfaOptionRemovedEmailShouldBeSent()
     {
         $this->mfaOptionRemovedEmailShouldBeSent = $this->fakeEmailer->shouldSendMfaOptionRemovedMessageTo(
@@ -770,9 +657,7 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @When I check if a mfa disabled email should be sent
-     */
+    #[When('I check if a mfa disabled email should be sent')]
     public function iCheckIfAMfaDisabledEmailShouldBeSent()
     {
         $this->mfaDisabledEmailShouldBeSent = $this->fakeEmailer->shouldSendMfaDisabledMessageTo(
@@ -782,9 +667,7 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @When I check if a get backup codes email has been sent recently
-     */
+    #[When('I check if a get backup codes email has been sent recently')]
     public function iCheckIfAGetBackupCodesEmailHasBeenSentRecently()
     {
         $messageType = EmailLog::MESSAGE_TYPE_GET_BACKUP_CODES;
@@ -794,170 +677,128 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @When I check if a lost security key email should be sent
-     */
+    #[When('I check if a lost security key email should be sent')]
     public function iCheckIfALostSecurityKeyEmailShouldBeSent()
     {
         $this->lostKeyEmailShouldBeSent = $this->fakeEmailer->shouldSendLostSecurityKeyMessageTo($this->tempUser);
     }
 
-    /**
-     * @When I check if a get backup codes email should be sent
-     */
+    #[When('I check if a get backup codes email should be sent')]
     public function iCheckIfAGetBackupCodesEmailShouldBeSent()
     {
         $this->getBackupCodesEmailShouldBeSent = $this->fakeEmailer->shouldSendGetBackupCodesMessageTo($this->tempUser);
     }
 
 
-    /**
-     * @When I check if a refresh backup codes email should be sent
-     */
+    #[When('I check if a refresh backup codes email should be sent')]
     public function iCheckIfARefreshBackupCodesEmailShouldBeSent()
     {
         $this->refreshBackupCodesEmailShouldBeSent = $this->fakeEmailer->shouldSendRefreshBackupCodesMessage(count($this->tempBackupCodes));
     }
 
-    /**
-     * @When I send delayed mfa related emails
-     */
+    #[When('I send delayed mfa related emails')]
     public function iSendDelayedMfaRelatedEmails()
     {
         $this->fakeEmailer->sendDelayedMfaRelatedEmails();
     }
 
-    /**
-     * @Then I see that a mfa option added email should NOT be sent
-     */
+    #[Then('I see that a mfa option added email should NOT be sent')]
     public function iSeeThatAMfaOptionAddedEmailShouldNotBeSent()
     {
         Assert::false($this->mfaOptionAddedEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a mfa option added email should be sent
-     */
+    #[Then('I see that a mfa option added email should be sent')]
     public function iSeeThatAMfaOptionAddedEmailShouldBeSent()
     {
         Assert::true($this->mfaOptionAddedEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a mfa enabled email should NOT be sent
-     */
+    #[Then('I see that a mfa enabled email should NOT be sent')]
     public function iSeeThatAMfaEnabledEmailShouldNotBeSent()
     {
         Assert::false($this->mfaEnabledEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a mfa enabled email should be sent
-     */
+    #[Then('I see that a mfa enabled email should be sent')]
     public function iSeeThatAMfaEnabledEmailShouldBeSent()
     {
         Assert::true($this->mfaEnabledEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a mfa option removed email should NOT be sent
-     */
+    #[Then('I see that a mfa option removed email should NOT be sent')]
     public function iSeeThatAMfaOptionRemovedEmailShouldNotBeSent()
     {
         Assert::false($this->mfaOptionRemovedEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a mfa option removed email should be sent
-     */
+    #[Then('I see that a mfa option removed email should be sent')]
     public function iSeeThatAMfaOptionRemovedEmailShouldBeSent()
     {
         Assert::true($this->mfaOptionRemovedEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a mfa disabled email should NOT be sent
-     */
+    #[Then('I see that a mfa disabled email should NOT be sent')]
     public function iSeeThatAMfaDisabledEmailShouldNotBeSent()
     {
         Assert::false($this->mfaDisabledEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a mfa disabled email should be sent
-     */
+    #[Then('I see that a mfa disabled email should be sent')]
     public function iSeeThatAMfaDisabledEmailShouldBeSent()
     {
         Assert::true($this->mfaDisabledEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a get backup codes email has NOT been sent recently
-     */
+    #[Then('I see that a get backup codes email has NOT been sent recently')]
     public function iSeeThatAGetBackupCodesEmailHasNotBeSent()
     {
         Assert::false($this->getBackupCodesEmailHasBeenSent);
     }
 
-    /**
-     * @Then I see that a get backup codes email has been sent recently
-     */
+    #[Then('I see that a get backup codes email has been sent recently')]
     public function iSeeThatAGetBackupCodesEmailHasBeenSent()
     {
         Assert::true($this->getBackupCodesEmailHasBeenSent);
     }
 
-    /**
-     * @Then I see that a lost security key email should NOT be sent
-     */
+    #[Then('I see that a lost security key email should NOT be sent')]
     public function iSeeThatALostSecurityKeyEmailShouldNotBeSent()
     {
         Assert::false($this->lostKeyEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a lost security key email should be sent
-     */
+    #[Then('I see that a lost security key email should be sent')]
     public function iSeeThatALostSecurityKeyEmailShouldBeSent()
     {
         Assert::true($this->lostKeyEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a get backup codes email should NOT be sent
-     */
+    #[Then('I see that a get backup codes email should NOT be sent')]
     public function iSeeThatAGetBackupCodesEmailShouldNotBeSent()
     {
         Assert::false($this->getBackupCodesEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a get backup codes email should be sent
-     */
+    #[Then('I see that a get backup codes email should be sent')]
     public function iSeeThatAGetBackupCodesEmailShouldBeSent()
     {
         Assert::true($this->getBackupCodesEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a refresh backup codes email should NOT be sent
-     */
+    #[Then('I see that a refresh backup codes email should NOT be sent')]
     public function iSeeThatARefreshBackupCodesEmailShouldNotBeSent()
     {
         Assert::false($this->refreshBackupCodesEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that a refresh backup codes email should be sent
-     */
+    #[Then('I see that a refresh backup codes email should be sent')]
     public function iSeeThatARefreshBackupCodesEmailShouldBeSent()
     {
         Assert::true($this->refreshBackupCodesEmailShouldBeSent);
     }
 
-    /**
-     * @Then I see that the first user has received a lost-security-key email
-     */
+    #[Then('I see that the first user has received a lost-security-key email')]
     public function iSeeThatTheFirstUserHasReceivedALostSecurityKeyEmail()
     {
         Assert::true($this->fakeEmailer->hasUserReceivedMessageRecently(
@@ -966,9 +807,7 @@ class EmailContext extends YiiContext
         ));
     }
 
-    /**
-     * @Then I see that the second user has received a get-backup-codes email
-     */
+    #[Then('I see that the second user has received a get-backup-codes email')]
     public function iSeeThatTheSecondUserHasReceivedAGetBackupCodesEmail()
     {
         Assert::true($this->fakeEmailer->hasUserReceivedMessageRecently(
@@ -977,9 +816,7 @@ class EmailContext extends YiiContext
         ));
     }
 
-    /**
-     * @Then I see that the first user has NOT received a lost-security-key email
-     */
+    #[Then('I see that the first user has NOT received a lost-security-key email')]
     public function iSeeThatTheFirstUserHasNotReceivedALostSecurityKeyEmail()
     {
         Assert::false($this->fakeEmailer->hasUserReceivedMessageRecently(
@@ -988,9 +825,7 @@ class EmailContext extends YiiContext
         ));
     }
 
-    /**
-     * @Then I see that the second user has NOT received a get-backup-codes email
-     */
+    #[Then('I see that the second user has NOT received a get-backup-codes email')]
     public function iSeeThatTheSecondUserHasNotReceivedAGetBackupCodesEmail()
     {
         Assert::false($this->fakeEmailer->hasUserReceivedMessageRecently(
@@ -999,9 +834,7 @@ class EmailContext extends YiiContext
         ));
     }
 
-    /**
-     * @Given no methods exist
-     */
+    #[Given('no methods exist')]
     public function noMethodsExist()
     {
         Method::deleteAll();
@@ -1020,9 +853,7 @@ class EmailContext extends YiiContext
         Assert::true($method->save(), "Could not create new method.");
     }
 
-    /**
-     * @When I create a new recovery method
-     */
+    #[When('I create a new recovery method')]
     public function iCreateANewRecoveryMethod()
     {
         $this->createMethod(self::METHOD_EMAIL_ADDRESS);
@@ -1045,81 +876,61 @@ class EmailContext extends YiiContext
         Assert::contains(current($this->matchingFakeEmails)['bcc_address'], $address, 'address not on bcc line');
     }
 
-    /**
-     * @Then a Method Verify email is sent to that method
-     */
+    #[Then('a Method Verify email is sent to that method')]
     public function aMethodVerifyEmailIsSentToThatMethod()
     {
         $this->assertEmailSent(EmailLog::MESSAGE_TYPE_METHOD_VERIFY, self::METHOD_EMAIL_ADDRESS);
     }
 
-    /**
-     * @Then a Manager Rescue email is sent to the manager
-     */
+    #[Then('a Manager Rescue email is sent to the manager')]
     public function aManagerRescueEmailIsSentToTheManager()
     {
         $this->assertEmailSent(EmailLog::MESSAGE_TYPE_MFA_RECOVERY, self::MANAGER_EMAIL);
     }
 
-    /**
-     * @Then a Recovery Rescue email is sent to the recovery contact
-     */
+    #[Then('a Recovery Rescue email is sent to the recovery contact')]
     public function aRecoveryRescueEmailIsSentToTheRecoveryContact()
     {
         $this->assertEmailSent(EmailLog::MESSAGE_TYPE_MFA_RECOVERY, self::RECOVERY_EMAIL);
     }
 
-    /**
-     * @Given an unverified method exists
-     */
+    #[Given('an unverified method exists')]
     public function anUnverifiedMethodExists()
     {
         $this->createMethod(self::METHOD_EMAIL_ADDRESS);
     }
 
-    /**
-     * @When I request that the verify email is resent
-     */
+    #[When('I request that the verify email is resent')]
     public function iRequestThatTheVerifyEmailIsResent()
     {
         $this->testMethod->sendVerification();
     }
 
-    /**
-     * @When I request a new manager mfa
-     */
+    #[When('I request a new manager mfa')]
     public function iRequestANewManagerMfa()
     {
         Mfa::create($this->tempUser->id, Mfa::TYPE_MANAGER, label: 'label');
     }
 
-    /**
-     * @When I request a new recovery mfa
-     */
+    #[When('I request a new recovery mfa')]
     public function iRequestANewRecoveryMfa()
     {
         Mfa::create($this->tempUser->id, Mfa::TYPE_RECOVERY, 'label', '', self::RECOVERY_EMAIL);
     }
 
-    /**
-     * @Then that email should have been copied to the personal email address
-     */
+    #[Then('that email should have been copied to the personal email address')]
     public function thatEmailShouldHaveBeenCopiedToThePersonalEmailAddress()
     {
         Assert::eq($this->matchingFakeEmails[0]['cc_address'], $this->tempUser->personal_email);
     }
 
-    /**
-     * @Given /^we are configured (NOT to|to) send recovery method reminder emails$/
-     */
+    #[Given('/^we are configured (NOT to|to) send recovery method reminder emails$/')]
     public function weAreConfiguredToSendRecoveryMethodReminderEmails($sendOrNot)
     {
         $this->fakeEmailer->sendMethodReminderEmails = ($sendOrNot === 'to');
     }
 
-    /**
-     * @Given a recovery method was created :n days ago
-     */
+    #[Given('a recovery method was created :n days ago')]
     public function aRecoveryMethodWasCreatedDaysAgo($n)
     {
         $method = Method::findOrCreate($this->tempUser->id, 'email@example.com');
@@ -1131,17 +942,13 @@ class EmailContext extends YiiContext
         Assert::true($method->save(), "Could not create new method.");
     }
 
-    /**
-     * @When I send recovery method reminder emails
-     */
+    #[When('I send recovery method reminder emails')]
     public function iSendRecoveryMethodReminderEmails()
     {
         $this->fakeEmailer->sendMethodReminderEmails();
     }
 
-    /**
-     * @Then /^I see that a recovery method reminder (has|has NOT) been sent$/
-     */
+    #[Then('/^I see that a recovery method reminder (has|has NOT) been sent$/')]
     public function iSeeThatARecoveryMethodReminderHasNotBeenSent($hasOrHasNot)
     {
         $hasBeenSent = $this->fakeEmailer->hasUserReceivedMessageRecently(
@@ -1156,25 +963,19 @@ class EmailContext extends YiiContext
         }
     }
 
-    /**
-     * @Given /^we are configured (NOT to|to) send password expiring emails$/
-     */
+    #[Given('/^we are configured (NOT to|to) send password expiring emails$/')]
     public function weAreConfiguredToSendPasswordExpiringEmails($sendOrNot)
     {
         $this->fakeEmailer->sendPasswordExpiringEmails = ($sendOrNot === 'to');
     }
 
-    /**
-     * @When I send password expiring emails
-     */
+    #[When('I send password expiring emails')]
     public function iSendPasswordExpiringEmails()
     {
         $this->fakeEmailer->sendPasswordExpiringEmails();
     }
 
-    /**
-     * @Given that user has a password that expires in :n days
-     */
+    #[Given('that user has a password that expires in :n days')]
     public function thatUserHasAPasswordThatExpiresInDays($n)
     {
         $this->setPasswordForUser(
@@ -1194,49 +995,37 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @Given /^we are configured (NOT to|to) send password expired emails$/
-     */
+    #[Given('/^we are configured (NOT to|to) send password expired emails$/')]
     public function weAreConfiguredToSendPasswordExpiredEmails($sendOrNot)
     {
         $this->fakeEmailer->sendPasswordExpiredEmails = ($sendOrNot === 'to');
     }
 
-    /**
-     * @When I send password expired emails
-     */
+    #[When('I send password expired emails')]
     public function iSendPasswordExpiredEmails()
     {
         $this->fakeEmailer->sendPasswordExpiredEmails();
     }
 
-    /**
-     * @Given a :param email address is configured
-     */
+    #[Given('a :param email address is configured')]
     public function aParamEmailAddressIsConfigured(string $param)
     {
         \Yii::$app->params[$param] = 'email@example.com';
     }
 
-    /**
-     * @Then the :param email address is on the bcc line
-     */
+    #[Then('the :param email address is on the bcc line')]
     public function theParamEmailAddressIsOnTheBccLine(string $param)
     {
         $this->assertEmailBcc(\Yii::$app->params[$param]);
     }
 
-    /**
-     * @Given /^hr notification email (is|is NOT) set$/
-     */
+    #[Given('/^hr notification email (is|is NOT) set$/')]
     public function hrNotificationEmailIsOrIsNotSet($isOrIsNot)
     {
         $this->fakeEmailer->hrNotificationsEmail = ($isOrIsNot === 'is') ? "hr@example.com" : "";
     }
 
-    /**
-     * @Given the user has not logged in for :months
-     */
+    #[Given('the user has not logged in for :months')]
     public function theUserHasNotLoggedInFor($months)
     {
         $date = MySqlDateTime::relative("-" . $months);
@@ -1247,17 +1036,13 @@ class EmailContext extends YiiContext
         $this->tempUser->save();
     }
 
-    /**
-     * @When I send abandoned user email (again)
-     */
+    #[When('I send abandoned user email (again)')]
     public function iSendAbandonedUserEmail()
     {
         $this->fakeEmailer->sendAbandonedUsersEmail();
     }
 
-    /**
-     * @Then /^the abandoned user email (has|has NOT) been sent$/
-     */
+    #[Then('/^the abandoned user email (has|has NOT) been sent$/')]
     public function theAbandonedUserEmailHasOrHasNotBeenSent($hasOrHasNot)
     {
         $numberSent = $this->countEmailsSent(EmailLog::MESSAGE_TYPE_ABANDONED_USERS);
@@ -1284,9 +1069,7 @@ class EmailContext extends YiiContext
         return $actualCount;
     }
 
-    /**
-     * @Given the database has been purged
-     */
+    #[Given('the database has been purged')]
     public function theDatabaseHasBeenPurged()
     {
         MfaBackupcode::deleteAll();
@@ -1298,18 +1081,14 @@ class EmailContext extends YiiContext
         $this->fakeEmailer->forgetFakeEmailsSent();
     }
 
-    /**
-     * @Then the abandoned user email has been sent :expectedCount time(s)
-     */
+    #[Then('the abandoned user email has been sent :expectedCount time(s)')]
     public function theAbandonedUserEmailHasBeenSentTime($expectedCount)
     {
         $actualCount = $this->countEmailsSent(EmailLog::MESSAGE_TYPE_ABANDONED_USERS);
         Assert::eq($actualCount, $expectedCount);
     }
 
-    /**
-     * @Given I send an external-groups sync-error email (again)
-     */
+    #[Given('I send an external-groups sync-error email (again)')]
     public function iSendAnExternalGroupsSyncErrorEmail()
     {
         $this->fakeEmailer->sendExternalGroupSyncErrorsEmail(
@@ -1320,9 +1099,7 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @Then the external-groups sync-error email has been sent :expectedCount time(s)
-     */
+    #[Then('the external-groups sync-error email has been sent :expectedCount time(s)')]
     public function theExternalGroupsSyncErrorEmailHasBeenSentTime($expectedCount)
     {
         // The $appPrefix is needed by the FakeEmailer, to find the appropriate
@@ -1335,9 +1112,7 @@ class EmailContext extends YiiContext
         Assert::eq($actualCount, $expectedCount);
     }
 
-    /**
-     * @When I try to log an email as sent to that User and to a non-user address
-     */
+    #[When('I try to log an email as sent to that User and to a non-user address')]
     public function iTryToLogAnEmailAsSentToThatUserAndToANonUserAddress()
     {
         $this->tempEmailLog = new EmailLog([
@@ -1348,9 +1123,7 @@ class EmailContext extends YiiContext
         $this->tempEmailLog->save();
     }
 
-    /**
-     * @Then an email log validation error should have occurred
-     */
+    #[Then('an email log validation error should have occurred')]
     public function anEmailLogValidationErrorShouldHaveOccurred()
     {
         Assert::notEmpty(
@@ -1359,9 +1132,7 @@ class EmailContext extends YiiContext
         );
     }
 
-    /**
-     * @When I try to log an email as sent to neither a User nor a non-user address
-     */
+    #[When('I try to log an email as sent to neither a User nor a non-user address')]
     public function iTryToLogAnEmailAsSentToNeitherAUserNorANonUserAddress()
     {
         $this->tempEmailLog = new EmailLog([
@@ -1370,9 +1141,7 @@ class EmailContext extends YiiContext
         $this->tempEmailLog->save();
     }
 
-    /**
-     * @Given I sent an external-groups sync-error email :numberOfHours hour(s) ago
-     */
+    #[Given('I sent an external-groups sync-error email :numberOfHours hour(s) ago')]
     public function iSentAnExternalGroupsSyncErrorEmailHourAgo($numberOfHours)
     {
         $this->iSendAnExternalGroupsSyncErrorEmail();

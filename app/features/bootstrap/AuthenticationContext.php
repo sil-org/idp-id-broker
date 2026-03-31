@@ -5,6 +5,7 @@ namespace Sil\SilIdBroker\Behat\Context;
 use Aws\DynamoDb\DynamoDbClient;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Hook\AfterScenario;
+use Behat\Step\Given;
 use common\models\Mfa;
 use common\models\User;
 use FeatureContext;
@@ -23,9 +24,7 @@ class AuthenticationContext extends FeatureContext
         }
     }
 
-    /**
-     * @Given :username has a valid WebAuthn MFA method
-     */
+    #[Given(':username has a valid WebAuthn MFA method')]
     public function userHasAValidWebauthnMfaMethod($username)
     {
         $user = User::findByUsername($username);
@@ -74,9 +73,7 @@ class AuthenticationContext extends FeatureContext
         return $u2fSimResponse;
     }
 
-    /**
-     * @Given we have the wrong password for the WebAuthn MFA API
-     */
+    #[Given('we have the wrong password for the WebAuthn MFA API')]
     public function weHaveTheWrongPasswordForTheWebauthnMfaApi()
     {
         /* This is setting the API secret to something else, so that the one
@@ -109,9 +106,7 @@ class AuthenticationContext extends FeatureContext
         ]);
     }
 
-    /**
-     * @Given we have the right password for the WebAuthn MFA API
-     */
+    #[Given('we have the right password for the WebAuthn MFA API')]
     public function weHaveTheRightPasswordForTheWebauthnMfaApi()
     {
         $this->setWebAuthnApiSecretTo(Env::get('MFA_API_SECRET'));

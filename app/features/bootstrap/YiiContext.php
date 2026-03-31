@@ -4,6 +4,7 @@ namespace Sil\SilIdBroker\Behat\Context;
 
 use Behat\Behat\Context\Context;
 use Behat\Hook\BeforeScenario;
+use Behat\Hook\BeforeSuite;
 use Sil\Psr3Adapters\Psr3StdOutLogger;
 use Sil\SilIdBroker\Behat\Context\fakes\FakeEmailer;
 use Sil\SilIdBroker\Behat\Context\fakes\FakeLogTarget;
@@ -51,9 +52,7 @@ class YiiContext implements Context
         Yii::$app->log->targets[] = $this->fakeLogTarget;
     }
 
-    /**
-     * @BeforeSuite
-     */
+    #[BeforeSuite]
     public static function loadYiiApp()
     {
         if (empty(self::$application)) {
