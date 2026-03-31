@@ -5,6 +5,9 @@ namespace Sil\SilIdBroker\Behat\Context;
 use common\models\Mfa;
 use common\models\MfaBackupcode;
 use Webmozart\Assert\Assert;
+use Behat\Step\Given;
+use Behat\Step\When;
+use Behat\Step\Then;
 
 class MfaUnitTestsContext extends UnitTestsContext
 {
@@ -12,9 +15,7 @@ class MfaUnitTestsContext extends UnitTestsContext
 
     protected $inputBackupCode;
 
-    /**
-     * @Given I have a user with a backup codes mfa option
-     */
+    #[Given('I have a user with a backup codes mfa option')]
     public function iHaveAUserWithABackupCodesMfaOption()
     {
         $this->tempUser = $this->createNewUserInDatabase('mfa_tester');
@@ -22,9 +23,7 @@ class MfaUnitTestsContext extends UnitTestsContext
         MfaBackupcode::deleteAll();
     }
 
-    /**
-     * @Given I have a user with a manager rescue mfa option
-     */
+    #[Given('I have a user with a manager rescue mfa option')]
     public function iHaveAUserWithAManagerRescueMfaOption()
     {
         $this->tempUser = $this->createNewUserInDatabase('mfa_tester');
@@ -32,9 +31,7 @@ class MfaUnitTestsContext extends UnitTestsContext
         MfaBackupcode::deleteAll();
     }
 
-    /**
-     * @Given I have a user with an unverified totp mfa option
-     */
+    #[Given('I have a user with an unverified totp mfa option')]
     public function iHaveAUserWithAnUnverifiedTotpMfaOption()
     {
         Mfa::deleteAll();
@@ -46,9 +43,7 @@ class MfaUnitTestsContext extends UnitTestsContext
         );
     }
 
-    /**
-     * @Given I have a user with a verified totp mfa option
-     */
+    #[Given('I have a user with a verified totp mfa option')]
     public function iHaveAUserWithAVerifiedTotpMfaOption()
     {
         Mfa::deleteAll([]);
@@ -60,33 +55,25 @@ class MfaUnitTestsContext extends UnitTestsContext
         );
     }
 
-    /**
-     * @Given the totp mfa option is new
-     */
+    #[Given('the totp mfa option is new')]
     public function theTotpMfaOptionIsNew()
     {
         $this->mfaIsNew = true;
     }
 
-    /**
-     * @Given the totp mfa option is old
-     */
+    #[Given('the totp mfa option is old')]
     public function theTotpMfaOptionIsOld()
     {
         $this->mfaIsNew = false;
     }
 
-    /**
-     * @Given the totp mfa option has just been verified
-     */
+    #[Given('the totp mfa option has just been verified')]
     public function theTotpMfaOptionHasJustBeenVerified()
     {
         $this->mfaChangedAttrs['verified'] = 0;
     }
 
-    /**
-     * @Given a backup code with a leading zero was saved and was shortened
-     */
+    #[Given('a backup code with a leading zero was saved and was shortened')]
     public function aBackupCodeWithALeadingZeroWasSavedAndWasShortened()
     {
         $fullBackupCode = '01234567';
@@ -95,9 +82,7 @@ class MfaUnitTestsContext extends UnitTestsContext
         MfaBackupcode::insertBackupCode($this->mfaId, substr($fullBackupCode, 1));
     }
 
-    /**
-     * @Given a backup code with a leading zero was saved and was not shortened
-     */
+    #[Given('a backup code with a leading zero was saved and was not shortened')]
     public function aBackupCodeWithALeadingZeroWasSavedAndWasNotShortened()
     {
         $fullBackupCode = '01234567';
@@ -106,9 +91,7 @@ class MfaUnitTestsContext extends UnitTestsContext
         MfaBackupcode::insertBackupCode($this->mfaId, $fullBackupCode);
     }
 
-    /**
-     * @Given a backup code without a leading zero was saved and was not shortened
-     */
+    #[Given('a backup code without a leading zero was saved and was not shortened')]
     public function aBackupCodeWithoutALeadingZeroWasSavedAndWasNotShortened()
     {
         $fullBackupCode = '81234567';
@@ -117,9 +100,7 @@ class MfaUnitTestsContext extends UnitTestsContext
         MfaBackupcode::insertBackupCode($this->mfaId, $fullBackupCode);
     }
 
-    /**
-     * @When a matching backup code is provided for validation
-     */
+    #[When('a matching backup code is provided for validation')]
     public function aMatchingBackupCodeIsProvidedForValidation()
     {
         $this->backupCodeWasValid = MfaBackupcode::validateAndRemove(
@@ -128,9 +109,7 @@ class MfaUnitTestsContext extends UnitTestsContext
         );
     }
 
-    /**
-     * @When a not matching backup code is provided for validation
-     */
+    #[When('a not matching backup code is provided for validation')]
     public function aNOTMatchingBackupCodeIsProvidedForValidation()
     {
         $this->backupCodeWasValid = MfaBackupcode::validateAndRemove(
@@ -139,17 +118,13 @@ class MfaUnitTestsContext extends UnitTestsContext
         );
     }
 
-    /**
-     * @When I check if the new mfa option is newly verified
-     */
+    #[When('I check if the new mfa option is newly verified')]
     public function iCheckIfTheNewMfaOptionIsNewlyVerified()
     {
         $this->mfaIsNewlyVerified = $this->mfa->isNewlyVerified(true, []);
     }
 
-    /**
-     * @When I check if the mfa option is newly verified
-     */
+    #[When('I check if the mfa option is newly verified')]
     public function iCheckIfTheMfaOptionIsNewlyVerified()
     {
         $this->mfaIsNewlyVerified = $this->mfa->isNewlyVerified(
@@ -158,49 +133,37 @@ class MfaUnitTestsContext extends UnitTestsContext
         );
     }
 
-    /**
-     * @Then a backup code match should be detected
-     */
+    #[Then('a backup code match should be detected')]
     public function aBackupCodeMatchShouldBeDetected()
     {
         Assert::true($this->backupCodeWasValid);
     }
 
-    /**
-     * @Then a backup code match should not be detected
-     */
+    #[Then('a backup code match should not be detected')]
     public function aBackupCodeMatchShouldNotBeDetected()
     {
         Assert::false($this->backupCodeWasValid);
     }
 
-    /**
-     * @Then :number backup codes should exist
-     */
+    #[Then(':number backup codes should exist')]
     public function xBackupCodesShouldExist($number)
     {
         Assert::eq($number, MfaBackupcode::find()->count());
     }
 
-    /**
-     * @Then I see that the mfa option is newly verified
-     */
+    #[Then('I see that the mfa option is newly verified')]
     public function iSeeThatTheMfaOptionIsNewlyVerified()
     {
         Assert::true($this->mfaIsNewlyVerified);
     }
 
-    /**
-     * @Then I see that the mfa option is NOT newly verified
-     */
+    #[Then('I see that the mfa option is NOT newly verified')]
     public function iSeeThatTheMfaOptionIsNotNewlyVerified()
     {
         Assert::false($this->mfaIsNewlyVerified);
     }
 
-    /**
-     * @Given that user also has a manager rescue mfa option
-     */
+    #[Given('that user also has a manager rescue mfa option')]
     public function thatUserAlsoHasAManagerRescueMfaOption()
     {
         $code = 'manager';
@@ -208,9 +171,7 @@ class MfaUnitTestsContext extends UnitTestsContext
         MfaBackupcode::insertBackupCode($this->mfaId, $code);
     }
 
-    /**
-     * @When I verify a backup code
-     */
+    #[When('I verify a backup code')]
     public function iVerifyABackupCode()
     {
         $code = 'backup';
@@ -219,9 +180,7 @@ class MfaUnitTestsContext extends UnitTestsContext
         Assert::true($mfa->verify($code));
     }
 
-    /**
-     * @Then I see that the user no longer has a manager rescue mfa option
-     */
+    #[Then('I see that the user no longer has a manager rescue mfa option')]
     public function iSeeThatTheUserNoLongerHasAManagerRescueMfaOption()
     {
         $mfa = Mfa::findOne(['user_id' => $this->tempUser->id, 'type' => Mfa::TYPE_MANAGER]);

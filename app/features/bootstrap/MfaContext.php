@@ -12,6 +12,7 @@ use common\models\MfaWebauthn;
 use common\models\User;
 use OTPHP\TOTP;
 use Webmozart\Assert\Assert;
+use Behat\Step\Then;
 
 class MfaContext extends \FeatureContext
 {
@@ -42,9 +43,7 @@ class MfaContext extends \FeatureContext
      */
     private $totpSecret;
 
-    /**
-     * @Given the user has a verified :mfaType MFA
-     */
+    #[Given('the user has a verified :mfaType MFA')]
     public function iGiveThatUserAVerifiedMfa($mfaType)
     {
         Assert::notEq($mfaType, mfa::TYPE_WEBAUTHN, "should have called iGiveThatUserAVerifiedWebauthnMfa");
@@ -72,9 +71,7 @@ class MfaContext extends \FeatureContext
         }
     }
 
-    /**
-     * @Given the user has a mfaWebauthn with a key_handle_hash of :keyHandleHash
-     */
+    #[Given('the user has a mfaWebauthn with a key_handle_hash of :keyHandleHash')]
     public function iGiveThatUserAMfaWebauthnMfaWithAKeyHandleHashOf($keyHandleHash)
     {
         $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
@@ -95,9 +92,7 @@ class MfaContext extends \FeatureContext
         $this->mfaWebauthnIds[] = $webauthn->id;
     }
 
-    /**
-     * @Then an MFA record exists for an employee_id of :employeeId
-     */
+    #[Then('an MFA record exists for an employee_id of :employeeId')]
     public function anMfaRecordExistsForAnEmployeeIdOf($employeeId)
     {
         $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
@@ -107,9 +102,7 @@ class MfaContext extends \FeatureContext
         Assert::notEmpty($this->mfa, 'No MFA record found for that user.');
     }
 
-    /**
-     * @Then the following MFA data should be stored:
-     */
+    #[Then('the following MFA data should be stored:')]
     public function theFollowingMfaDataShouldBeStored(TableNode $table)
     {
         foreach ($table as $row) {
@@ -121,9 +114,7 @@ class MfaContext extends \FeatureContext
     }
 
 
-    /**
-     * @Then the following mfaWebauthn data should be stored:
-     */
+    #[Then('the following mfaWebauthn data should be stored:')]
     public function theFollowingMfaWebauthnDataShouldBeStored(TableNode $table)
     {
         $this->mfaWebauthn = MfaWebauthn::findOne(['id' => $this->mfaWebauthn->id]);
@@ -137,9 +128,7 @@ class MfaContext extends \FeatureContext
         }
     }
 
-    /**
-     * @Given the user has a manager email address
-     */
+    #[Given('the user has a manager email address')]
     public function theUserHasAManagerEmailAddress()
     {
         $dataForTableNode = [
@@ -151,9 +140,7 @@ class MfaContext extends \FeatureContext
         $this->theResponseStatusCodeShouldBe(200);
     }
 
-    /**
-     * @Given the user does not have a manager email address
-     */
+    #[Given('the user does not have a manager email address')]
     public function theUserDoesNotHaveAManagerEmailAddress()
     {
         $dataForTableNode = [
@@ -165,9 +152,7 @@ class MfaContext extends \FeatureContext
         $this->theResponseStatusCodeShouldBe(200);
     }
 
-    /**
-     * @Given the user has requested a new webauthn MFA
-     */
+    #[Given('the user has requested a new webauthn MFA')]
     public function theUserHasRequestedANewWebauthnMfa()
     {
         $rpId = getenv('MFA_WEBAUTHN_rpId');
@@ -228,18 +213,14 @@ class MfaContext extends \FeatureContext
     }
 
 
-    /**
-     * @When I update the MFA
-     */
+    #[When('I update the MFA')]
     public function iUpdateTheMfa()
     {
         $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id, self::UPDATED);
     }
 
 
-    /**
-     * @When I update the mfaWebauthn
-     */
+    #[When('I update the mfaWebauthn')]
     public function iUpdateTheMfaWebauthn()
     {
         $rpId = getenv('MFA_WEBAUTHN_rpId');
@@ -247,9 +228,7 @@ class MfaContext extends \FeatureContext
         $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/webauthn/' . $this->mfaWebauthn->id, self::UPDATED);
     }
 
-    /**
-     * @When I request to verify (one of) the code(s)
-     */
+    #[When('I request to verify (one of) the code(s)')]
     public function iRequestToVerifyOneOfTheCodes()
     {
         $dataForTableNode = [
@@ -262,9 +241,7 @@ class MfaContext extends \FeatureContext
         $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify', self::CREATED);
     }
 
-    /**
-     * @When I request to verify the webauthn Mfa registration
-     */
+    #[When('I request to verify the webauthn Mfa registration')]
     public function iRequestToVerifyTheWebauthnMfaRegistration()
     {
         $rpId = getenv('MFA_WEBAUTHN_rpId');
@@ -272,9 +249,7 @@ class MfaContext extends \FeatureContext
         $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify/registration', self::CREATED);
     }
 
-    /**
-     * @When I request to verify the webauthn Mfa registration with a label of :label
-     */
+    #[When('I request to verify the webauthn Mfa registration with a label of :label')]
     public function iRequestToVerifyTheWebauthnMfaRegistrationWithALabelOf($label)
     {
         $rpId = getenv('MFA_WEBAUTHN_rpId');
@@ -283,17 +258,13 @@ class MfaContext extends \FeatureContext
         $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify/registration', self::CREATED);
     }
 
-    /**
-     * @Then :num codes should be stored
-     */
+    #[Then(':num codes should be stored')]
     public function codesShouldBeStored($num)
     {
         Assert::eq(count($this->mfa->mfaBackupcodes), $num);
     }
 
-    /**
-     * @When I request to delete the MFA
-     */
+    #[When('I request to delete the MFA')]
     public function iRequestToDeleteTheMfa()
     {
         $dataForTableNode = [
@@ -308,9 +279,7 @@ class MfaContext extends \FeatureContext
     }
 
 
-    /**
-     * @When I request to delete the webauthn entry of the MFA with a webauthn_id of :webauthnId
-     */
+    #[When('I request to delete the webauthn entry of the MFA with a webauthn_id of :webauthnId')]
     public function iRequestToDeleteTheWebauthnEntryOfTheMfaWithAWebauthnIDOf($webauthnId)
     {
         $dataForTableNode = [
@@ -326,9 +295,7 @@ class MfaContext extends \FeatureContext
     }
 
 
-    /**
-     * @When I request to delete the webauthn entry of the MFA
-     */
+    #[When('I request to delete the webauthn entry of the MFA')]
     public function iRequestToDeleteTheWebauthnEntryOfTheMfa()
     {
         $webauthnId = $this->mfaWebauthnIds[0];
@@ -336,9 +303,7 @@ class MfaContext extends \FeatureContext
     }
 
 
-    /**
-     * @When the user requests a new webauthn MFA
-     */
+    #[When('the user requests a new webauthn MFA')]
     public function theUserRequestsANewWebauthnMfa()
     {
         $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
@@ -347,18 +312,14 @@ class MfaContext extends \FeatureContext
         $this->iRequestTheResourceBe('/mfa', self::CREATED);
     }
 
-    /**
-     * @Then the MFA record is not stored
-     */
+    #[Then('the MFA record is not stored')]
     public function theMfaRecordIsNotStored()
     {
         $this->mfa = Mfa::findOne(['id' => $this->mfa->id]);
         Assert::null($this->mfa, 'A matching record was found in the database');
     }
 
-    /**
-     * @Then the MFA record is still stored
-     */
+    #[Then('the MFA record is still stored')]
     public function theMfaRecordIsStillStored()
     {
         $this->mfa = Mfa::findOne(['id' => $this->mfa->id]);
