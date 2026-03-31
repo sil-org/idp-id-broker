@@ -709,11 +709,12 @@ class User extends UserBase
          * Provide method data when a profile review is requested OR
          * if a `mask=yes` query parameter has been given.
          */
-        $shouldProvideMethodOptions
-            = ($this->getNagState() === NagState::NAG_PROFILE_REVIEW
-            && $this->scenario == self::SCENARIO_AUTHENTICATE)
-            || $maskParam === 'yes';
-        $methods = $shouldProvideMethodOptions ? $this->methods : [];
+        $methods = [];
+        if ($maskParam === 'yes'
+            || ($this->getNagState() === NagState::NAG_PROFILE_REVIEW
+            && $this->scenario == self::SCENARIO_AUTHENTICATE)) {
+            $methods = $this->methods;
+        }
 
         if ($maskParam === 'yes') {
             foreach ($methods as $key => $method) {
