@@ -21,7 +21,7 @@ class MfaWebauthn extends MfaWebauthnBase
     {
         return ArrayHelper::merge([
             [
-                'label', 'required'
+                'label', 'required',
             ],
             [
                 'created_utc', 'default', 'value' => MySqlDateTime::now(),

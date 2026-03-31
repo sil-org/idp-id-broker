@@ -40,9 +40,9 @@ class Authentication
     protected function authenticateByPassword(string $username, string $password)
     {
         /* @var $user User */
-        $user = User::findByUsername($username) ??
-                User::findByEmail($username)    ?? // maybe we got an email
-                new User();
+        $user = User::findByUsername($username)
+                ?? User::findByEmail($username) // maybe we got an email
+                ?? new User();
 
         $user->scenario = User::SCENARIO_AUTHENTICATE;
         $user->password = $password;

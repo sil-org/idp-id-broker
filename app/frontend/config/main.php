@@ -27,7 +27,7 @@ return [
             // restrict input to JSON only http://www.yiiframework.com/doc-2.0/guide-rest-quick-start.html#enabling-json-input
             'parsers' => [
                 'application/json' => JsonParser::class,
-            ]
+            ],
         ],
         // http://www.yiiframework.com/doc-2.0/guide-runtime-responses.html
         'response' => [
@@ -87,7 +87,7 @@ return [
                 'site/status' => 'site/status',
 
                 '<undefinedRequest>' => 'site/undefined-request',
-            ]
+            ],
         ],
     ],
     'params' => [

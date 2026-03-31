@@ -87,7 +87,7 @@ class UnitTestsContext extends YiiContext
 
         $mergedProperties = array_merge([
             'email' => $username . '@example.com',
-            'employee_id' => (string)uniqid(),
+            'employee_id' => (string) uniqid(),
             'first_name' => 'Test',
             'last_name' => 'User',
             'username' => $username,
@@ -105,7 +105,7 @@ class UnitTestsContext extends YiiContext
 
     protected function createMfa($type, $verified = 1, $user = null)
     {
-        $user = $user ?? $this->tempUser;
+        $user ??= $this->tempUser;
 
         $mfa = new Mfa();
         $mfa->user_id = $user->id;
@@ -120,7 +120,7 @@ class UnitTestsContext extends YiiContext
 
     protected function createMfaBackupCodes($user = null)
     {
-        $user = $user ?? $this->tempUser;
+        $user ??= $this->tempUser;
 
         $mfa = new Mfa();
         $mfa->user_id = $user->id;
@@ -138,7 +138,7 @@ class UnitTestsContext extends YiiContext
 
     protected function createMfaWebauthn($user = null)
     {
-        $user = $user ?? $this->tempUser;
+        $user ??= $this->tempUser;
 
         $mfa = new Mfa();
         $mfa->user_id = $user->id;
@@ -156,7 +156,7 @@ class UnitTestsContext extends YiiContext
 
     protected function createMethod($value, $verified = 1, $user = null)
     {
-        $user = $user ?? $this->tempUser;
+        $user ??= $this->tempUser;
 
         $method = new Method();
         $method->user_id = $user->id;

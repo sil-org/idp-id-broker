@@ -73,7 +73,7 @@ class SesMailer extends BaseMailer
             \Yii::error([
                 'action' => 'sendMessage',
                 'type' => get_class($e),
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
             return false;
         }

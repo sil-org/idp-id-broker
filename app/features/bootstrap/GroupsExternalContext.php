@@ -49,8 +49,8 @@ class GroupsExternalContext extends FeatureContext
         string $employeeId,
         string $externalGroups = ''
     ): User {
-        list($username, ) = explode('@', $emailAddress);
-        list($lcFirstName, $lcLastName) = explode('_', $username);
+        [$username, ] = explode('@', $emailAddress);
+        [$lcFirstName, $lcLastName] = explode('_', $username);
         $user = new User([
             'email' => $emailAddress,
             'employee_id' => $employeeId,

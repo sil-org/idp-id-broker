@@ -244,27 +244,27 @@ class Emailer extends Component
             $this->logger = new Psr3Yii2Logger();
         }
 
-        $this->subjectForAbandonedUsers = $this->subjectForAbandonedUsers ?? self::SUBJ_ABANDONED_USER_ACCOUNTS;
-        $this->subjectForExtGroupSyncErrors = $this->subjectForExtGroupSyncErrors ?? self::SUBJ_EXT_GROUP_SYNC_ERRORS;
-        $this->subjectForGetBackupCodes = $this->subjectForGetBackupCodes ?? self::SUBJ_GET_BACKUP_CODES;
-        $this->subjectForInvite = $this->subjectForInvite ?? self::SUBJ_INVITE;
-        $this->subjectForLostSecurityKey = $this->subjectForLostSecurityKey ?? self::SUBJ_LOST_SECURITY_KEY;
-        $this->subjectForMethodPurged = $this->subjectForMethodPurged ?? self::SUBJ_METHOD_PURGED;
-        $this->subjectForMethodReminder = $this->subjectForMethodReminder ?? self::SUBJ_METHOD_REMINDER;
-        $this->subjectForMethodVerify = $this->subjectForMethodVerify ?? self::SUBJ_METHOD_VERIFY;
-        $this->subjectForMfaDisabled = $this->subjectForMfaDisabled ?? self::SUBJ_MFA_DISABLED;
-        $this->subjectForMfaEnabled = $this->subjectForMfaEnabled ?? self::SUBJ_MFA_ENABLED;
-        $this->subjectForMfaOptionAdded = $this->subjectForMfaOptionAdded ?? self::SUBJ_MFA_OPTION_ADDED;
-        $this->subjectForMfaOptionRemoved = $this->subjectForMfaOptionRemoved ?? self::SUBJ_MFA_OPTION_REMOVED;
-        $this->subjectForMfaRateLimit = $this->subjectForMfaRateLimit ?? self::SUBJ_MFA_RATE_LIMIT;
-        $this->subjectForMfaRecovery = $this->subjectForMfaRecovery ?? self::SUBJ_MFA_RECOVERY;
-        $this->subjectForMfaRecoveryHelp = $this->subjectForMfaRecoveryHelp ?? self::SUBJ_MFA_RECOVERY_HELP;
-        $this->subjectForPasswordChanged = $this->subjectForPasswordChanged ?? self::SUBJ_PASSWORD_CHANGED;
-        $this->subjectForPasswordExpired = $this->subjectForPasswordExpired ?? self::SUBJ_PASSWORD_EXPIRED;
-        $this->subjectForPasswordExpiring = $this->subjectForPasswordExpiring ?? self::SUBJ_PASSWORD_EXPIRING;
-        $this->subjectForPasswordPwned = $this->subjectForPasswordPwned ?? self::SUBJ_PASSWORD_PWNED;
-        $this->subjectForRefreshBackupCodes = $this->subjectForRefreshBackupCodes ?? self::SUBJ_REFRESH_BACKUP_CODES;
-        $this->subjectForWelcome = $this->subjectForWelcome ?? self::SUBJ_WELCOME;
+        $this->subjectForAbandonedUsers ??= self::SUBJ_ABANDONED_USER_ACCOUNTS;
+        $this->subjectForExtGroupSyncErrors ??= self::SUBJ_EXT_GROUP_SYNC_ERRORS;
+        $this->subjectForGetBackupCodes ??= self::SUBJ_GET_BACKUP_CODES;
+        $this->subjectForInvite ??= self::SUBJ_INVITE;
+        $this->subjectForLostSecurityKey ??= self::SUBJ_LOST_SECURITY_KEY;
+        $this->subjectForMethodPurged ??= self::SUBJ_METHOD_PURGED;
+        $this->subjectForMethodReminder ??= self::SUBJ_METHOD_REMINDER;
+        $this->subjectForMethodVerify ??= self::SUBJ_METHOD_VERIFY;
+        $this->subjectForMfaDisabled ??= self::SUBJ_MFA_DISABLED;
+        $this->subjectForMfaEnabled ??= self::SUBJ_MFA_ENABLED;
+        $this->subjectForMfaOptionAdded ??= self::SUBJ_MFA_OPTION_ADDED;
+        $this->subjectForMfaOptionRemoved ??= self::SUBJ_MFA_OPTION_REMOVED;
+        $this->subjectForMfaRateLimit ??= self::SUBJ_MFA_RATE_LIMIT;
+        $this->subjectForMfaRecovery ??= self::SUBJ_MFA_RECOVERY;
+        $this->subjectForMfaRecoveryHelp ??= self::SUBJ_MFA_RECOVERY_HELP;
+        $this->subjectForPasswordChanged ??= self::SUBJ_PASSWORD_CHANGED;
+        $this->subjectForPasswordExpired ??= self::SUBJ_PASSWORD_EXPIRED;
+        $this->subjectForPasswordExpiring ??= self::SUBJ_PASSWORD_EXPIRING;
+        $this->subjectForPasswordPwned ??= self::SUBJ_PASSWORD_PWNED;
+        $this->subjectForRefreshBackupCodes ??= self::SUBJ_REFRESH_BACKUP_CODES;
+        $this->subjectForWelcome ??= self::SUBJ_WELCOME;
 
         $this->subjects = [
             EmailLog::MESSAGE_TYPE_ABANDONED_USERS => $this->subjectForAbandonedUsers,
@@ -290,7 +290,7 @@ class Emailer extends Component
             EmailLog::MESSAGE_TYPE_WELCOME => $this->subjectForWelcome,
         ];
 
-        $this->hrNotificationsEmail = $this->hrNotificationsEmail ?? '';
+        $this->hrNotificationsEmail ??= '';
 
         $this->assertConfigIsValid();
 
@@ -688,8 +688,8 @@ class Emailer extends Component
         $methods = Method::findAll(['verified' => 0]);
         foreach ($methods as $method) {
             $user = $method->user;
-            if (!MySqlDateTime::dateIsRecent($method->created, 3) &&
-                !$this->hasUserReceivedMessageRecently($user->id, EmailLog::MESSAGE_TYPE_METHOD_REMINDER)
+            if (!MySqlDateTime::dateIsRecent($method->created, 3)
+                && !$this->hasUserReceivedMessageRecently($user->id, EmailLog::MESSAGE_TYPE_METHOD_REMINDER)
             ) {
                 $this->sendMessageTo(
                     EmailLog::MESSAGE_TYPE_METHOD_REMINDER,
@@ -724,7 +724,7 @@ class Emailer extends Component
         $users = User::getUsersForEmail('password-expiring', $this->emailRepeatDelayDays);
 
         $this->logger->info(json_encode(array_merge($logData, [
-            'users' => count($users)
+            'users' => count($users),
         ])));
 
         $numEmailsSent = 0;
@@ -765,7 +765,7 @@ class Emailer extends Component
         $users = User::getUsersForEmail('password-expired', $this->emailRepeatDelayDays);
 
         $this->logger->info(json_encode(array_merge($logData, [
-            'users' => count($users)
+            'users' => count($users),
         ])));
 
         $numEmailsSent = 0;

@@ -20,11 +20,11 @@ class SheetsUnitTestsContext extends UnitTestsContext
         $this->users = [
             [
                 'employee_id' => '12345',
-                'email' => 'user12345@example.com'
+                'email' => 'user12345@example.com',
             ],
             [
                 'employee_id' => '12346',
-                'email' => 'user12346@example.com'
+                'email' => 'user12346@example.com',
             ],
         ];
     }

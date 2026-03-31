@@ -261,7 +261,7 @@ class Mfa extends MfaBase
                 'type' => $this->type,
                 'username' => $this->user->username,
                 'status' => 'error',
-                'error' => 'too many recent failures'
+                'error' => 'too many recent failures',
             ]);
             throw new TooManyRequestsHttpException(
                 'Too many recent failed attempts for this MFA'
@@ -302,7 +302,7 @@ class Mfa extends MfaBase
             'type' => $this->type,
             'username' => $this->user->username,
             'status' => 'error',
-            'error' => 'verify mfa failed'
+            'error' => 'verify mfa failed',
         ]);
 
         return false;

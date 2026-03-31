@@ -27,7 +27,7 @@ class EmailClientContext extends YiiContext
     {
         Email::deleteAll();
 
-        $this->stubSubject = 'tested at '.microtime();
+        $this->stubSubject = 'tested at ' . microtime();
         $this->emailClient = new EmailClient();
     }
 
@@ -265,7 +265,7 @@ class EmailClientContext extends YiiContext
                 'to_address' => $this->stubToAddress,
                 'cc_address' => $this->stubCcAddress,
                 'bcc_address' => $this->stubBccAddress,
-                'subject' => $this->stubSubject." $i",
+                'subject' => $this->stubSubject . " $i",
                 'text_body' => $this->stubTextBody,
                 'html_body' => $this->stubHtmlBody,
             ];
@@ -295,7 +295,7 @@ class EmailClientContext extends YiiContext
                 'to_address' => $this->stubToAddress,
                 'cc_address' => $this->stubCcAddress,
                 'bcc_address' => $this->stubBccAddress,
-                'subject' => $this->stubSubject." $i",
+                'subject' => $this->stubSubject . " $i",
                 'text_body' => $this->stubTextBody,
                 'html_body' => $this->stubHtmlBody,
                 'delay_seconds' => 2,

@@ -202,16 +202,16 @@ class User extends UserBase
     {
         return ArrayHelper::merge([
             [
-                'uuid', 'default', 'value' => Uuid::uuid4()->toString()
+                'uuid', 'default', 'value' => Uuid::uuid4()->toString(),
             ],
             [
-                'active', 'default', 'value' => 'yes', 'on' => self::SCENARIO_NEW_USER
+                'active', 'default', 'value' => 'yes', 'on' => self::SCENARIO_NEW_USER,
             ],
             [
-                'locked', 'default', 'value' => 'no', 'on' => self::SCENARIO_NEW_USER
+                'locked', 'default', 'value' => 'no', 'on' => self::SCENARIO_NEW_USER,
             ],
             [
-                'require_mfa', 'default', 'value' => 'no', 'on' => self::SCENARIO_NEW_USER
+                'require_mfa', 'default', 'value' => 'no', 'on' => self::SCENARIO_NEW_USER,
             ],
             [
                 'nag_for_mfa_after',
@@ -276,7 +276,7 @@ class User extends UserBase
             [
                 'email', 'required', 'when' => function ($model) {
                     return $model->personal_email === null;
-                }
+                },
             ],
             [
                 'employee_id',
@@ -324,10 +324,10 @@ class User extends UserBase
      */
     public function shouldHibpBeChecked(): bool
     {
-        return (\Yii::$app->params['hibpCheckOnLogin'] &&
-                !empty($this->password) &&
-                time() >= strtotime($this->currentPassword->check_hibp_after) &&
-                $this->currentPassword->hibp_is_pwned == 'no');
+        return (\Yii::$app->params['hibpCheckOnLogin']
+                && !empty($this->password)
+                && time() >= strtotime($this->currentPassword->check_hibp_after)
+                && $this->currentPassword->hibp_is_pwned == 'no');
     }
 
     /*
@@ -359,7 +359,7 @@ class User extends UserBase
             /* @var $emailer Emailer */
             $emailer = \Yii::$app->emailer;
             $emailer->sendMessageTo(EmailLog::MESSAGE_TYPE_PASSWORD_PWNED, $this, [
-                'bccAddress' => \Yii::$app->params['hibpNotificationBcc']
+                'bccAddress' => \Yii::$app->params['hibpNotificationBcc'],
             ]);
         } catch (Exception $e) {
             \Yii::error([
@@ -709,11 +709,12 @@ class User extends UserBase
          * Provide method data when a profile review is requested OR
          * if a `mask=yes` query parameter has been given.
          */
-        $shouldProvideMethodOptions =
-            ($this->getNagState() === NagState::NAG_PROFILE_REVIEW
-            && $this->scenario == self::SCENARIO_AUTHENTICATE)
-            || $maskParam === 'yes';
-        $methods = $shouldProvideMethodOptions ? $this->methods : [];
+        $methods = [];
+        if ($maskParam === 'yes'
+            || ($this->getNagState() === NagState::NAG_PROFILE_REVIEW
+            && $this->scenario == self::SCENARIO_AUTHENTICATE)) {
+            $methods = $this->methods;
+        }
 
         if ($maskParam === 'yes') {
             foreach ($methods as $key => $method) {
@@ -1413,7 +1414,7 @@ class User extends UserBase
             'action' => 'deactivate expired user',
             'employeeId' => $this->employee_id,
             'scenario' => $this->scenario,
-            'expires_on' => $this->expires_on
+            'expires_on' => $this->expires_on,
         ];
 
         $this->active = 'no';
