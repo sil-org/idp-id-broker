@@ -55,7 +55,7 @@ services:
       - ./db/certs/test.env
       - ./test.env
     healthcheck:
-      test: nc -vz localhost 80
+      test: curl --connect-timeout 5 http://localhost:80/site/status
       start_period: 1s
       interval: 1s
       timeout: 5s
