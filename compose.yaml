@@ -1,3 +1,11 @@
+x-db_healthcheck: &db_healthcheck
+  healthcheck:
+    test: ["CMD", "mariadb-admin", "--socket=/run/mysqld/mysqld.sock", "-u", "root", "ping"]
+    start_period: 10s
+    interval: 10s
+    timeout: 5s
+    retries: 3
+
 services:
   db:
     image: mariadb:10
@@ -9,6 +17,7 @@ services:
     env_file:
       - path: ./local.env
         required: false
+    <<: *db_healthcheck
 
   app:
     build: ./
@@ -20,7 +29,8 @@ services:
       - "51143:443"
     mem_limit: 200m
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - path: ./local.env
         required: false
@@ -39,10 +49,17 @@ services:
     ports:
       - "80"
     depends_on:
-      - testdb
+      testdb:
+        condition: service_healthy
     env_file:
       - ./db/certs/test.env
       - ./test.env
+    healthcheck:
+      test: curl --connect-timeout 5 http://localhost:80/site/status
+      start_period: 1s
+      interval: 1s
+      timeout: 5s
+      retries: 20
 
   testdb:
     image: mariadb:10
@@ -56,6 +73,7 @@ services:
       MYSQL_DATABASE: appfortests
       MYSQL_USER: appfortests
       MYSQL_PASSWORD: appfortests
+    <<: *db_healthcheck
 
   cli:
     image: ghcr.io/sil-org/php8:8.3
@@ -144,9 +162,12 @@ services:
     mem_limit: 200m
     working_dir: /app
     depends_on:
-      - appfortests
-      - mfaapi
-      - u2fsim
+      appfortests:
+        condition: service_healthy
+      mfaapi:
+        condition: service_started
+      u2fsim:
+        condition: service_started
     env_file:
       - ./db/certs/test.env
       - ./test.env

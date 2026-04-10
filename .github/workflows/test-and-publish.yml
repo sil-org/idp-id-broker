@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Check PSR2
-        run: docker compose run --rm test ./check-psr12.sh
+        run: docker compose run --rm cli ./check-psr12.sh
       - name: Run unit tests
         run: make test
 

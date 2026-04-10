@@ -7,7 +7,7 @@ appfortests: testdb composerfortests
 	docker compose up -d appfortests
 
 basemodels: db tables
-	docker compose run --rm cli whenavail db 3306 100 ./rebuildbasemodels.sh
+	docker compose run --rm cli ./rebuildbasemodels.sh
 
 bash:
 	docker compose run --rm cli bash
@@ -56,10 +56,10 @@ raml2html:
 	docker compose run --rm raml2html
 
 tables: db
-	docker compose run --rm cli whenavail db 3306 100 ./yii migrate --interactive=0
+	docker compose run --rm cli ./yii migrate --interactive=0
 
 tablesfortests: testdb
-	docker compose run --rm appfortests whenavail testdb 3306 100 ./yii migrate --interactive=0
+	docker compose run --rm appfortests ./yii migrate --interactive=0
 
 test: appfortests
 	docker compose run --rm test
