@@ -63,3 +63,11 @@ default:
             paths:
                 - "features/sheets-unit-tests.feature"
             contexts: [ Sil\SilIdBroker\Behat\Context\SheetsUnitTestsContext ]
+        ses_message_unit_tests_features:
+            paths:
+                - "features/ses-message-unit-tests.feature"
+            contexts: [ Sil\SilIdBroker\Behat\Context\SesMessageUnitTestsContext ]
+        ses_mailer_unit_tests_features:
+            paths:
+                - "features/ses-mailer-unit-tests.feature"
+            contexts: [ Sil\SilIdBroker\Behat\Context\SesMailerUnitTestsContext ]
