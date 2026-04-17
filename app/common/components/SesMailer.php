@@ -45,13 +45,23 @@ class SesMailer extends BaseMailer
      */
     protected function sendMessage($message)
     {
+        $destination = [
+            'ToAddresses' => $message->getTo(),
+        ];
+
+        $cc = $message->getCc();
+        if (!empty($cc)) {
+            $destination['CcAddresses'] = $cc;
+        }
+
+        $bcc = $message->getBcc();
+        if (!empty($bcc)) {
+            $destination['BccAddresses'] = $bcc;
+        }
+
         try {
             $result = $this->client->sendEmail([
-                'Destination' => [
-                    'ToAddresses' => $message->getTo(),
-                    'CcAddresses' => $message->getCc(),
-                    'BccAddresses' => $message->getBcc(),
-                ],
+                'Destination' => $destination,
                 'ReplyToAddresses' => $message->getReplyTo(),
                 'Source' => $message->getFrom(),
                 'Message' => [
