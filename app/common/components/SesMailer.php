@@ -86,6 +86,7 @@ class SesMailer extends BaseMailer
                 'action' => 'sendMessage',
                 'type' => get_class($e),
                 'message' => $e->getMessage(),
+                'destination' => $destination,
             ]);
             return false;
         }
