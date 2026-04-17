@@ -50,12 +50,12 @@ class SesMailer extends BaseMailer
         ];
 
         $cc = $message->getCc();
-        if (!empty($cc)) {
+        if (!empty($cc) && !empty($cc[0])) {
             $destination['CcAddresses'] = $cc;
         }
 
         $bcc = $message->getBcc();
-        if (!empty($bcc)) {
+        if (!empty($bcc) && !empty($bcc[0])) {
             $destination['BccAddresses'] = $bcc;
         }
 
