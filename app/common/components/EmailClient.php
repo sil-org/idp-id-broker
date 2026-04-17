@@ -15,6 +15,8 @@ use yii\db\Exception;
  */
 class EmailClient extends Component
 {
+    public const string NONE = '(none)';
+
     /**
      * @throws Exception
      * @throws InvalidConfigException
@@ -62,8 +64,9 @@ class EmailClient extends Component
             'action' => 'email/queue',
             'status' => 'queued',
             'id' => $email->id,
-            'toAddress' => $email->to_address ?? '(null)',
-            'subject' => $email->subject ?? '(null)',
+            'toAddress' => $email->to_address ?? self::NONE,
+            'ccAddress' => $email->cc_address ?? self::NONE,
+            'subject' => $email->subject ?? self::NONE,
             'send_after' => date('c', $email->send_after),
             'delay_seconds' => $email->delay_seconds,
         ]);

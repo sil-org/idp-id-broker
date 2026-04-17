@@ -49,6 +49,8 @@ class SesMailer extends BaseMailer
             $result = $this->client->sendEmail([
                 'Destination' => [
                     'ToAddresses' => $message->getTo(),
+                    'CcAddresses' => $message->getCc(),
+                    'BccAddresses' => $message->getBcc(),
                 ],
                 'ReplyToAddresses' => $message->getReplyTo(),
                 'Source' => $message->getFrom(),
