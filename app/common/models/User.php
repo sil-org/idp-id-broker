@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Closure;
+use common\components\Emailer;
 use common\components\HIBP;
 use common\components\Sheets;
 use common\helpers\MySqlDateTime;

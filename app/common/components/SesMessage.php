@@ -99,7 +99,10 @@ class SesMessage extends BaseMessage
 
     public function getCc()
     {
-        return $this->cc ?? [];
+        if (empty($this->cc)) {
+            return [];
+        }
+        return $this->cc;
     }
 
     public function setCc($cc)
@@ -113,7 +116,10 @@ class SesMessage extends BaseMessage
 
     public function getBcc()
     {
-        return $this->bcc ?? [];
+        if (empty($this->bcc)) {
+            return [];
+        }
+        return $this->bcc;
     }
 
     public function setBcc($bcc)

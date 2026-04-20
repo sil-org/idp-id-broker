@@ -45,11 +45,23 @@ class SesMailer extends BaseMailer
      */
     protected function sendMessage($message)
     {
+        $destination = [
+            'ToAddresses' => $message->getTo(),
+        ];
+
+        $cc = $message->getCc();
+        if (!empty($cc) && !empty($cc[0])) {
+            $destination['CcAddresses'] = $cc;
+        }
+
+        $bcc = $message->getBcc();
+        if (!empty($bcc) && !empty($bcc[0])) {
+            $destination['BccAddresses'] = $bcc;
+        }
+
         try {
             $result = $this->client->sendEmail([
-                'Destination' => [
-                    'ToAddresses' => $message->getTo(),
-                ],
+                'Destination' => $destination,
                 'ReplyToAddresses' => $message->getReplyTo(),
                 'Source' => $message->getFrom(),
                 'Message' => [
@@ -74,6 +86,7 @@ class SesMailer extends BaseMailer
                 'action' => 'sendMessage',
                 'type' => get_class($e),
                 'message' => $e->getMessage(),
+                'destination' => $destination,
             ]);
             return false;
         }

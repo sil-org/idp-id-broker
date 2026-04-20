@@ -163,6 +163,8 @@ class Email extends EmailBase
             $mailer->setFrom([$from => $name]);
         }
         $mailer->setTo($this->to_address);
+        $mailer->setCc($this->cc_address);
+        $mailer->setBcc($this->bcc_address);
         $mailer->setSubject($this->subject);
 
         /*
