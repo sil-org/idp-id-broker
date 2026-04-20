@@ -108,10 +108,7 @@ class SesMessage extends BaseMessage
      */
     public function getReplyTo(): string|array
     {
-        if ($this->replyTo) {
-            return $this->replyTo;
-        }
-        return $this->getFrom();
+        return $this->replyTo;
     }
 
     /**
