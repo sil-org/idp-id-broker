@@ -45,6 +45,25 @@ class SesMailer extends BaseMailer
      */
     protected function sendMessage($message)
     {
+        $emailArgs = $this->buildEmailArgs($message);
+
+        try {
+            $result = $this->client->sendEmail($emailArgs);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'action' => 'sendMessage',
+                'type' => get_class($e),
+                'message' => $e->getMessage(),
+                'destination' => $emailArgs['Destination'],
+            ]);
+            return false;
+        }
+        \Yii::info('message sent, id: ' . $result['MessageId']);
+        return true;
+    }
+
+    protected function buildEmailArgs($message): array
+    {
         $destination = [
             'ToAddresses' => $message->getTo(),
         ];
@@ -59,38 +78,26 @@ class SesMailer extends BaseMailer
             $destination['BccAddresses'] = $bcc;
         }
 
-        try {
-            $result = $this->client->sendEmail([
-                'Destination' => $destination,
-                'ReplyToAddresses' => $message->getReplyTo(),
-                'Source' => $message->getFrom(),
-                'Message' => [
-                    'Body' => [
-                        'Html' => [
-                            'Charset' => $message->getCharset(),
-                            'Data' => $message->getHtmlBody(),
-                        ],
-                        'Text' => [
-                            'Charset' => $message->getCharset(),
-                            'Data' => $message->getTextBody(),
-                        ],
-                    ],
-                    'Subject' => [
+        return [
+            'Destination' => $destination,
+            'ReplyToAddresses' => $message->getReplyTo(),
+            'Source' => $message->getFrom(),
+            'Message' => [
+                'Body' => [
+                    'Html' => [
                         'Charset' => $message->getCharset(),
-                        'Data' => $message->getSubject(),
+                        'Data' => $message->getHtmlBody(),
+                    ],
+                    'Text' => [
+                        'Charset' => $message->getCharset(),
+                        'Data' => $message->getTextBody(),
                     ],
                 ],
-            ]);
-        } catch (\Throwable $e) {
-            \Yii::error([
-                'action' => 'sendMessage',
-                'type' => get_class($e),
-                'message' => $e->getMessage(),
-                'destination' => $destination,
-            ]);
-            return false;
-        }
-        \Yii::info('message sent, id: ' . $result['MessageId']);
-        return true;
+                'Subject' => [
+                    'Charset' => $message->getCharset(),
+                    'Data' => $message->getSubject(),
+                ],
+            ],
+        ];
     }
 }

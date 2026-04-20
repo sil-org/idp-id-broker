@@ -163,22 +163,20 @@ class Email extends EmailBase
             $mailer->setFrom([$from => $name]);
         }
         $mailer->setTo($this->to_address);
-        $mailer->setCc($this->cc_address);
-        $mailer->setBcc($this->bcc_address);
         $mailer->setSubject($this->subject);
 
         /*
          * Conditionally set optional fields
          */
-        $setMethods = [
-            'setCc' => $this->cc_address,
-            'setBcc' => $this->bcc_address,
-        ];
-        foreach ($setMethods as $method => $value) {
-            if ($value) {
-                $mailer->$method($value);
-            }
+
+        if ($this->cc_address) {
+            $mailer->setCc($this->cc_address);
         }
+
+        if ($this->bcc_address) {
+            $mailer->setBcc($this->bcc_address);
+        }
+
 
         return $mailer;
     }
