@@ -97,7 +97,9 @@ class SesMessage extends BaseMessage
      */
     public function setTo($to): SesMessage|static
     {
-        $this->to = static::formatAddresses($to);
+        if ($to) {
+            $this->to = static::formatAddresses($to);
+        }
         return $this;
     }
 
@@ -117,7 +119,9 @@ class SesMessage extends BaseMessage
      */
     public function setReplyTo($replyTo): SesMessage|static
     {
-        $this->replyTo = static::formatAddresses($replyTo);
+        if ($replyTo) {
+            $this->replyTo = static::formatAddresses($replyTo);
+        }
         return $this;
     }
 
@@ -134,7 +138,9 @@ class SesMessage extends BaseMessage
      */
     public function setCc($cc): SesMessage|static
     {
-        $this->cc = static::formatAddresses($cc);
+        if ($cc) {
+            $this->cc = static::formatAddresses($cc);
+        }
         return $this;
     }
 
@@ -151,7 +157,9 @@ class SesMessage extends BaseMessage
      */
     public function setBcc($bcc): SesMessage|static
     {
-        $this->bcc = static::formatAddresses($bcc);
+        if ($bcc) {
+            $this->bcc = static::formatAddresses($bcc);
+        }
         return $this;
     }
 
