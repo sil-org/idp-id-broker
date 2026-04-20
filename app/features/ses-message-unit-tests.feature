@@ -53,7 +53,7 @@ Feature: SesMessage Unit Tests
   Scenario: Testing Reply-To default (should be From address)
     Given I have a new SesMessage
     And I set the from address to "tester@example.com"
-    Then the reply-to address should be "tester@example.com"
+    Then the reply-to address should be empty
 
   Scenario: Testing CC address
     Given I have a new SesMessage

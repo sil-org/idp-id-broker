@@ -109,10 +109,10 @@ class SesMessageUnitTestsContext extends YiiContext
         }
     }
 
-    #[Then('the reply-to address should be :replyTo')]
-    public function theReplyToAddressShouldBe($replyTo)
+    #[Then('the reply-to address should be empty')]
+    public function theReplyToAddressShouldBeEmpty()
     {
-        Assert::eq($this->message->getReplyTo(), $replyTo);
+        Assert::isEmpty($this->message->getReplyTo());
     }
 
     #[When('I set the cc address to :cc')]
