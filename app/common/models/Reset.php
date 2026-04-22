@@ -348,7 +348,7 @@ class Reset extends ResetBase
     {
         if ($this->disable_until !== null) {
             $disableUntilTs = strtotime($this->disable_until);
-            if ($disableUntilTs == false) {
+            if ($disableUntilTs === false) {
                 return true;
             }
 
@@ -418,7 +418,7 @@ class Reset extends ResetBase
     {
         if ($this->disable_until !== null) {
             $disableUntilTs = strtotime($this->disable_until);
-            if ($disableUntilTs == false) {
+            if ($disableUntilTs === false) {
                 throw new ServerErrorHttpException('Unable to check disable timeout.', 1463146757);
             }
 
