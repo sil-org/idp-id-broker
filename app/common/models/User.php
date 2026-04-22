@@ -128,6 +128,18 @@ class User extends UserBase
             }
         }
 
+        $reset = $this->reset;
+        if ($reset !== null && !$reset->delete()) {
+            \Yii::error([
+                'action' => 'delete reset record before deleting user',
+                'status' => 'error',
+                'error' => $reset->getFirstErrors(),
+                'reset_id' => $reset->id,
+                'user_id' => $this->id,
+            ]);
+            return false;
+        }
+
         /*
          * Delete email logs last in case other deletions trigger new emails
          */
@@ -1517,5 +1529,46 @@ class User extends UserBase
         }
 
         return join(',', $emails);
+    }
+
+    /**
+     * Return an array of masked email addresses that can be used for password reset.
+     * Includes the user's primary address, their supervisor address (if present),
+     * and any verified recovery methods.
+     *
+     * @return array<int, array{type: string, value: string, id?: string}>
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function getMaskedMethods(): array
+    {
+        $methods = [];
+
+        // Primary email address
+        $primaryEmail = $this->getEmailAddress();
+        if (!empty($primaryEmail)) {
+            $methods[] = [
+                'type'  => Reset::TYPE_PRIMARY,
+                'value' => Utils::maskEmail($primaryEmail),
+            ];
+        }
+
+        // Supervisor (manager) email address
+        if (!empty($this->manager_email)) {
+            $methods[] = [
+                'type'  => Reset::TYPE_SUPERVISOR,
+                'value' => Utils::maskEmail($this->manager_email),
+            ];
+        }
+
+        // Verified alternate recovery methods
+        foreach ($this->getVerifiedMethodOptions() as $method) {
+            $methods[] = [
+                'id'    => $method->uid,
+                'type'  => Reset::TYPE_METHOD,
+                'value' => $method->getMaskedValue(),
+            ];
+        }
+
+        return $methods;
     }
 }

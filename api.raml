@@ -384,6 +384,63 @@ types:
       send_after:
         type: integer
         description: message will be sent after this time (Unix epoch, UTC)
+  ResetResponse:
+    description: >
+      Response returned by password reset endpoints. Contains the uid of the reset
+      and a list of masked methods the user can choose to receive their reset code.
+    type: object
+    properties:
+      uid: string
+      methods:
+        description: List of masked destinations available for sending the reset code.
+        type: array
+        items:
+          type: object
+          properties:
+            type:
+              enum: [ primary, supervisor, method ]
+            value: string
+            id?:
+              description: uid of the Method record (only present when type is "method")
+              type: string
+    example: |
+      {
+        "uid": "aBcDeFgHiJkLmNoPqRsTuVwXyZ123456",
+        "methods": [
+          { "type": "primary",    "value": "j****_s***h@e*******.c**" },
+          { "type": "supervisor", "value": "m***r@e*******.c**" },
+          { "type": "method",     "id": "qRsTuVwXyZ123456aBcDeFgHiJkL7890", "value": "r*****y@e*******.c**" }
+        ]
+      }
+  ResetCreate:
+    type: object
+    properties:
+      username: string
+    example: |
+      {
+        "username": "john_smith"
+      }
+  ResetUpdate:
+    type: object
+    properties:
+      type:
+        enum: [ primary, supervisor, method ]
+      id?:
+        description: uid of the Method record (required when type is "method")
+        type: string
+    example: |
+      {
+        "type": "method",
+        "id": "qRsTuVwXyZ123456aBcDeFgHiJkL7890"
+      }
+  ResetValidate:
+    type: object
+    properties:
+      code: string
+    example: |
+      {
+        "code": "aBcDeFgHiJkLmNoPqRsTuVwXyZ123456"
+      }
 /authentication:
   post:
     queryParameters:
@@ -1038,3 +1095,91 @@ types:
               "code": 0,
               "status": 500
             }
+
+/reset:
+  post:
+    description: Initiate a password reset for the given user.
+    body:
+      type: ResetCreate
+    responses:
+      200:
+        body:
+          type: ResetResponse
+      400:
+        description: Missing or invalid request data.
+        body:
+          type: Error
+      404:
+        description: User not found.
+        body:
+          type: Error
+      500:
+        body:
+          type: Error
+  /{uid}:
+    get:
+      description: Retrieve a password reset record by its uid.
+      responses:
+        200:
+          body:
+            type: ResetResponse
+        404:
+          body:
+            type: Error
+    put:
+      description: Update the reset type/method and resend the verification email.
+      body:
+        type: ResetUpdate
+      responses:
+        200:
+          body:
+            type: ResetResponse
+        400:
+          body:
+            type: Error
+        404:
+          body:
+            type: Error
+        429:
+          description: Too many attempts.
+          body:
+            type: Error
+    /resend:
+      put:
+        description: Resend the reset verification email.
+        responses:
+          200:
+            body:
+              type: ResetResponse
+          404:
+            body:
+              type: Error
+          429:
+            description: Too many attempts.
+            body:
+              type: Error
+    /validate:
+      put:
+        description: >
+          Validate the reset code. Returns 200 on success, 400 for wrong code,
+          410 for expired reset.
+        body:
+          type: ResetValidate
+        responses:
+          200:
+            description: Code is correct and the reset record has been deleted.
+          400:
+            description: Incorrect code or missing request data.
+            body:
+              type: Error
+          404:
+            body:
+              type: Error
+          410:
+            description: Reset has expired; a new one has been created and sent.
+            body:
+              type: Error
+          429:
+            description: Too many attempts.
+            body:
+              type: Error

@@ -41,6 +41,8 @@ class Emailer extends Component
     public const SUBJ_PASSWORD_EXPIRED = 'The password for your {idpDisplayName} Identity account has expired';
     public const SUBJ_PASSWORD_EXPIRING = 'The password for your {idpDisplayName} Identity account is about to expire';
     public const SUBJ_PASSWORD_PWNED = 'ALERT: The password for your {idpDisplayName} Identity account has been exposed';
+    public const SUBJ_PASSWORD_RESET = 'Reset your {idpDisplayName} Identity account password';
+    public const SUBJ_PASSWORD_RESET_ON_BEHALF = '{displayName} has requested a password reset for their {idpDisplayName} Identity account';
     public const SUBJ_REFRESH_BACKUP_CODES = 'Get a new set of printable codes for your {idpDisplayName} Identity account';
     public const SUBJ_WELCOME = 'Important information about your {idpDisplayName} Identity account';
 
@@ -88,6 +90,7 @@ class Emailer extends Component
     public $sendPasswordChangedEmails = true;
     public $sendPasswordExpiredEmails = true;
     public $sendPasswordExpiringEmails = true;
+    public $sendPasswordResetEmails = true;
     public $sendRefreshBackupCodesEmails = true;
     public $sendWelcomeEmails = true;
 
@@ -118,6 +121,8 @@ class Emailer extends Component
     public $subjectForPasswordExpired;
     public $subjectForPasswordExpiring;
     public $subjectForPasswordPwned;
+    public $subjectForPasswordReset;
+    public $subjectForPasswordResetOnBehalf;
     public $subjectForRefreshBackupCodes;
     public $subjectForWelcome;
 
@@ -263,6 +268,8 @@ class Emailer extends Component
         $this->subjectForPasswordExpired ??= self::SUBJ_PASSWORD_EXPIRED;
         $this->subjectForPasswordExpiring ??= self::SUBJ_PASSWORD_EXPIRING;
         $this->subjectForPasswordPwned ??= self::SUBJ_PASSWORD_PWNED;
+        $this->subjectForPasswordReset ??= self::SUBJ_PASSWORD_RESET;
+        $this->subjectForPasswordResetOnBehalf ??= self::SUBJ_PASSWORD_RESET_ON_BEHALF;
         $this->subjectForRefreshBackupCodes ??= self::SUBJ_REFRESH_BACKUP_CODES;
         $this->subjectForWelcome ??= self::SUBJ_WELCOME;
 
@@ -286,6 +293,8 @@ class Emailer extends Component
             EmailLog::MESSAGE_TYPE_PASSWORD_EXPIRED => $this->subjectForPasswordExpired,
             EmailLog::MESSAGE_TYPE_PASSWORD_EXPIRING => $this->subjectForPasswordExpiring,
             EmailLog::MESSAGE_TYPE_PASSWORD_PWNED => $this->subjectForPasswordPwned,
+            EmailLog::MESSAGE_TYPE_PASSWORD_RESET => $this->subjectForPasswordReset,
+            EmailLog::MESSAGE_TYPE_PASSWORD_RESET_ON_BEHALF => $this->subjectForPasswordResetOnBehalf,
             EmailLog::MESSAGE_TYPE_REFRESH_BACKUP_CODES => $this->subjectForRefreshBackupCodes,
             EmailLog::MESSAGE_TYPE_WELCOME => $this->subjectForWelcome,
         ];

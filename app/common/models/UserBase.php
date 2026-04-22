@@ -39,6 +39,7 @@ use Yii;
  * @property Invite[] $invites
  * @property Method[] $methods
  * @property Mfa[] $mfas
+ * @property Reset|null $reset
  */
 class UserBase extends \yii\db\ActiveRecord
 {
@@ -152,5 +153,15 @@ class UserBase extends \yii\db\ActiveRecord
     public function getMfas()
     {
         return $this->hasMany(Mfa::class, ['user_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Reset]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getReset()
+    {
+        return $this->hasOne(Reset::class, ['user_id' => 'id']);
     }
 }

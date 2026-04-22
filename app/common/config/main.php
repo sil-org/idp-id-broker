@@ -148,6 +148,8 @@ return [
             'sendPasswordExpiringEmails' => Env::get('SEND_PASSWORD_EXPIRING_EMAILS', true),
             'sendPasswordExpiredEmails' => Env::get('SEND_PASSWORD_EXPIRED_EMAILS', true),
 
+            'sendPasswordResetEmails' => Env::get('SEND_PASSWORD_RESET_EMAILS', true),
+
             'subjectForInvite' => Env::get('SUBJECT_FOR_INVITE'),
             'subjectForMfaRateLimit' => Env::get('SUBJECT_FOR_MFA_RATE_LIMIT'),
             'subjectForPasswordChanged' => Env::get('SUBJECT_FOR_PASSWORD_CHANGED'),
@@ -172,6 +174,8 @@ return [
             'subjectForMethodPurged' => Env::get('SUBJECT_FOR_METHOD_PURGED'),
             'subjectForPasswordExpiring' => Env::get('SUBJECT_FOR_PASSWORD_EXPIRING'),
             'subjectForPasswordExpired' => Env::get('SUBJECT_FOR_PASSWORD_EXPIRED'),
+            'subjectForPasswordReset' => Env::get('SUBJECT_FOR_PASSWORD_RESET'),
+            'subjectForPasswordResetOnBehalf' => Env::get('SUBJECT_FOR_PASSWORD_RESET_ON_BEHALF'),
             'subjectForAbandonedUsers' => Env::get('SUBJECT_FOR_ABANDONED_USERS'),
             'subjectForExtGroupSyncErrors' => Env::get('SUBJECT_FOR_EXT_GROUP_SYNC_ERRORS'),
 
@@ -331,6 +335,12 @@ return [
         'passwordGracePeriodExtension'  => '+7 days',
         'passwordLifespan'              => Env::get('PASSWORD_LIFESPAN', '+1 year'),
         'passwordMfaLifespanExtension'  => Env::get('PASSWORD_MFA_LIFESPAN_EXTENSION', '+4 years'),
+        'passwordReset'                 => [
+            'lifetimeSeconds' => (int) Env::get('PASSWORD_RESET_LIFETIME_SECONDS', 7200),
+            'maxAttempts'     => (int) Env::get('PASSWORD_RESET_MAX_ATTEMPTS', 10),
+            'disableDuration' => (int) Env::get('PASSWORD_RESET_DISABLE_DURATION', 600),
+        ],
+        'passwordResetUrl'              => Env::get('PASSWORD_RESET_URL', ''),
         'passwordReuseLimit'            => Env::get('PASSWORD_REUSE_LIMIT', 10),
         'profileReviewInterval'         => Env::get('PROFILE_REVIEW_INTERVAL', '+6 months'),
     ],
