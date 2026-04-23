@@ -106,12 +106,7 @@ class ResetContext extends \FeatureContext
         $method = Method::findOne(['user_id' => $user->id, 'verified' => 1]);
         Assert::notNull($method, 'No verified method found for user 123.');
 
-        // Delegate to the inherited method so the private $reqBody in
-        // FeatureContext is updated correctly.
-        $this->iProvideTheFollowingValidData(new TableNode([
-            ['property', 'value'],
-            ['id', $method->uid],
-        ]));
+        $this->setRequestBody('id', $method->uid);
 
         // Restore tempUid to the reset's uid (it was overwritten above by the
         // Method creation step that sets tempUid to the method's uid).
