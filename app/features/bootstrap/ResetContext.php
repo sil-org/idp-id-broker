@@ -2,6 +2,7 @@
 
 namespace Sil\SilIdBroker\Behat\Context;
 
+use Behat\Gherkin\Node\TableNode;
 use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
@@ -9,17 +10,12 @@ use common\helpers\MySqlDateTime;
 use common\models\Method;
 use common\models\Reset;
 use common\models\User;
-use GuzzleHttp\Client;
-use Sil\PhpEnv\Env;
 use Webmozart\Assert\Assert;
 
 class ResetContext extends \FeatureContext
 {
     /** @var Reset|null */
     protected $tempReset = null;
-
-    /** @var string|null The uid of the last reset that was created/found */
-    protected $tempResetCode = null;
 
     // -------------------------------------------------------------------------
     // Given / setup steps
@@ -50,13 +46,12 @@ class ResetContext extends \FeatureContext
     {
         $this->aResetExistsForUser($employeeId);
 
-        $knownCode = 'RESETCODE1' . str_repeat('0', 22); // 32-char code
-        $this->tempReset->code = $knownCode;
+        // Use a short code that matches exactly what the validate test scenarios send.
+        $this->tempReset->code = 'RESETCODE1';
         Assert::true(
             $this->tempReset->save(),
             'Failed to set reset code: ' . implode(', ', $this->tempReset->getFirstErrors())
         );
-        $this->tempResetCode = $knownCode;
     }
 
     #[Given('a reset exists for user :employeeId that is expired')]
@@ -76,7 +71,7 @@ class ResetContext extends \FeatureContext
     {
         $user = User::findOne(['employee_id' => '123']);
         Assert::notNull($user, 'User with employee_id=123 not found.');
-        $user->scenario = \common\models\User::SCENARIO_UPDATE_USER;
+        $user->scenario = User::SCENARIO_UPDATE_USER;
         $user->manager_email = $managerEmail;
         Assert::true(
             $user->save(),
@@ -84,32 +79,54 @@ class ResetContext extends \FeatureContext
         );
     }
 
-    #[Given('that user has an email of :email')]
-    public function thatUserHasAnEmailOf(string $email): void
+    #[Given('/^user with employee id (.*) has (?:a|an) (verified|unverified) Method "(.*)"$/')]
+    public function userHasAMethod(string $employeeId, string $verified, string $value): void
     {
-        // This step just documents the email we use for login; the user was
-        // already created in the Background using iAddAUserWithAnOf (john_smith
-        // for employee_id 123, or "test_user" for employee_id 456 in specific
-        // scenarios). The step is effectively a no-op because iAddAUserWithAnOf
-        // already sets whatever is given.
+        $user = User::findOne(['employee_id' => $employeeId]);
+        Assert::notEmpty($user, "Unable to find user with employee_id=$employeeId.");
+
+        $method = new Method([
+            'user_id'  => $user->id,
+            'verified' => $verified === 'verified' ? 1 : 0,
+            'value'    => $value,
+        ]);
+        Assert::true(
+            $method->save(),
+            'Failed to add Method record: ' . implode(', ', $method->getFirstErrors())
+        );
+
+        $this->tempUid = $method->uid;
     }
 
     #[Given('I also provide the method id in the request')]
     public function iAlsoProvideTheMethodIdInTheRequest(): void
     {
-        // Find the verified method belonging to user 123
         $user = User::findOne(['employee_id' => '123']);
-        Assert::notNull($user);
+        Assert::notNull($user, 'User with employee_id=123 not found.');
         $method = Method::findOne(['user_id' => $user->id, 'verified' => 1]);
         Assert::notNull($method, 'No verified method found for user 123.');
 
-        $this->reqBody['id'] = $method->uid;
+        // Delegate to the inherited method so the private $reqBody in
+        // FeatureContext is updated correctly.
+        $this->iProvideTheFollowingValidData(new TableNode([
+            ['property', 'value'],
+            ['id', $method->uid],
+        ]));
+
+        // Restore tempUid to the reset's uid (it was overwritten above by the
+        // Method creation step that sets tempUid to the method's uid).
+        if ($this->tempReset !== null) {
+            $this->tempUid = $this->tempReset->uid;
+        }
     }
 
     #[Given('I request "/reset" be created with username :username')]
     public function iRequestResetBeCreatedWithUsername(string $username): void
     {
-        $this->reqBody['username'] = $username;
+        $this->iProvideTheFollowingValidData(new TableNode([
+            ['property', 'value'],
+            ['username', $username],
+        ]));
         $this->iRequestTheResourceBe('/reset', self::CREATED);
     }
 
@@ -121,42 +138,25 @@ class ResetContext extends \FeatureContext
     public function iSubmitTooManyIncorrectCodesForTheReset(): void
     {
         $maxAttempts = \Yii::$app->params['passwordReset']['maxAttempts'] ?? 10;
-        $hostname    = Env::get('TEST_SERVER_HOSTNAME');
-
-        $client = new Client([
-            'base_uri'    => "http://$hostname",
-            'http_errors' => false,
-            'headers'     => $this->reqHeaders,
-        ]);
 
         for ($i = 0; $i <= (int) $maxAttempts; $i++) {
-            $this->response = $client->put(
-                '/reset/' . $this->tempUid . '/validate',
-                ['json' => ['code' => 'WRONG' . str_repeat('X', 27)]]
-            );
+            // Use the inherited method to properly set FeatureContext's private
+            // $reqBody and then call the inherited request method which also
+            // sets FeatureContext's private $response / $resBody.
+            $this->iProvideTheFollowingValidData(new TableNode([
+                ['property', 'value'],
+                ['code', 'WRONGCODE1QRSTUVWXYZ1234567890AB'],
+            ]));
+            $this->iSendAToWithAValidUid('PUT', '/reset/{uid}/validate');
         }
-
-        $this->resBody = json_decode(
-            $this->response->getBody()->getContents(),
-            true
-        ) ?? [];
     }
 
     #[When('I send a "GET" to :resource with no uid substitution')]
     public function iSendAGetWithNoUidSubstitution(string $resource): void
     {
-        $hostname = Env::get('TEST_SERVER_HOSTNAME');
-        $client   = new Client([
-            'base_uri'    => "http://$hostname",
-            'http_errors' => false,
-            'headers'     => $this->reqHeaders,
-        ]);
-
-        $this->response = $client->get($resource);
-        $this->resBody  = json_decode(
-            $this->response->getBody()->getContents(),
-            true
-        ) ?? [];
+        // Delegate to the inherited step. If $resource has no {uid} placeholder,
+        // str_replace is a no-op and the URL is sent as-is.
+        $this->iSendAToWithAValidUid('GET', $resource);
     }
 
     // -------------------------------------------------------------------------
@@ -166,13 +166,14 @@ class ResetContext extends \FeatureContext
     #[Then('the response should contain a :property property')]
     public function theResponseShouldContainAProperty(string $property): void
     {
+        $resBody = $this->getResponseBody();
         Assert::keyExists(
-            $this->resBody,
+            $resBody,
             $property,
             sprintf(
                 'Response does not contain "%s". Body: %s',
                 $property,
-                var_export($this->resBody, true)
+                var_export($resBody, true)
             )
         );
     }
@@ -208,7 +209,7 @@ class ResetContext extends \FeatureContext
         $count = Reset::find()->where(['user_id' => $user->id])->count();
         Assert::eq(
             1,
-            $count,
+            (int) $count,
             "Expected exactly 1 reset record for user $employeeId, found $count."
         );
     }

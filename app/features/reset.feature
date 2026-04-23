@@ -18,11 +18,9 @@ Feature: Password Reset API
       And a reset record exists for user "123"
 
   Scenario: Create a reset using an email address as username
-    Given I add a user with an "employee_id" of "456"
-      And that user has an email of "test_user@example.org"
     When I provide the following valid data:
-        | property | value                  |
-        | username | test_user@example.org  |
+        | property | value                      |
+        | username | john_smith@example.org     |
       And I request "/reset" be created
     Then the response status code should be 200
 
