@@ -794,4 +794,10 @@ class FeatureContext extends YiiContext
         $user = User::findOne(['username' => $this->reqBody['username']]);
         Assert::lessThanEq(strtotime($user->currentPassword->expires_on), time());
     }
+
+    #[When('I provide an empty request body')]
+    public function iProvideAnEmptyRequestBody(): void
+    {
+        $this->cleanRequestBody();
+    }
 }

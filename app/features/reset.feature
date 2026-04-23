@@ -114,5 +114,6 @@ Feature: Password Reset API
     Then the response status code should be 404
 
   Scenario: Create reset fails with missing username
-    When I request "/reset" be created
+    When I provide an empty request body
+    And I request "/reset" be created
     Then the response status code should be 400
