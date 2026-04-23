@@ -74,4 +74,4 @@ default:
         reset_features:
             paths:
                 - "features/reset.feature"
-            contexts: [ FeatureContext, Sil\SilIdBroker\Behat\Context\ResetContext ]
+            contexts: [ Sil\SilIdBroker\Behat\Context\ResetContext ]
