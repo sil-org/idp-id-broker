@@ -197,7 +197,8 @@ return [
         'idStore' => ArrayHelper::merge([
             'class' => IdStoreBase::getAdapterClassFor(
                 Env::get('ID_STORE_ADAPTER')
-            ),
+            )
+        ], $idStoreOptionalConfig),
         // http://www.yiiframework.com/doc-2.0/guide-runtime-logging.html
         'log' => [
             'targets' => [
