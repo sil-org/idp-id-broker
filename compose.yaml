@@ -123,6 +123,12 @@ services:
     # Copy files from the override folder to be used for possible troubleshooting (e.g. with extra log statements)
     # (using bash -c to keep the chown command from ignoring the && and throwing an error)
     command: bash -c "cp -R ./override/* ./ && go run ./server/"
+    healthcheck:
+      test: ["CMD", "curl", "localhost:8080/status"]
+      start_period: 1s
+      interval: 1s
+      timeout: 2s
+      retries: 3
 
   u2fsim:
     build: ./u2f-simulator
@@ -165,7 +171,7 @@ services:
       appfortests:
         condition: service_healthy
       mfaapi:
-        condition: service_started
+        condition: service_healthy
       u2fsim:
         condition: service_started
     env_file:
