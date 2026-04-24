@@ -23,6 +23,9 @@ default:
       paths:
         - "features/email-client.feature"
       contexts: [Sil\SilIdBroker\Behat\Context\EmailClientContext]
+    google_sheets_integration_features:
+      paths: ["features/id-store-integration.feature"]
+      contexts: [Sil\SilIdBroker\Behat\Context\GoogleSheetsIntegrationContext]
     groups_external_features:
       paths:
         - "features/groups-external.feature"
@@ -66,22 +69,6 @@ default:
     safety_cutoff_features:
       paths: ["features/safetyCutoff.feature"]
       contexts: [Sil\SilIdBroker\Behat\Context\SafetyCutoffContext]
-    sync_features:
-      paths: ["features/sync.feature"]
-      contexts: [Sil\SilIdBroker\Behat\Context\SyncContext]
-    workday_features:
-      paths: ["features/workday.feature"]
-      contexts: [Sil\SilIdBroker\Behat\Context\WorkdayContext]
-    google_sheets_integration_features:
-      paths: ["features/id-store-integration.feature"]
-      contexts: [Sil\SilIdBroker\Behat\Context\GoogleSheetsIntegrationContext]
-    workday_integration_features:
-      filters:
-        # removing whitespace to silence faulty deprecation warning
-        # see https://github.com/Behat/Gherkin/pull/215#issuecomment-944115733
-        tags: '~@specificUser&&~@usersChangedSince&&~@canUpdateLastSynced'
-      paths: ["features/id-store-integration.feature"]
-      contexts: [Sil\SilIdBroker\Behat\Context\WorkdayIntegrationContext]
     secure_user_integration_features:
       filters:
         # removing whitespace to silence faulty deprecation warning
@@ -89,3 +76,24 @@ default:
         tags: '~@usersChangedSince&&~@canUpdateLastSynced'
       paths: ["features/id-store-integration.feature"]
       contexts: [Sil\SilIdBroker\Behat\Context\SecureUserIntegrationContext]
+    ses_message_unit_tests_features:
+      paths:
+        - "features/ses-message-unit-tests.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\SesMessageUnitTestsContext]
+    ses_mailer_unit_tests_features:
+      paths:
+        - "features/ses-mailer-unit-tests.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\SesMailerUnitTestsContext]
+    sync_features:
+      paths: ["features/sync.feature"]
+      contexts: [Sil\SilIdBroker\Behat\Context\SyncContext]
+    workday_features:
+      paths: ["features/workday.feature"]
+      contexts: [Sil\SilIdBroker\Behat\Context\WorkdayContext]
+    workday_integration_features:
+      filters:
+        # removing whitespace to silence faulty deprecation warning
+        # see https://github.com/Behat/Gherkin/pull/215#issuecomment-944115733
+        tags: '~@specificUser&&~@usersChangedSince&&~@canUpdateLastSynced'
+      paths: ["features/id-store-integration.feature"]
+      contexts: [Sil\SilIdBroker\Behat\Context\WorkdayIntegrationContext]
