@@ -10,14 +10,6 @@ set -e
 cd /app
 composer install --no-interaction --no-scripts --no-progress
 
-# avoid having issues locally due to the random sleep on the appfortests container
-testServer=${TEST_SERVER_HOSTNAME}
-localServer='appfortests'
-
-if [[ "$testServer" == "$localServer" ]]; then
-  whenavail $localServer 80 10 true
-fi
-
 if [[ -n "$SSL_CA_BASE64" ]]; then
     # Decode the base64 and write to the file
     caFile="/app/console/runtime/ca.pem"
@@ -29,7 +21,7 @@ if [[ -n "$SSL_CA_BASE64" ]]; then
 fi
 
 # Try to run database migrations
-whenavail testdb 3306 100 ./yii migrate --interactive=0
+./yii migrate --interactive=0
 
 make-ssl-cert generate-default-snakeoil
 

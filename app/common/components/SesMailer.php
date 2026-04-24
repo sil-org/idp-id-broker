@@ -45,39 +45,59 @@ class SesMailer extends BaseMailer
      */
     protected function sendMessage($message)
     {
+        $emailArgs = $this->buildEmailArgs($message);
+
         try {
-            $result = $this->client->sendEmail([
-                'Destination' => [
-                    'ToAddresses' => $message->getTo(),
-                ],
-                'ReplyToAddresses' => $message->getReplyTo(),
-                'Source' => $message->getFrom(),
-                'Message' => [
-                    'Body' => [
-                        'Html' => [
-                            'Charset' => $message->getCharset(),
-                            'Data' => $message->getHtmlBody(),
-                        ],
-                        'Text' => [
-                            'Charset' => $message->getCharset(),
-                            'Data' => $message->getTextBody(),
-                        ],
-                    ],
-                    'Subject' => [
-                        'Charset' => $message->getCharset(),
-                        'Data' => $message->getSubject(),
-                    ],
-                ],
-            ]);
+            $result = $this->client->sendEmail($emailArgs);
         } catch (\Throwable $e) {
             \Yii::error([
                 'action' => 'sendMessage',
                 'type' => get_class($e),
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'destination' => $emailArgs['Destination'],
             ]);
             return false;
         }
         \Yii::info('message sent, id: ' . $result['MessageId']);
         return true;
+    }
+
+    protected function buildEmailArgs($message): array
+    {
+        $destination = [
+            'ToAddresses' => $message->getTo(),
+        ];
+
+        $cc = $message->getCc();
+        if (!empty($cc) && !empty($cc[0])) {
+            $destination['CcAddresses'] = $cc;
+        }
+
+        $bcc = $message->getBcc();
+        if (!empty($bcc) && !empty($bcc[0])) {
+            $destination['BccAddresses'] = $bcc;
+        }
+
+        return [
+            'Destination' => $destination,
+            'ReplyToAddresses' => $message->getReplyTo(),
+            'Source' => $message->getFrom(),
+            'Message' => [
+                'Body' => [
+                    'Html' => [
+                        'Charset' => $message->getCharset(),
+                        'Data' => $message->getHtmlBody(),
+                    ],
+                    'Text' => [
+                        'Charset' => $message->getCharset(),
+                        'Data' => $message->getTextBody(),
+                    ],
+                ],
+                'Subject' => [
+                    'Charset' => $message->getCharset(),
+                    'Data' => $message->getSubject(),
+                ],
+            ],
+        ];
     }
 }

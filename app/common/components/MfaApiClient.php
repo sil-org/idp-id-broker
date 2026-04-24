@@ -205,7 +205,7 @@ class MfaApiClient
                 $path,
                 [
                     'json' => $body,
-                    'headers' => array_merge($this->headers, $additionalHeaders)
+                    'headers' => array_merge($this->headers, $additionalHeaders),
                 ]
             );
         } catch (\Exception $e) {
@@ -213,7 +213,7 @@ class MfaApiClient
                 \Yii::error([
                     'action' => 'calling 2sv api',
                     'status' => 'error',
-                    'error' => 'connection error: ' . $e->getMessage()
+                    'error' => 'connection error: ' . $e->getMessage(),
                 ]);
             }
 

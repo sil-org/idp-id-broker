@@ -5,6 +5,9 @@ namespace Sil\SilIdBroker\Behat\Context;
 use Behat\Behat\Context\Context;
 use common\helpers\MySqlDateTime;
 use Webmozart\Assert\Assert;
+use Behat\Step\Given;
+use Behat\Step\When;
+use Behat\Step\Then;
 
 class MySqlDateTimeContext implements Context
 {
@@ -14,17 +17,13 @@ class MySqlDateTimeContext implements Context
     /** @var  int */
     protected $recentDays;
 
-    /**
-     * @Given I say that recent is in the last :arg1 days
-     */
+    #[Given('I say that recent is in the last :arg1 days')]
     public function iSayThatRecentIsInTheLastXDays($recentDays)
     {
         $this->recentDays = $recentDays;
     }
 
-    /**
-     * @When  I ask if :arg1 days ago is recent
-     */
+    #[When('I ask if :arg1 days ago is recent')]
     public function iAskIfXDaysAgoIsRecent($daysAgo)
     {
         $diffConfig = "-" . $daysAgo . " days";
@@ -34,18 +33,14 @@ class MySqlDateTimeContext implements Context
     }
 
 
-    /**
-     * @Then I see that that date is recent
-     */
+    #[Then('I see that that date is recent')]
     public function iSeeThatThatDateIsRecent()
     {
         Assert::true($this->dateIsRecent);
     }
 
 
-    /**
-     * @Then I see that that date is not recent
-     */
+    #[Then('I see that that date is not recent')]
     public function iSeeThatThatDateIsNotRecent()
     {
         Assert::false($this->dateIsRecent);

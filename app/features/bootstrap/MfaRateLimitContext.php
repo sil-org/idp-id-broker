@@ -11,6 +11,9 @@ use common\models\User;
 use Webmozart\Assert\Assert;
 use Yii;
 use yii\web\TooManyRequestsHttpException;
+use Behat\Step\Given;
+use Behat\Step\When;
+use Behat\Step\Then;
 
 class MfaRateLimitContext extends YiiContext
 {
@@ -42,7 +45,7 @@ class MfaRateLimitContext extends YiiContext
 
         $user = new User([
             'email' => $username . '@example.com',
-            'employee_id' => (string)uniqid(),
+            'employee_id' => (string) uniqid(),
             'first_name' => 'Test',
             'last_name' => 'User',
             'username' => $username,
@@ -79,9 +82,7 @@ class MfaRateLimitContext extends YiiContext
         }
     }
 
-    /**
-     * @Given I have a user with backup codes available
-     */
+    #[Given('I have a user with backup codes available')]
     public function iHaveAUserWithBackupCodesAvailable()
     {
         $user = $this->createNewUserInDatabase('has_backupcodes');
@@ -92,17 +93,13 @@ class MfaRateLimitContext extends YiiContext
         $this->validBackupCodes = $mfaCreateResult['data'];
     }
 
-    /**
-     * @Given that MFA method has no recent failures
-     */
+    #[Given('that MFA method has no recent failures')]
     public function thatMfaMethodHasNoRecentFailures()
     {
         $this->thatMfaMethodShouldHaveRecentFailure(0);
     }
 
-    /**
-     * @When I submit a correct backup code
-     */
+    #[When('I submit a correct backup code')]
     public function iSubmitACorrectBackupCode()
     {
         Assert::notEmpty($this->validBackupCodes);
@@ -110,17 +107,13 @@ class MfaRateLimitContext extends YiiContext
         $this->submitBackupCode($this->mfaId, $correctBackupCode);
     }
 
-    /**
-     * @Then the backup code should be accepted
-     */
+    #[Then('the backup code should be accepted')]
     public function theBackupCodeShouldBeAccepted()
     {
         Assert::true($this->mfaVerifyResult);
     }
 
-    /**
-     * @When I submit an incorrect backup code
-     */
+    #[When('I submit an incorrect backup code')]
     public function iSubmitAnIncorrectBackupCode()
     {
         $incorrectBackupCode = $this->generateBackupCodeNotIn(
@@ -129,22 +122,18 @@ class MfaRateLimitContext extends YiiContext
         $this->submitBackupCode($this->mfaId, $incorrectBackupCode);
     }
 
-    /**
-     * @Then that MFA method should have :number recent failure(s)
-     */
+    #[Then('that MFA method should have :number recent failure(s)')]
     public function thatMfaMethodShouldHaveRecentFailure(int $number)
     {
         $mfa = Mfa::findOne($this->mfaId);
         Assert::notNull($mfa);
         Assert::same(
-            (string)$mfa->countRecentFailures(),
-            (string)$number
+            (string) $mfa->countRecentFailures(),
+            (string) $number
         );
     }
 
-    /**
-     * @Given that MFA method has nearly too many recent failures
-     */
+    #[Given('that MFA method has nearly too many recent failures')]
     public function thatMfaMethodHasNearlyTooManyRecentFailures()
     {
         $mfa = Mfa::findOne($this->mfaId);
@@ -166,9 +155,7 @@ class MfaRateLimitContext extends YiiContext
         Assert::same($mfa->countRecentFailures(), $desiredCount);
     }
 
-    /**
-     * @Given that MFA method has too many recent failures
-     */
+    #[Given('that MFA method has too many recent failures')]
     public function thatMfaMethodHasTooManyRecentFailures()
     {
         $this->thatMfaMethodHasNearlyTooManyRecentFailures();
@@ -183,9 +170,7 @@ class MfaRateLimitContext extends YiiContext
         );
     }
 
-    /**
-     * @Then I should be told to wait and try later
-     */
+    #[Then('I should be told to wait and try later')]
     public function iShouldBeToldToWaitAndTryLater()
     {
         Assert::isInstanceOf(
@@ -194,9 +179,7 @@ class MfaRateLimitContext extends YiiContext
         );
     }
 
-    /**
-     * @Then an MFA rate-limit email should have been sent to that user
-     */
+    #[Then('an MFA rate-limit email should have been sent to that user')]
     public function anEmailShouldHaveBeenSentToThatUser()
     {
         $mfa = Mfa::findOne($this->mfaId);
@@ -213,9 +196,7 @@ class MfaRateLimitContext extends YiiContext
         ));
     }
 
-    /**
-     * @Then that MFA rate-limit activation should have been logged
-     */
+    #[Then('that MFA rate-limit activation should have been logged')]
     public function thatMfaRateLimitActivationShouldHaveBeenLogged()
     {
         Yii::getLogger()->flush();
@@ -224,9 +205,7 @@ class MfaRateLimitContext extends YiiContext
         Assert::contains($loggedMessagesJson, 'MFA rate limit triggered');
     }
 
-    /**
-     * @Given that MFA method had too many failures, but they are not recent
-     */
+    #[Given('that MFA method had too many failures, but they are not recent')]
     public function thatMfaMethodHadTooManyFailuresButTheyAreNotRecent()
     {
         $mfa = Mfa::findOne($this->mfaId);

@@ -44,13 +44,13 @@ class Password extends PasswordBase
                 'grace_period_ends_on', 'default', 'value' => MySqlDateTime::today(),
             ],
             [
-                'password', 'required', 'on' => self::SCENARIO_DEFAULT
+                'password', 'required', 'on' => self::SCENARIO_DEFAULT,
             ],
             [
                 'password', 'string',
             ],
             [
-                'password', 'checkRecentlyUsed', 'on' => self::SCENARIO_DEFAULT
+                'password', 'checkRecentlyUsed', 'on' => self::SCENARIO_DEFAULT,
             ],
             [
                 'hash', 'default', 'value' => function () {
@@ -99,21 +99,21 @@ class Password extends PasswordBase
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'created_utc',
                 ],
-                'value' => MySqlDateTime::now()
+                'value' => MySqlDateTime::now(),
             ],
             'expirationTracker' => [
                 'class' => AttributeBehavior::className(),
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'expires_on',
                 ],
-                'value' => $this->expires()
+                'value' => $this->expires(),
             ],
             'gracePeriodTracker' => [
                 'class' => AttributeBehavior::className(),
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'grace_period_ends_on',
                 ],
-                'value' => $this->gracePeriodEnds()
+                'value' => $this->gracePeriodEnds(),
             ],
         ];
     }
@@ -286,7 +286,7 @@ class Password extends PasswordBase
             \Yii::warning([
                 'action' => 'mark pwned',
                 'employee_id' => $this->user->employee_id,
-                'message' => 'pwned password detected and processed'
+                'message' => 'pwned password detected and processed',
             ]);
         }
     }

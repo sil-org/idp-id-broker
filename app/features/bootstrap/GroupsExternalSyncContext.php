@@ -8,6 +8,9 @@ use common\models\EmailLog;
 use common\models\User;
 use Sil\PhpEnv\Env;
 use Webmozart\Assert\Assert;
+use Behat\Step\Given;
+use Behat\Step\When;
+use Behat\Step\Then;
 
 class GroupsExternalSyncContext extends GroupsExternalContext
 {
@@ -29,9 +32,7 @@ class GroupsExternalSyncContext extends GroupsExternalContext
     /** @var string[] */
     private array $syncErrors;
 
-    /**
-     * @Given the following users exist, with these external groups:
-     */
+    #[Given('the following users exist, with these external groups:')]
     public function theFollowingUsersExistWithTheseExternalGroups(TableNode $table)
     {
         $dummyEmployeeId = 11110;
@@ -43,15 +44,13 @@ class GroupsExternalSyncContext extends GroupsExternalContext
             $this->deleteTestUser($emailAddress);
             $this->createTestUser(
                 $emailAddress,
-                (string)$employeeId,
+                (string) $employeeId,
                 $groups
             );
         }
     }
 
-    /**
-     * @Given the :appPrefix external groups list is the following:
-     */
+    #[Given('the :appPrefix external groups list is the following:')]
     public function theExternalGroupsListIsTheFollowing(string $appPrefix, TableNode $table)
     {
         $userGroupsMap = [];
@@ -63,9 +62,7 @@ class GroupsExternalSyncContext extends GroupsExternalContext
         $this->externalGroupsLists[$appPrefix] = $userGroupsMap;
     }
 
-    /**
-     * @When I sync the list of :appPrefix external groups
-     */
+    #[When('I sync the list of :appPrefix external groups')]
     public function iSyncTheListOfExternalGroups($appPrefix)
     {
         $this->syncErrors = ExternalGroupsSync::processUpdates(
@@ -76,9 +73,7 @@ class GroupsExternalSyncContext extends GroupsExternalContext
         );
     }
 
-    /**
-     * @Then there should not have been any sync errors
-     */
+    #[Then('there should not have been any sync errors')]
     public function thereShouldNotHaveBeenAnySyncErrors()
     {
         Assert::isEmpty($this->syncErrors, sprintf(
@@ -87,9 +82,7 @@ class GroupsExternalSyncContext extends GroupsExternalContext
         ));
     }
 
-    /**
-     * @Then the following users should have the following external groups:
-     */
+    #[Then('the following users should have the following external groups:')]
     public function theFollowingUsersShouldHaveTheFollowingExternalGroups(TableNode $table)
     {
         foreach ($table as $row) {
@@ -110,9 +103,7 @@ class GroupsExternalSyncContext extends GroupsExternalContext
         }
     }
 
-    /**
-     * @Then there should have been a sync error
-     */
+    #[Then('there should have been a sync error')]
     public function thereShouldHaveBeenASyncError()
     {
         Assert::notEmpty(
@@ -124,9 +115,7 @@ class GroupsExternalSyncContext extends GroupsExternalContext
         }
     }
 
-    /**
-     * @Then there should have been a sync error that mentions :text
-     */
+    #[Then('there should have been a sync error that mentions :text')]
     public function thereShouldHaveBeenASyncErrorThatMentions($text)
     {
         $foundMatch = false;
@@ -142,9 +131,7 @@ class GroupsExternalSyncContext extends GroupsExternalContext
         ));
     }
 
-    /**
-     * @Given only the following users exist, with these external groups:
-     */
+    #[Given('only the following users exist, with these external groups:')]
     public function onlyTheFollowingUsersExistWithTheseExternalGroups(TableNode $table)
     {
         Assert::inArray(
@@ -166,9 +153,7 @@ class GroupsExternalSyncContext extends GroupsExternalContext
         }
     }
 
-    /**
-     * @Then we should have sent exactly :expectedCount :appPrefix sync-error notification email
-     */
+    #[Then('we should have sent exactly :expectedCount :appPrefix sync-error notification email')]
     public function weShouldHaveSentExactlySyncErrorNotificationEmail($expectedCount, $appPrefix)
     {
         $fakeEmailer = $this->fakeEmailer;
@@ -190,9 +175,7 @@ class GroupsExternalSyncContext extends GroupsExternalContext
         ));
     }
 
-    /**
-     * @Given we have provided an error-notifications email address
-     */
+    #[Given('we have provided an error-notifications email address')]
     public function weHaveProvidedAnErrorNotificationsEmailAddress()
     {
         $this->errorsEmailRecipient = 'sync-errors@example.com';

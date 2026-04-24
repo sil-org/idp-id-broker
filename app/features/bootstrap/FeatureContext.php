@@ -1,6 +1,11 @@
 <?php
 
 use Behat\Gherkin\Node\TableNode;
+use Behat\Hook\AfterSuite;
+use Behat\Step\Given;
+use Behat\Step\Then;
+use Behat\Step\When;
+use Behat\Transformation\Transform;
 use common\helpers\MySqlDateTime;
 use common\models\EmailLog;
 use common\models\Invite;
@@ -49,9 +54,7 @@ class FeatureContext extends YiiContext
     public const RETRIEVED = 'retrieved';
     public const UPDATED = 'updated';
 
-    /**
-     * @Given I add a user with a(n) :property of :value
-     */
+    #[Given('I add a user with a(n) :property of :value')]
     public function iAddAUserWithAnOf($property, $value)
     {
         $sampleUserData = [
@@ -77,17 +80,13 @@ class FeatureContext extends YiiContext
         $this->theResponseStatusCodeShouldBe(200);
     }
 
-    /**
-     * @Then I should receive :numRecords record(s)
-     */
+    #[Then('I should receive :numRecords record(s)')]
     public function iShouldReceiveRecords($numRecords)
     {
         $this->iShouldReceiveUsers($numRecords);
     }
 
-    /**
-     * @Then that record should have a data item with the following elements:
-     */
+    #[Then('that record should have a data item with the following elements:')]
     public function thatRecordShouldHaveADataItemWithTheFollowingElements(TableNode $table)
     {
         Assert::minCount($this->resBody, 1);
@@ -107,18 +106,14 @@ class FeatureContext extends YiiContext
         }
     }
 
-    /**
-     * @Given the requester is not authorized
-     */
+    #[Given('the requester is not authorized')]
     public function theRequesterIsNotAuthorized()
     {
         unset($this->reqHeaders['Authorization']);
     }
 
-    /**
-     * @Given the user store is empty
-     * @AfterSuite @database
-     */
+    #[Given('the user store is empty')]
+    #[AfterSuite('@database')]
     public static function theUserStoreIsEmpty()
     {
         // To avoid calls to try to remove TOTP/WebAuthn entries from their
@@ -135,9 +130,7 @@ class FeatureContext extends YiiContext
         User::deleteAll();
     }
 
-    /**
-     * @When /^I request "(.*)" be <?(created|updated|deleted|retrieved|headed|patched)>?$/
-     */
+    #[When('/^I request "(.*)" be <?(created|updated|deleted|retrieved|headed|patched)>?$/')]
     public function iRequestTheResourceBe($resource, $action)
     {
         $client = $this->buildClient();
@@ -165,7 +158,7 @@ class FeatureContext extends YiiContext
 
     public function callU2fSimulator($resource, $action, User $user, string $externalId)
     {
-        $webConfig = Yii::$app->components['webauthn'];
+        $webConfig = \Yii::$app->components['webauthn'];
 
         $this->reqHeaders = array_merge($this->reqHeaders, [
             'x-mfa-RPID' => $webConfig['rpId'],
@@ -212,9 +205,7 @@ class FeatureContext extends YiiContext
         }
     }
 
-    /**
-     * @When I send a :verb to :resource with a valid uid
-     */
+    #[When('I send a :verb to :resource with a valid uid')]
     public function iSendAToWithAValidUid($verb, $resource)
     {
         $client = $this->buildClient();
@@ -236,9 +227,7 @@ class FeatureContext extends YiiContext
         return Json::decode($jsonBlob) ?? [];
     }
 
-    /**
-     * @Then the response status code should be :statusCode
-     */
+    #[Then('the response status code should be :statusCode')]
     public function theResponseStatusCodeShouldBe($statusCode)
     {
         Assert::eq(
@@ -252,9 +241,7 @@ class FeatureContext extends YiiContext
         );
     }
 
-    /**
-     * @Then the response body should contain :containsText
-     */
+    #[Then('the response body should contain :containsText')]
     public function theResponseBodyShouldContain($containsText)
     {
         Assert::contains(
@@ -268,9 +255,7 @@ class FeatureContext extends YiiContext
         );
     }
 
-    /**
-     * @Then the response body should not contain :notContainsText
-     */
+    #[Then('the response body should not contain :notContainsText')]
     public function theResponseBodyShouldNotContain($notContainsText)
     {
         Assert::notContains(
@@ -284,26 +269,20 @@ class FeatureContext extends YiiContext
         );
     }
 
-    /**
-     * @Then /^the property (\w+) should contain "(.*)"$/
-     */
+    #[Then('/^the property (\w+) should contain "(.*)"$/')]
     public function thePropertyShouldContain($property, $contents)
     {
         empty($contents) ? Assert::eq($this->resBody[$property], "")
                          : Assert::contains($this->resBody[$property], $contents);
     }
 
-    /**
-     * @Then the user store is still empty
-     */
+    #[Then('the user store is still empty')]
     public function thereAreStillNoUsers()
     {
         Assert::isEmpty(User::find()->all());
     }
 
-    /**
-     * @Given the requester is authorized
-     */
+    #[Given('the requester is authorized')]
     public function theRequesterIsAuthorized()
     {
         $keys = Env::requireArray('API_ACCESS_KEYS');
@@ -311,57 +290,43 @@ class FeatureContext extends YiiContext
         $this->reqHeaders['Authorization'] = 'Bearer ' . $keys[0];
     }
 
-    /**
-     * @Given /^then I remove the (.*)$/
-     */
+    #[Given('/^then I remove the (.*)$/')]
     public function thenIRemoveThe($property)
     {
         unset($this->reqBody[$property]);
     }
 
-    /**
-     * @Given /^I provide an invalid (.*) of "?([^"]*)"?$/
-     */
+    #[Given('/^I provide an invalid (.*) of "?([^"]*)"?$/')]
     public function iProvideAnInvalidPropertyValue($property, $value)
     {
         $this->reqBody[$property] = $value;
     }
 
-    /**
-     * @Transform /^(true|false)$/
-     */
+    #[Transform('/^(true|false)$/')]
     public function transformBool($string)
     {
         return boolval($string);
     }
 
-    /**
-     * @Transform /^null$/
-     */
+    #[Transform('/^null$/')]
     public function transformNull()
     {
         return null;
     }
 
-    /**
-     * @Given /^I provide (?:a|an) (.*) that is too long$/
-     */
+    #[Given('/^I provide (?:a|an) (.*) that is too long$/')]
     public function iProvideAPropertyThatIsTooLong($property)
     {
         $this->reqBody[$property] = str_repeat("z", 256);
     }
 
-    /**
-     * @Given /^a record does not exist with (?:a|an) (.*) of "?([^"]*)"?$/
-     */
+    #[Given('/^a record does not exist with (?:a|an) (.*) of "?([^"]*)"?$/')]
     public function aUserDoesNotExist($property, $value)
     {
         User::deleteAll([$property => $value]);
     }
 
-    /**
-     * @Given I provide the following (valid) data:
-     */
+    #[Given('I provide the following (valid) data:')]
     public function iProvideTheFollowingValidData(TableNode $data)
     {
         foreach ($data as $row) {
@@ -369,9 +334,7 @@ class FeatureContext extends YiiContext
         }
     }
 
-    /**
-     * @Then the following data is returned:
-     */
+    #[Then('the following data is returned:')]
     public function theFollowingDataIsReturned(TableNode $data)
     {
         foreach ($data as $row) {
@@ -399,9 +362,7 @@ class FeatureContext extends YiiContext
     }
 
 
-    /**
-     * @Given the following data is not returned:
-     */
+    #[Given('the following data is not returned:')]
     public function theFollowingDataIsNotReturned(TableNode $data)
     {
         foreach ($data as $row) {
@@ -409,9 +370,7 @@ class FeatureContext extends YiiContext
         }
     }
 
-    /**
-     * @Then /^a record exists with (?:a|an) (.*) of "?([^"]*)"?$/
-     */
+    #[Then('/^a record exists with (?:a|an) (.*) of "?([^"]*)"?$/')]
     public function aRecordExistsForThisKey($lookupKey, $lookupValue)
     {
         $this->userFromDbBefore = $this->userFromDb;
@@ -425,9 +384,7 @@ class FeatureContext extends YiiContext
         ));
     }
 
-    /**
-     * @Then the following data should be stored:
-     */
+    #[Then('the following data should be stored:')]
     public function theFollowingDataIsStored(TableNode $data)
     {
         foreach ($data as $row) {
@@ -445,12 +402,11 @@ class FeatureContext extends YiiContext
     }
 
     /**
-     * @Then :property should be stored as now UTC
-     *
      * The time between the request being made and that data being stored might have
      * some latency so "now" may not be the same in every circumstance, therefore a
      * range of acceptable time will be used to determine accuracy.
      */
+    #[Then(':property should be stored as now UTC')]
     public function shouldBeStoredAsNowUTC($property)
     {
         $expectedNow = strtotime($this->now);
@@ -463,10 +419,7 @@ class FeatureContext extends YiiContext
         Assert::range($storedNow, $minAcceptable, $maxAcceptable, "Stored time $storedNow is not within acceptable range of $minAcceptable to $maxAcceptable");
     }
 
-    /**
-     * @Then :property should not change
-     *
-     */
+    #[Then(':property should not change')]
     public function shouldNotChange($property)
     {
         $valueBefore = $this->userFromDbBefore->$property;
@@ -475,9 +428,7 @@ class FeatureContext extends YiiContext
         Assert::eq($valueBefore, $valueNow);
     }
 
-    /**
-     * @When I request :resource be created again
-     */
+    #[When('I request :resource be created again')]
     public function iRequestTheResourceBeCreatedAgain($resource)
     {
         $this->userFromDbBefore = $this->userFromDb;
@@ -487,9 +438,7 @@ class FeatureContext extends YiiContext
         $this->iRequestTheResourceBe($resource, self::CREATED);
     }
 
-    /**
-     * @Then the only property to change should be :property
-     */
+    #[Then('the only property to change should be :property')]
     public function theOnlyPropertyToChangeShouldBe($property)
     {
         foreach ($this->userFromDbBefore->attributes as $name => $value) {
@@ -501,25 +450,19 @@ class FeatureContext extends YiiContext
         }
     }
 
-    /**
-     * @Given /^I change the (\w*) to (.*)$/
-     */
+    #[Given('/^I change the (\w*) to (.*)$/')]
     public function iChangeThe($property, $value)
     {
         $this->reqBody[$property] = $value;
     }
 
-    /**
-     * @Given :property1 and :property2 are the same
-     */
+    #[Given(':property1 and :property2 are the same')]
     public function propertiesAreTheSame($property1, $property2)
     {
         Assert::eq($this->userFromDb->$property1, $this->userFromDb->$property2);
     }
 
-    /**
-     * @Given the user has a password of :password
-     */
+    #[Given('the user has a password of :password')]
     public function theUserHasAPasswordOf($password)
     {
         $this->userFromDb->scenario = User::SCENARIO_UPDATE_PASSWORD;
@@ -529,9 +472,7 @@ class FeatureContext extends YiiContext
         Assert::true($this->userFromDb->save());
     }
 
-    /**
-     * @Then /^a record still exists with (?:a|an) (.*) of "?([^"]*)"?$/
-     */
+    #[Then('/^a record still exists with (?:a|an) (.*) of "?([^"]*)"?$/')]
     public function aRecordStillExistsForThisKey($lookupKey, $lookupValue)
     {
         $this->userFromDbBefore = $this->userFromDb;
@@ -539,9 +480,7 @@ class FeatureContext extends YiiContext
         $this->aRecordExistsForThisKey($lookupKey, $lookupValue);
     }
 
-    /**
-     * @Then none of the data has changed
-     */
+    #[Then('none of the data has changed')]
     public function noneOfTheDataHasChanged()
     {
         foreach ($this->userFromDbBefore->attributes as $name => $value) {
@@ -552,18 +491,14 @@ class FeatureContext extends YiiContext
         }
     }
 
-    /**
-     * @Then the authentication is not successful
-     */
+    #[Then('the authentication is not successful')]
     public function theAuthenticationIsNotSuccessful()
     {
         $this->theResponseStatusCodeShouldBe(400);
         $this->thePropertyShouldContain("message", "");
     }
 
-    /**
-     * @Given /^the (.*) is stored as (.*)$/
-     */
+    #[Given('/^the (.*) is stored as (.*)$/')]
     public function thePropertyIsStoredAs($property, $value)
     {
         $this->userFromDb->$property = $value;
@@ -572,17 +507,13 @@ class FeatureContext extends YiiContext
         Assert::true($this->userFromDb->save());
     }
 
-    /**
-     * @Given /^I should receive (\d+) users$/
-     */
+    #[Given('/^I should receive (\d+) users$/')]
     public function iShouldReceiveUsers($numOfUsers)
     {
         Assert::count($this->resBody, $numOfUsers);
     }
 
-    /**
-     * @Given the user :username has no password in the database
-     */
+    #[Given('the user :username has no password in the database')]
     public function theUserHasNoPasswordInTheDatabase($username)
     {
         $user = User::findByUsername($username);
@@ -594,9 +525,7 @@ class FeatureContext extends YiiContext
         Password::deleteAll(['user_id' => $user->id]);
     }
 
-    /**
-     * @Given the user :username does have a password in the database
-     */
+    #[Given('the user :username does have a password in the database')]
     public function theUserDoesHaveAPasswordInTheDatabase($username)
     {
         $user = User::findByUsername($username);
@@ -616,9 +545,7 @@ class FeatureContext extends YiiContext
         );
     }
 
-    /**
-     * @Given the user :username has an expired invite code :code
-     */
+    #[Given('the user :username has an expired invite code :code')]
     public function theUserHasAnExpiredInviteCode($username, $code)
     {
         $user = User::findByUsername($username);
@@ -627,9 +554,7 @@ class FeatureContext extends YiiContext
         $this->createInviteCode($user, $code, true);
     }
 
-    /**
-     * @Given the user :username has a non-expired invite code :code
-     */
+    #[Given('the user :username has a non-expired invite code :code')]
     public function theUserHasANonExpiredInviteCode($username, $code)
     {
         $user = User::findByUsername($username);
@@ -638,17 +563,13 @@ class FeatureContext extends YiiContext
         $this->createInviteCode($user, $code);
     }
 
-    /**
-     * @Given I do not provide an employee_id
-     */
+    #[Given('I do not provide an employee_id')]
     public function iDoNotProvideAnEmployeeId()
     {
         unset($this->reqBody['employee_id']);
     }
 
-    /**
-     * @Given the response should contain a :key array with :num items
-     */
+    #[Given('the response should contain a :key array with :num items')]
     public function theResponseShouldContainAArrayWithItems($key, $num)
     {
         Assert::keyExists($this->resBody, $key);
@@ -691,9 +612,7 @@ class FeatureContext extends YiiContext
         return $this->resBody;
     }
 
-    /**
-     * @Then /^a method record exists with (?:a|an) (.*) of "?([^"]*)"?$/
-     */
+    #[Then('/^a method record exists with (?:a|an) (.*) of "?([^"]*)"?$/')]
     public function aMethodRecordExistsForThisKey($lookupKey, $lookupValue)
     {
         $this->methodFromDb = Method::findOne([$lookupKey => $lookupValue]);
@@ -705,9 +624,7 @@ class FeatureContext extends YiiContext
         ));
     }
 
-    /**
-     * @Then a method record exists with a value of :address text to change signature
-     */
+    #[Then('a method record exists with a value of :address text to change signature')]
     public function aMethodRecordExistsForEmployeeIdWithAValueOf($address)
     {
         $this->methodFromDb = Method::findOne(['value' => $address, 'user_id' => $this->userFromDb->id]);
@@ -719,17 +636,13 @@ class FeatureContext extends YiiContext
     }
 
 
-    /**
-     * @Then the method record is marked as verified
-     */
+    #[Then('the method record is marked as verified')]
     public function theMethodRecordIsMarkedAsVerified()
     {
         Assert::eq(1, $this->methodFromDb->verified, 'method is not marked as verified');
     }
 
-    /**
-     * @Then a method record does not exist with a value of :address
-     */
+    #[Then('a method record does not exist with a value of :address')]
     public function aMethodRecordDoesNotExistForEmployeeIdWithAValueOf($address)
     {
         Assert::null(
@@ -738,18 +651,14 @@ class FeatureContext extends YiiContext
         );
     }
 
-    /**
-     * @Then the profile review date should be past
-     */
+    #[Then('the profile review date should be past')]
     public function theProfileReviewDateShouldBePast()
     {
         $this->userFromDb->refresh();
         Assert::true(MySqlDateTime::isBefore($this->userFromDb->review_profile_after, time()));
     }
 
-    /**
-     * @Given the user record for :username has expired
-     */
+    #[Given('the user record for :username has expired')]
     public function theUserRecordForHasExpired($username)
     {
         $user = User::findByUsername($username);
@@ -758,17 +667,13 @@ class FeatureContext extends YiiContext
         Assert::true($user->save());
     }
 
-    /**
-     * @Given there is a :username user in the database
-     */
+    #[Given('there is a :username user in the database')]
     public function thereIsAUserInTheDatabase($username)
     {
         $this->userFromDb = User::findOne(['username' => $username]);
     }
 
-    /**
-     * @Given that user has a :field in the :tense
-     */
+    #[Given('that user has a :field in the :tense')]
     public function thatUserHasAFieldInTheTense($field, $tense)
     {
         $relativeTimes = [
@@ -781,9 +686,7 @@ class FeatureContext extends YiiContext
         Assert::true($this->userFromDb->save());
     }
 
-    /**
-     * @Given I create the following users:
-     */
+    #[Given('I create the following users:')]
     public function iCreateTheFollowingUsers(TableNode $data)
     {
         $dataArray = $data->getColumnsHash();
@@ -792,26 +695,20 @@ class FeatureContext extends YiiContext
             $this->iRequestTheResourceBe('/user', self::CREATED);
         }
     }
-    /**
-     * @Given I provide a(n) :field query property of :value
-     */
+    #[Given('I provide a(n) :field query property of :value')]
     public function iProvideAFieldQueryPropertyOfValue($field, $value)
     {
         $this->queryParams[$field] = $value;
     }
 
-    /**
-     * @When I search by :field
-     */
+    #[When('I search by :field')]
     public function iSearchByField($field)
     {
         $request = '/user?' . $field . '=' . $this->queryParams[$field];
         $this->iRequestTheResourceBe($request, self::RETRIEVED);
     }
 
-    /**
-     * @Then user :employeeId is returned
-     */
+    #[Then('user :employeeId is returned')]
     public function userIsReturned($employeeId)
     {
         $found = false;
@@ -824,17 +721,13 @@ class FeatureContext extends YiiContext
         Assert::true($found, 'user ' . $employeeId . ' was not returned');
     }
 
-    /**
-     * @Then no users are returned
-     */
+    #[Then('no users are returned')]
     public function noUsersAreReturned()
     {
         Assert::eq(count($this->resBody), 0, 'response is not empty');
     }
 
-    /**
-     * @Given the response should contain a :key array with only these elements:
-     */
+    #[Given('the response should contain a :key array with only these elements:')]
     public function theResponseShouldContainAMemberArrayWithOnlyTheseElements($key, TableNode $data)
     {
         $property = $this->resBody[$key];
@@ -848,14 +741,12 @@ class FeatureContext extends YiiContext
             $n++;
         }
 
-        Assert::eq(count($property), $n, "unexpected element(s) in property array: " .
-            implode(", ", $property));
+        Assert::eq(count($property), $n, "unexpected element(s) in property array: "
+            . implode(", ", $property));
     }
 
 
-    /**
-     * @Then the uuid property should be a valid UUID
-     */
+    #[Then('the uuid property should be a valid UUID')]
     public function theUuidPropertyShouldBeAValidUuid()
     {
         Assert::regex(
@@ -864,9 +755,7 @@ class FeatureContext extends YiiContext
         );
     }
 
-    /**
-     * @Given I wait until after the user :username expiration date
-     */
+    #[Given('I wait until after the user :username expiration date')]
     public function iWaitUntilAfterTheUserExpirationDate($username)
     {
         $this->userFromDb = User::findOne(['username' => $username]);
@@ -876,36 +765,28 @@ class FeatureContext extends YiiContext
         $this->userFromDb->save();
     }
 
-    /**
-     * @Given The user's current password should not be marked as pwned
-     */
+    #[Given("The user's current password should not be marked as pwned")]
     public function theUserSCurrentPasswordShouldNotBeMarkedAsPwned()
     {
         $user = User::findOne(['username' => $this->reqBody['username']]);
         Assert::eq($user->currentPassword->hibp_is_pwned, "no");
     }
 
-    /**
-     * @Given The user's current password should be marked as pwned
-     */
+    #[Given("The user's current password should be marked as pwned")]
     public function theUserSCurrentPasswordShouldBeMarkedAsPwned()
     {
         $user = User::findOne(['username' => $this->reqBody['username']]);
         Assert::eq($user->currentPassword->hibp_is_pwned, "yes");
     }
 
-    /**
-     * @Given The user's password is not expired
-     */
+    #[Given("The user's password is not expired")]
     public function theUserSPasswordIsNotExpired()
     {
         $user = User::findOne(['username' => $this->reqBody['username']]);
         Assert::greaterThanEq(strtotime($user->currentPassword->expires_on), time());
     }
 
-    /**
-     * @Given The user's password is expired
-     */
+    #[Given("The user's password is expired")]
     public function theUserSPasswordIsExpired()
     {
         $user = User::findOne(['username' => $this->reqBody['username']]);

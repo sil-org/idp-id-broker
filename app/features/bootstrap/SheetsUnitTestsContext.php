@@ -5,6 +5,9 @@ namespace Sil\SilIdBroker\Behat\Context;
 use Behat\Behat\Tester\Exception\PendingException;
 use common\components\Sheets;
 use Webmozart\Assert\Assert;
+use Behat\Step\Given;
+use Behat\Step\When;
+use Behat\Step\Then;
 
 class SheetsUnitTestsContext extends UnitTestsContext
 {
@@ -12,26 +15,22 @@ class SheetsUnitTestsContext extends UnitTestsContext
     private $header;
     private $table;
 
-    /**
-     * @Given I have a list of users
-     */
+    #[Given('I have a list of users')]
     public function iHaveAListOfUsers()
     {
         $this->users = [
             [
                 'employee_id' => '12345',
-                'email' => 'user12345@example.com'
+                'email' => 'user12345@example.com',
             ],
             [
                 'employee_id' => '12346',
-                'email' => 'user12346@example.com'
+                'email' => 'user12346@example.com',
             ],
         ];
     }
 
-    /**
-     * @Given I have an array of table headers
-     */
+    #[Given('I have an array of table headers')]
     public function iHaveAnArrayOfTableHeaders()
     {
         $this->header = [
@@ -43,17 +42,13 @@ class SheetsUnitTestsContext extends UnitTestsContext
         ];
     }
 
-    /**
-     * @When I generate a table
-     */
+    #[When('I generate a table')]
     public function iGenerateATable()
     {
         $this->table = Sheets::makeTable($this->header, $this->users);
     }
 
-    /**
-     * @Then I see that the table was generated correctly
-     */
+    #[Then('I see that the table was generated correctly')]
     public function iSeeThatTheTableWasGeneratedCorrectly()
     {
         $table = $this->table;

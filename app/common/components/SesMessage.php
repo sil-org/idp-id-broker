@@ -4,6 +4,7 @@ namespace common\components;
 
 use yii\base\NotSupportedException;
 use yii\mail\BaseMessage;
+use yii\mail\MessageInterface;
 
 /*
  * SesMessage is a Yii2 message component to send email messages using AWS Simple Email Service
@@ -13,48 +14,61 @@ use yii\mail\BaseMessage;
 class SesMessage extends BaseMessage
 {
     /** @var string */
-    private $charset;
+    private string $charset = '';
 
     /** @var string */
-    private $from;
+    private string $from = '';
 
     /** @var string[] */
-    private $to;
+    private array $to = [];
 
     /** @var string[] */
-    private $replyTo;
+    private array $replyTo = [];
 
     /** @var string[] */
-    private $cc;
+    private array $cc = [];
 
     /** @var string[] */
-    private $bcc;
+    private array $bcc = [];
 
     /** @var string */
-    private $subject;
+    private string $subject = '';
 
     /** @var string */
-    private $textBody;
+    private string $textBody = '';
 
     /** @var string */
-    private $htmlBody;
+    private string $htmlBody = '';
 
-    public function getCharset()
+    /**
+     * @inheritdoc
+     */
+    public function getCharset(): string
     {
         return $this->charset ?? 'UTF-8';
     }
 
-    public function setCharset($charset)
+    /**
+     * @inheritdoc
+     */
+    public function setCharset($charset): SesMessage|static
     {
         $this->charset = $charset;
+        return $this;
     }
 
-    public function getFrom()
+    /**
+     * @inheritdoc
+     */
+    public function getFrom(): string
     {
         return $this->from;
     }
 
-    public function setFrom($from)
+    /**
+     * @inheritdoc
+     */
+    public function setFrom($from): SesMessage|static
     {
         if (is_array($from)) {
             if (isset($from[0])) {
@@ -67,78 +81,106 @@ class SesMessage extends BaseMessage
         } else {
             $this->from = $from;
         }
+        return $this;
     }
 
-    public function getTo()
+    /**
+     * @inheritdoc
+     */
+    public function getTo(): string|array
     {
         return $this->to;
     }
 
-    public function setTo($to)
+    /**
+     * @inheritdoc
+     */
+    public function setTo($to): SesMessage|static
     {
-        if (is_array($to)) {
-            $this->to = $to;
-        } else {
-            $this->to = explode(",", $to);
+        if ($to) {
+            $this->to = static::formatAddresses($to);
         }
+        return $this;
     }
 
-    public function getReplyTo()
+    /**
+     * @inheritdoc
+     */
+    public function getReplyTo(): string|array
     {
-        return $this->replyTo ?? [$this->getFrom()];
+        return $this->replyTo;
     }
 
-    public function setReplyTo($replyTo)
+    /**
+     * @inheritdoc
+     */
+    public function setReplyTo($replyTo): SesMessage|static
     {
-        if (is_array($replyTo)) {
-            $this->replyTo = $replyTo;
-        } else {
-            $this->replyTo = explode(",", $replyTo);
+        if ($replyTo) {
+            $this->replyTo = static::formatAddresses($replyTo);
         }
+        return $this;
     }
 
-    public function getCc()
+    /**
+     * @inheritdoc
+     */
+    public function getCc(): string|array
     {
-        return $this->cc ?? [];
+        return $this->cc;
     }
 
-    public function setCc($cc)
+    /**
+     * @inheritdoc
+     */
+    public function setCc($cc): SesMessage|static
     {
-        if (is_array($cc)) {
-            $this->cc = $cc;
-        } else {
-            $this->cc = explode(",", $cc);
+        if ($cc) {
+            $this->cc = static::formatAddresses($cc);
         }
+        return $this;
     }
 
-    public function getBcc()
+    /**
+     * @inheritdoc
+     */
+    public function getBcc(): string|array
     {
-        return $this->bcc ?? [];
+        return $this->bcc;
     }
 
-    public function setBcc($bcc)
+    /**
+     * @inheritdoc
+     */
+    public function setBcc($bcc): SesMessage|static
     {
-        if (is_array($bcc)) {
-            $this->bcc = $bcc;
-        } else {
-            $this->bcc = explode(",", $bcc);
+        if ($bcc) {
+            $this->bcc = static::formatAddresses($bcc);
         }
+        return $this;
     }
 
-    public function getSubject()
+    /**
+     * @inheritdoc
+     */
+    public function getSubject(): string
     {
         return $this->subject;
     }
 
-    public function setSubject($subject)
+    /**
+     * @inheritdoc
+     */
+    public function setSubject($subject): SesMessage|static
     {
         $this->subject = $subject;
+        return $this;
     }
 
     /**
      * @return string
      */
-    public function getTextBody()
+    public function getTextBody(): string
     {
         if (empty($this->textBody)) {
             return strip_tags($this->htmlBody);
@@ -146,15 +188,19 @@ class SesMessage extends BaseMessage
         return $this->textBody;
     }
 
-    public function setTextBody($text)
+    /**
+     * @inheritdoc
+     */
+    public function setTextBody($text): SesMessage|static
     {
         $this->textBody = $text;
+        return $this;
     }
 
     /**
      * @return string
      */
-    public function getHtmlBody()
+    public function getHtmlBody(): string
     {
         if (empty($this->htmlBody)) {
             return htmlspecialchars($this->textBody);
@@ -162,33 +208,76 @@ class SesMessage extends BaseMessage
         return $this->htmlBody;
     }
 
-    public function setHtmlBody($html)
+    /**
+     * @inheritdoc
+     */
+    public function setHtmlBody($html): SesMessage|static
     {
         $this->htmlBody = $html;
+        return $this;
     }
 
-    public function attach($fileName, array $options = [])
+    /**
+     * @inheritdoc
+     * @throws NotSupportedException
+     */
+    public function attach($fileName, array $options = []): MessageInterface
     {
         throw new NotSupportedException('attach is not implemented');
     }
 
-    public function attachContent($content, array $options = [])
+    /**
+     * @inheritdoc
+     * @throws NotSupportedException
+     */
+    public function attachContent($content, array $options = []): MessageInterface
     {
-        throw new NotSupportedException('attacheContent is not implemented');
+        throw new NotSupportedException('attachContent is not implemented');
     }
 
-    public function embed($fileName, array $options = [])
+    /**
+     * @inheritdoc
+     * @throws NotSupportedException
+     */
+    public function embed($fileName, array $options = []): string
     {
         throw new NotSupportedException('embed is not implemented');
     }
 
-    public function embedContent($content, array $options = [])
+    /**
+     * @inheritdoc
+     * @throws NotSupportedException
+     */
+    public function embedContent($content, array $options = []): string
     {
         throw new NotSupportedException('embedContent is not implemented');
     }
 
-    public function toString()
+    /**
+     * @inheritdoc
+     */
+    public function toString(): string
     {
         return $this->textBody;
+    }
+
+    /**
+     * Format addresses as an array of strings, given a string or array as defined by Yii's MailInterface.
+     * @param $email string|array
+     * @return array
+     */
+    private static function formatAddresses(string|array $email): array
+    {
+        $email = is_array($email) ? $email : [$email];
+
+        if (array_is_list($email)) {
+            return $email;
+        }
+
+        $out = [];
+        foreach ($email as $addr => $name) {
+            $out[] = sprintf('%s <%s>', $name, $addr);
+        }
+        return $out;
     }
 }

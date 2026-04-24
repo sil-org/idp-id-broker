@@ -20,15 +20,15 @@ class AuthenticationController extends BaseRestController
      */
     public function actionCreate(): User
     {
-        $username = (string)Yii::$app->request->getBodyParam('username');
-        $password = (string)Yii::$app->request->getBodyParam('password');
-        $inviteCode = (string)Yii::$app->request->getBodyParam('invite');
+        $username = (string) Yii::$app->request->getBodyParam('username');
+        $password = (string) Yii::$app->request->getBodyParam('password');
+        $inviteCode = (string) Yii::$app->request->getBodyParam('invite');
 
         // rpOrigin is needed for WebAuthn authentication
         $rpOrigin = \Yii::$app->request->get('rpOrigin', '');
         if ($rpOrigin != '' && !in_array($rpOrigin, \Yii::$app->params['authorizedRPOrigins'])) {
-            $message = "Invalid rpOrigin. Received " . $rpOrigin . " authorized " .
-                var_export(\Yii::$app->params['authorizedRPOrigins'], true);
+            $message = "Invalid rpOrigin. Received " . $rpOrigin . " authorized "
+                . var_export(\Yii::$app->params['authorizedRPOrigins'], true);
             \Yii::error($message);
             throw new ForbiddenHttpException($message, 1639169238);
         }

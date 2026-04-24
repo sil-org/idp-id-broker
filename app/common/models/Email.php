@@ -119,7 +119,7 @@ class Email extends EmailBase
                 'attempts_count' => $this->attempts_count,
                 'last_attempt' => $this->updated_at,
                 'error' => $e->getMessage(),
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ];
             \Yii::error($log);
 
@@ -130,8 +130,8 @@ class Email extends EmailBase
                     'error' => $this->getFirstErrors(),
                 ]);
                 throw new ServerErrorHttpException(
-                    'Unable to save email after failing to retry sending. Error: ' .
-                    print_r($this->getFirstErrors(), true),
+                    'Unable to save email after failing to retry sending. Error: '
+                    . print_r($this->getFirstErrors(), true),
                     1741067362
                 );
             }
@@ -148,11 +148,11 @@ class Email extends EmailBase
         $mailer = \Yii::$app->mailer->compose(
             [
                 'html' => '@common/mail/html',
-                'text' => '@common/mail/text'
+                'text' => '@common/mail/text',
             ],
             [
                 'html' => $this->html_body,
-                'text' => $this->text_body
+                'text' => $this->text_body,
             ]
         );
         $from = \Yii::$app->params['fromEmail'];
@@ -168,15 +168,15 @@ class Email extends EmailBase
         /*
          * Conditionally set optional fields
          */
-        $setMethods = [
-            'setCc' => $this->cc_address,
-            'setBcc' => $this->bcc_address,
-        ];
-        foreach ($setMethods as $method => $value) {
-            if ($value) {
-                $mailer->$method($value);
-            }
+
+        if ($this->cc_address) {
+            $mailer->setCc($this->cc_address);
         }
+
+        if ($this->bcc_address) {
+            $mailer->setBcc($this->bcc_address);
+        }
+
 
         return $mailer;
     }

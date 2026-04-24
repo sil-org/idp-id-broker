@@ -29,9 +29,9 @@ class EmailLogTarget extends Target
             throw new InvalidConfigException('The "to" option must be set for EmailLogTarget::message.');
         }
 
-        $this->message['subject'] = $this->message['subject'] ?? 'System Alert';
-        $this->message['cc'] = $this->message['cc'] ?? '';
-        $this->message['bcc'] = $this->message['bcc'] ?? '';
+        $this->message['subject'] ??= 'System Alert';
+        $this->message['cc'] ??= '';
+        $this->message['bcc'] ??= '';
     }
 
 

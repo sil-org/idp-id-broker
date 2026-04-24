@@ -2,6 +2,10 @@
 
 namespace Sil\SilIdBroker\Behat\Context;
 
+use Behat\Hook\AfterScenario;
+use Behat\Step\Given;
+use Behat\Step\Then;
+use Behat\Step\When;
 use common\helpers\MySqlDateTime;
 use common\models\EmailLog;
 use common\models\Invite;
@@ -87,7 +91,7 @@ class UnitTestsContext extends YiiContext
 
         $mergedProperties = array_merge([
             'email' => $username . '@example.com',
-            'employee_id' => (string)uniqid(),
+            'employee_id' => (string) uniqid(),
             'first_name' => 'Test',
             'last_name' => 'User',
             'username' => $username,
@@ -119,7 +123,7 @@ class UnitTestsContext extends YiiContext
 
     protected function createMfa($type, $verified = 1, $user = null)
     {
-        $user = $user ?? $this->tempUser;
+        $user ??= $this->tempUser;
 
         $mfa = new Mfa();
         $mfa->user_id = $user->id;
@@ -134,7 +138,7 @@ class UnitTestsContext extends YiiContext
 
     protected function createMfaBackupCodes($user = null)
     {
-        $user = $user ?? $this->tempUser;
+        $user ??= $this->tempUser;
 
         $mfa = new Mfa();
         $mfa->user_id = $user->id;
@@ -152,7 +156,7 @@ class UnitTestsContext extends YiiContext
 
     protected function createMfaWebauthn($user = null)
     {
-        $user = $user ?? $this->tempUser;
+        $user ??= $this->tempUser;
 
         $mfa = new Mfa();
         $mfa->user_id = $user->id;
@@ -170,7 +174,7 @@ class UnitTestsContext extends YiiContext
 
     protected function createMethod($value, $verified = 1, $user = null)
     {
-        $user = $user ?? $this->tempUser;
+        $user ??= $this->tempUser;
 
         $method = new Method();
         $method->user_id = $user->id;
@@ -181,25 +185,19 @@ class UnitTestsContext extends YiiContext
         $user->refresh();
     }
 
-    /**
-     * @When I request a list of verified methods
-     */
+    #[When('I request a list of verified methods')]
     public function iRequestAListOfVerifiedMethods()
     {
         $this->methodList = $this->tempUser->getVerifiedMethodOptions();
     }
 
-    /**
-     * @Then I see a list containing :num method
-     */
+    #[Then('I see a list containing :num method')]
     public function iSeeAListContainingMethod($num)
     {
         Assert::count($this->methodList, $num);
     }
 
-    /**
-     * @Given the database contains a user with no invite codes
-     */
+    #[Given('the database contains a user with no invite codes')]
     public function theDatabaseContainsAUserWithNoInviteCodes()
     {
         $this->tempUser = $this->createNewUserInDatabase('unit_test');
@@ -213,9 +211,7 @@ class UnitTestsContext extends YiiContext
         }
     }
 
-    /**
-     * @Given /^the database contains a user with a (non-expired|expired) invite code$/
-     */
+    #[Given('/^the database contains a user with a (non-expired|expired) invite code$/')]
     public function theDatabaseContainsAUserWithANonExpiredInviteCode($expiredOrNot)
     {
         $this->theDatabaseContainsAUserWithNoInviteCodes();
@@ -230,27 +226,21 @@ class UnitTestsContext extends YiiContext
         $this->tempUser->refresh();
     }
 
-    /**
-     * @When I request an invite code
-     */
+    #[When('I request an invite code')]
     public function iRequestAnInviteCode()
     {
         $this->oldInviteCode = $this->tempUser->invites[0] ?? null;
         $this->inviteCode = Invite::findOrCreate($this->tempUser->id);
     }
 
-    /**
-     * @Then I receive a code that is not expired
-     */
+    #[Then('I receive a code that is not expired')]
     public function iReceiveACodeThatIsNotExpired()
     {
         Assert::notNull($this->inviteCode);
         Assert::false($this->inviteCode->isExpired());
     }
 
-    /**
-     * @Then the code should be in UUID format
-     */
+    #[Then('the code should be in UUID format')]
     public function theCodeShouldBeInUuidFormat()
     {
         Assert::notNull($this->inviteCode);
@@ -258,9 +248,7 @@ class UnitTestsContext extends YiiContext
     }
 
 
-    /**
-     * @Then I receive a new code
-     */
+    #[Then('I receive a new code')]
     public function iReceiveANewCode()
     {
         Assert::notNull($this->inviteCode, 'inviteCode is null');
@@ -268,17 +256,13 @@ class UnitTestsContext extends YiiContext
         Assert::notEq($this->inviteCode->uuid, $this->oldInviteCode->uuid);
     }
 
-    /**
-     * @Then the new code is not expired
-     */
+    #[Then('the new code is not expired')]
     public function theNewCodeIsNotExpired()
     {
         $this->iReceiveACodeThatIsNotExpired();
     }
 
-    /**
-     * @Given the nag dates are in the past
-     */
+    #[Given('the nag dates are in the past')]
     public function theNagDatesAreInThePast()
     {
         $this->tempUser->review_profile_after = MySqlDateTime::relative('-1 day');
@@ -286,33 +270,25 @@ class UnitTestsContext extends YiiContext
         $this->tempUser->nag_for_mfa_after = MySqlDateTime::relative('-1 day');
     }
 
-    /**
-     * @When I request the nag state
-     */
+    #[When('I request the nag state')]
     public function iRequestTheNagState()
     {
         $this->nagState = $this->tempUser->getNagState();
     }
 
-    /**
-     * @Then I see that the nag state is :state
-     */
+    #[Then('I see that the nag state is :state')]
     public function iSeeThatTheNagStateIs($state)
     {
         Assert::eq($this->nagState, $state);
     }
 
-    /**
-     * @Given there is a user in the database
-     */
+    #[Given('there is a user in the database')]
     public function thereIsAUserInTheDatabase()
     {
         $this->tempUser = $this->createNewUserInDatabase('unit_test');
     }
 
-    /**
-     * @Given /^that user has (\d+) (verified|unverified) methods?$/i
-     */
+    #[Given('/^that user has (\d+) (verified|unverified) methods?$/i')]
     public function thatUserHasVerifiedMethods($n, $verifiedOrUnverified)
     {
         for ($i = 0; $i < $n; $i++) {
@@ -323,9 +299,7 @@ class UnitTestsContext extends YiiContext
         }
     }
 
-    /**
-     * @Given /^that user has (\d+) (verified|unverified) mfas?/i
-     */
+    #[Given('/^that user has (\d+) (verified|unverified) mfas?/i')]
     public function thatUserHasVerifiedMfas($n, $verifiedOrUnverified)
     {
         for ($i = 0; $i < $n; $i++) {
@@ -336,49 +310,37 @@ class UnitTestsContext extends YiiContext
         }
     }
 
-    /**
-     * @Given that user has a verified backup code mfa
-     */
+    #[Given('that user has a verified backup code mfa')]
     public function thatUserHasAVerifiedBackupCodeMfa()
     {
         $this->createMfaBackupCodes();
     }
 
-    /**
-     * @Given that user has a verified webauthn mfa
-     */
+    #[Given('that user has a verified webauthn mfa')]
     public function thatUserHasAVerifiedWebauthnMfa()
     {
         $this->createMfaWebauthn();
     }
 
-    /**
-     * @When I create a new user with a :property property of :value
-     */
+    #[When('I create a new user with a :property property of :value')]
     public function iCreateANewUserWithAPropertyOf($property, $value)
     {
         $this->tempUser = $this->createNewUserInDatabase('test_user', [$property => $value]);
     }
 
-    /**
-     * @Given the database contains a user (with no MFA options)
-     */
+    #[Given('the database contains a user (with no MFA options)')]
     public function theDatabaseContainsAUser()
     {
         $this->tempUser = $this->createNewUserInDatabase('test_user');
     }
 
-    /**
-     * @Given that user has a :property property value of :value
-     */
+    #[Given('that user has a :property property value of :value')]
     public function thatUserHasAPropertyValueOf($property, $value)
     {
         $this->iChangeTheUsersPropertyTo($property, $value);
     }
 
-    /**
-     * @When I change the user's :property property to :value
-     */
+    #[When("I change the user's :property property to :value")]
     public function iChangeTheUsersPropertyTo($property, $value)
     {
         $this->tempUser->scenario = User::SCENARIO_UPDATE_USER;
@@ -386,26 +348,22 @@ class UnitTestsContext extends YiiContext
         Assert::eq(true, $this->tempUser->save());
     }
 
-    /**
-     * @Then I see the user's :property property is :value
-     */
+    #[Then("I see the user's :property property is :value")]
     public function iSeeTheUsersPropertyIs($property, $value)
     {
         $this->tempUser->refresh();
         Assert::eq($this->tempUser->$property, $value);
     }
 
-    /**
-     * @Given the :param config parameter is true
-     */
+    #[Given('the :param config parameter is true')]
     public function theConfigParameterIsTrue($param)
     {
         $this->originalParams[$param] = \Yii::$app->params[$param];
         \Yii::$app->params[$param] = true;
     }
 
+    #[Given("the :param config parameter is false")]
     /**
-     * @Given the :param config parameter is false
      * Behat can't seem to pass a false boolean correctly as an argument
      */
     public function theConfigParameterIsFalse($param)
@@ -414,10 +372,7 @@ class UnitTestsContext extends YiiContext
         \Yii::$app->params[$param] = false;
     }
 
-
-    /**
-     * @AfterScenario
-     */
+    #[AfterScenario]
     public function resetParams()
     {
         foreach ($this->originalParams as $param => $value) {
@@ -425,17 +380,13 @@ class UnitTestsContext extends YiiContext
         }
     }
 
-    /**
-     * @When I add backup codes for that user
-     */
+    #[When('I add backup codes for that user')]
     public function iAddBackupCodesForThatUser()
     {
         $this->createMfa(Mfa::TYPE_BACKUPCODE);
     }
 
-    /**
-     * @Given the user has not logged in for :months
-     */
+    #[Given('the user has not logged in for :months')]
     public function theUserHasNotLoggedInFor($months)
     {
         $date = MySqlDateTime::relative("-{$months}");
@@ -443,17 +394,13 @@ class UnitTestsContext extends YiiContext
         $this->iChangeTheUsersPropertyTo("created_utc", $date);
     }
 
-    /**
-     * @When I get users for HR notification
-     */
+    #[When('I get users for HR notification')]
     public function iGetUsersForHrNotification()
     {
         $this->dataToVerify = User::getAbandonedUsers();
     }
 
-    /**
-     * @Then /^the user (is|is NOT) included in the data$/
-     */
+    #[Then('/^the user (is|is NOT) included in the data$/')]
     public function isUserIncludedInTheData($option)
     {
         $isIncluded = false;
@@ -471,9 +418,7 @@ class UnitTestsContext extends YiiContext
         }
     }
 
-    /**
-     * @When I delete inactive users
-     */
+    #[When('I delete inactive users')]
     public function iDeleteInactiveUsers()
     {
         // Temporarily set the configs to something that will allow
@@ -488,17 +433,13 @@ class UnitTestsContext extends YiiContext
         \Yii::$app->params['inactiveUserPeriod'] = $originalPeriod;
     }
 
-    /**
-     * @When I retrieve the remaining users
-     */
+    #[When('I retrieve the remaining users')]
     public function IRetrieveTheRemainingUsers()
     {
         $this->dataToVerify = User::find()->all();
     }
 
-    /**
-     * @When the user submits a new password
-     */
+    #[When('the user submits a new password')]
     public function theUserSubmitsANewPassword()
     {
         $this->tempUser->password = 'k23@U$%235u25@I2$o';
@@ -506,18 +447,14 @@ class UnitTestsContext extends YiiContext
         $this->tempUser->save();
     }
 
-    /**
-     * @Then a new password hash should be stored
-     */
+    #[Then('a new password hash should be stored')]
     public function aNewPasswordHashShouldBeStored()
     {
         $hash = $this->tempUser->currentPassword->hash;
         Assert::notEmpty($hash);
     }
 
-    /**
-     * @Given that user has a password with a low hash cost
-     */
+    #[Given('that user has a password with a low hash cost')]
     public function thatUserHasAPasswordWithALowHashCost()
     {
         $this->password = 'k23@U24urchr,@I2$o';
@@ -534,9 +471,7 @@ class UnitTestsContext extends YiiContext
         Assert::true($this->tempUser->save(), var_export($passwordObject->errors, true));
     }
 
-    /**
-     * @When the user uses their password
-     */
+    #[When('the user uses their password')]
     public function theUserUsesTheirPassword()
     {
         $this->tempUser->scenario = User::SCENARIO_AUTHENTICATE;
@@ -544,9 +479,7 @@ class UnitTestsContext extends YiiContext
         Assert::true($this->tempUser->validate(), var_export($this->tempUser->errors, true));
     }
 
-    /**
-     * @Then the password hash should be updated
-     */
+    #[Then('the password hash should be updated')]
     public function thePasswordHashShouldBeUpdated()
     {
         $currentPassword = $this->tempUser->getCurrentPassword()->one();

@@ -1,3 +1,11 @@
+x-db_healthcheck: &db_healthcheck
+  healthcheck:
+    test: ["CMD", "mariadb-admin", "--socket=/run/mysqld/mysqld.sock", "-u", "root", "ping"]
+    start_period: 10s
+    interval: 10s
+    timeout: 5s
+    retries: 3
+
 services:
   db:
     image: mariadb:10
@@ -9,6 +17,7 @@ services:
     env_file:
       - path: ./local.env
         required: false
+    <<: *db_healthcheck
 
   app:
     build: ./
@@ -20,7 +29,8 @@ services:
       - "51143:443"
     mem_limit: 200m
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - path: ./local.env
         required: false
@@ -39,31 +49,17 @@ services:
     ports:
       - "80"
     depends_on:
-      - testdb
+      testdb:
+        condition: service_healthy
     env_file:
       - ./db/certs/test.env
-    environment:
-      API_ACCESS_KEYS: api-test-NOTASECRET
-      APP_ENV: test
-      EMAIL_SIGNATURE: Dummy Signature for Tests
-      EMAILER_CLASS: \Sil\SilIdBroker\Behat\Context\fakes\FakeEmailer
-      IDP_NAME: test
-      MAILER_USEFILES: true
-      MYSQL_ROOT_PASSWORD: r00tp@ss!
-      MYSQL_HOST: testdb
-      MYSQL_DATABASE: appfortests
-      MYSQL_USER: appfortests
-      MYSQL_PASSWORD: appfortests
-      MFA_TOTP_apiBaseUrl: mfaapi:8080/
-      MFA_WEBAUTHN_apiBaseUrl: mfaapi:8080/
-      MFA_API_KEY: 10345678-1234-1234-1234-123456789012
-      MFA_API_SECRET: 11345678-1234-1234-1234-12345678
-      # the corresponding hash: $2a$10$8Bp9PqqfStjLvh1nQJ67JeY3CO/mEXmF1GKfe8Vk0kue1.i7fa2mC
-      MFA_WEBAUTHN_rpId: http://app99
-      RP_ORIGINS: http://app99
-      SUPPORT_EMAIL: support@example.com
-      ID_STORE_ADAPTER: fake
-      ALLOW_EMPTY_EMAIL: true
+      - ./test.env
+    healthcheck:
+      test: curl --connect-timeout 5 http://localhost:80/site/status
+      start_period: 1s
+      interval: 1s
+      timeout: 5s
+      retries: 20
 
   testdb:
     image: mariadb:10
@@ -77,6 +73,7 @@ services:
       MYSQL_DATABASE: appfortests
       MYSQL_USER: appfortests
       MYSQL_PASSWORD: appfortests
+    <<: *db_healthcheck
 
   cli:
     image: ghcr.io/sil-org/php8:8.3
@@ -165,44 +162,15 @@ services:
     mem_limit: 200m
     working_dir: /app
     depends_on:
-      - appfortests
-      - mfaapi
-      - u2fsim
+      appfortests:
+        condition: service_healthy
+      mfaapi:
+        condition: service_started
+      u2fsim:
+        condition: service_started
     env_file:
       - ./db/certs/test.env
-    environment:
-      TEST_SERVER_HOSTNAME: appfortests
-      API_ACCESS_KEYS: api-test-NOTASECRET
-      API_KEY_TABLE: ApiKey
-      APP_ENV: test
-      AWS_ENDPOINT: dynamo:8000
-      AWS_DEFAULT_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: abc123
-      AWS_SECRET_ACCESS_KEY: abc123
-      EMAILER_CLASS: \Sil\SilIdBroker\Behat\Context\fakes\FakeEmailer
-      EMAIL_SIGNATURE: Dummy Signature for Test
-      FROM_EMAIL: no_reply@example.com
-      MAILER_USEFILES: "true"
-      MFA_WEBAUTHN_apiBaseUrl: mfaapi:8080/
-      MFA_API_KEY: 10345678-1234-1234-1234-123456789012
-      MFA_API_SECRET: 11345678-1234-1234-1234-12345678
-      # the corresponding hash: $2a$10$8Bp9PqqfStjLvh1nQJ67JeY3CO/mEXmF1GKfe8Vk0kue1.i7fa2mC
-      MFA_WEBAUTHN_rpId: http://app99
-      HELP_CENTER_URL: https://www.example.com/help
-      IDP_DISPLAY_NAME: Test
-      IDP_NAME: test
-      MYSQL_DATABASE: appfortests
-      MYSQL_HOST: testdb
-      MYSQL_PASSWORD: appfortests
-      MYSQL_USER: appfortests
-      PASSWORD_PROFILE_URL: https://www.example.com
-      SUPPORT_EMAIL: support@example.com
-      HR_NOTIFICATIONS_EMAIL: hr@example.com
-      ABANDONED_USER_bestPracticeUrl: http://www.example.com/best-practices.html
-      ABANDONED_USER_deactivateInstructionsUrl: http://www.example.com/deactivate-instructions.html
-      U2F_SIM_HOST_AND_PORT: u2fsim:8080
-      ID_STORE_ADAPTER: fake
-      ALLOW_EMPTY_EMAIL: true
+      - ./test.env
     command: ./run-tests.sh
     # running isolated tests
     # docker compose run --rm test vendor/bin/behat --stop-on-failure features/user.feature

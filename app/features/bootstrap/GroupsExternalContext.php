@@ -3,6 +3,8 @@
 namespace Sil\SilIdBroker\Behat\Context;
 
 use Behat\Gherkin\Node\TableNode;
+use Behat\Step\Given;
+use Behat\Step\When;
 use common\models\User;
 use FeatureContext;
 use Webmozart\Assert\Assert;
@@ -13,9 +15,7 @@ class GroupsExternalContext extends FeatureContext
     private string $userEmailAddress = 'john_smith@example.org';
     private string $userPassword = 'dummy-password-#1';
 
-    /**
-     * @Given a user exists
-     */
+    #[Given('a user exists')]
     public function aUserExists()
     {
         $this->deleteTestUser($this->userEmailAddress);
@@ -49,8 +49,8 @@ class GroupsExternalContext extends FeatureContext
         string $employeeId,
         string $externalGroups = ''
     ): User {
-        list($username, ) = explode('@', $emailAddress);
-        list($lcFirstName, $lcLastName) = explode('_', $username);
+        [$username, ] = explode('@', $emailAddress);
+        [$lcFirstName, $lcLastName] = explode('_', $username);
         $user = new User([
             'email' => $emailAddress,
             'employee_id' => $employeeId,
@@ -88,9 +88,7 @@ class GroupsExternalContext extends FeatureContext
         return $this->userEmailAddress;
     }
 
-    /**
-     * @Given that user's list of groups is :commaSeparatedGroups
-     */
+    #[Given("that user's list of groups is :commaSeparatedGroups")]
     public function thatUsersListOfGroupsIs($commaSeparatedGroups)
     {
         $this->user->groups = $commaSeparatedGroups;
@@ -103,9 +101,7 @@ class GroupsExternalContext extends FeatureContext
         ));
     }
 
-    /**
-     * @Given that user's list of external groups is :commaSeparatedExternalGroups
-     */
+    #[Given("that user's list of external groups is :commaSeparatedExternalGroups")]
     public function thatUsersListOfExternalGroupsIs($commaSeparatedExternalGroups)
     {
         $this->user->groups_external = $commaSeparatedExternalGroups;
@@ -118,9 +114,7 @@ class GroupsExternalContext extends FeatureContext
         ));
     }
 
-    /**
-     * @When I sign in as that user
-     */
+    #[When('I sign in as that user')]
     public function iSignInAsThatUser()
     {
         $dataForTableNode = [
