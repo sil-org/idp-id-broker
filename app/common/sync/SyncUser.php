@@ -53,7 +53,7 @@ class SyncUser
         }
 
         // Ensure fields with stricter constraints have valid values.
-        $this->values[self::EMPLOYEE_ID] = (string)$userInfo[self::EMPLOYEE_ID];
+        $this->values[self::EMPLOYEE_ID] = (string) $userInfo[self::EMPLOYEE_ID];
         $this->setLocked($userInfo[self::LOCKED] ?? null);
         $this->setRequireMfa($userInfo[self::REQUIRE_MFA] ?? null);
     }

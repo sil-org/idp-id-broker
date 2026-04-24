@@ -320,8 +320,8 @@ class Synchronizer
         try {
             $ok = $user->save();
             if (!$ok) {
-                $this->logger->error('error while deactivating user: ' .
-                    json_encode($user->getErrors()));
+                $this->logger->error('error while deactivating user: '
+                    . json_encode($user->getErrors()));
                 return;
             }
         } catch (Exception $e) {

@@ -65,7 +65,7 @@ class GoogleSheetsIdStore extends IdStoreBase
     {
         $allUsers = $this->getAllActiveUsers();
         foreach ($allUsers as $user) {
-            if ((string)$user->getEmployeeId() === (string)$employeeId) {
+            if ((string) $user->getEmployeeId() === (string) $employeeId) {
                 return $user;
             }
         }

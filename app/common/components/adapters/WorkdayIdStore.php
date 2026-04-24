@@ -106,7 +106,7 @@ class WorkdayIdStore extends IdStoreBase
             'http_errors' => false,
         ]);
 
-        $statusCode = (int)$response->getStatusCode();
+        $statusCode = (int) $response->getStatusCode();
         if ($statusCode === 404) {
             $allActiveUsers = null;
         } elseif (($statusCode >= 200) && ($statusCode <= 299)) {

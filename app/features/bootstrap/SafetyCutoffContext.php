@@ -58,11 +58,11 @@ class SafetyCutoffContext extends SyncContext
         for ($i = 1; $i <= $number; $i++) {
             $tempEmployeeId = 10000 + $i;
             $properties = [
-                'employee_id' => (string)$tempEmployeeId,
+                'employee_id' => (string) $tempEmployeeId,
                 'display_name' => 'Person ' . $i,
                 'username' => 'person_' . $i,
                 'first_name' => 'Person',
-                'last_name' => (string)$i,
+                'last_name' => (string) $i,
                 'email' => 'person_' . $i . '@example.com',
                 'active' => 'yes',
             ];
@@ -142,11 +142,11 @@ class SafetyCutoffContext extends SyncContext
         for ($i = $numInBroker; $i <= $numToHaveInStore; $i++) {
             $tempEmployeeId = 10000 + $i;
             $activeIdStoreUsers[$tempEmployeeId] = [
-                'employeenumber' => (string)$tempEmployeeId,
+                'employeenumber' => (string) $tempEmployeeId,
                 'displayname' => 'Person ' . $i,
                 'username' => 'person_' . $i,
                 'firstname' => 'Person',
-                'lastname' => (string)$i,
+                'lastname' => (string) $i,
                 'email' => 'person_' . $i . '@example.com',
                 'locked' => 'no',
             ];
@@ -194,17 +194,17 @@ class SafetyCutoffContext extends SyncContext
         for ($i = 0; $i < $numToAdd; $i++) {
             $tempEmployeeId = 30000 + $i;
             $activeIdStoreUsers[$tempEmployeeId] = [
-                'employeenumber' => (string)$tempEmployeeId,
+                'employeenumber' => (string) $tempEmployeeId,
                 'displayname' => 'New Person ' . $i,
                 'username' => 'new_person_' . $i,
                 'firstname' => 'New Person',
-                'lastname' => (string)$i,
+                'lastname' => (string) $i,
                 'email' => 'new_person_' . $i . '@example.com',
                 'locked' => 'no',
             ];
             $idStoreUserChanges[] = [
                 'changedat' => $this->tempTimestamp + $i,
-                'employeenumber' => (string)$tempEmployeeId,
+                'employeenumber' => (string) $tempEmployeeId,
             ];
         }
 

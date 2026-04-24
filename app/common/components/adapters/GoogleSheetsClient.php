@@ -185,7 +185,7 @@ class GoogleSheetsClient extends Component
     public function updateSyncDatesFor(array $employeeIds)
     {
         $employeeIdsAsStrings = array_map(function ($employeeId) {
-            return (string)$employeeId;
+            return (string) $employeeId;
         }, $employeeIds);
 
         if (! $this->sheets instanceof \Google_Service_Sheets) {

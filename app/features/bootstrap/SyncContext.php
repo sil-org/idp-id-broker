@@ -240,7 +240,7 @@ class SyncContext extends UnitTestsContext
         $idStoreActiveUsers = [];
         foreach ($table as $row) {
             // Ensure all required fields have a value.
-            $row['email'] = $row['email'] ?? $row['username'] . '@example.com';
+            $row['email'] ??= $row['username'] . '@example.com';
 
             // Note: This should use the ID Store field name.
             $idStoreActiveUsers[$row['employeenumber']] = $row;
@@ -295,9 +295,9 @@ class SyncContext extends UnitTestsContext
         Assert::eq(
             Json::decode($users),
             Json::decode($expected),
-            "---\nTo debug this, see if any errors were logged (above) in the test output.\n---" . PHP_EOL .
-            'users: ' . $users . PHP_EOL .
-            'expected: ' . $expected
+            "---\nTo debug this, see if any errors were logged (above) in the test output.\n---" . PHP_EOL
+            . 'users: ' . $users . PHP_EOL
+            . 'expected: ' . $expected
         );
     }
 
@@ -369,11 +369,11 @@ class SyncContext extends UnitTestsContext
         for ($i = 1; $i <= $number; $i++) {
             $tempEmployeeId = 10000 + $i;
             $activeIdStoreUsers[$tempEmployeeId] = [
-                'employeenumber' => (string)$tempEmployeeId,
+                'employeenumber' => (string) $tempEmployeeId,
                 'displayname' => 'Person ' . $i,
                 'username' => 'person_' . $i,
                 'firstname' => 'Person',
-                'lastname' => (string)$i,
+                'lastname' => (string) $i,
                 'email' => 'person_' . $i . '@example.com',
                 'locked' => 'no',
             ];
@@ -408,7 +408,7 @@ class SyncContext extends UnitTestsContext
                 $numActiveUsers += 1;
             }
         }
-        Assert::same($numActiveUsers, (int)$number, sprintf(
+        Assert::same($numActiveUsers, (int) $number, sprintf(
             'Did not expect all of these users to be active: [%s]',
             json_encode($idBrokerUsers)
         ));

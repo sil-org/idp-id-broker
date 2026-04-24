@@ -64,7 +64,7 @@ class SecureUserIdStore extends IdStoreBase
     {
         $allUsers = $this->getAllActiveUsers();
         foreach ($allUsers as $user) {
-            if ((string)$user->getEmployeeId() === (string)$employeeId) {
+            if ((string) $user->getEmployeeId() === (string) $employeeId) {
                 return $user;
             }
         }
@@ -106,7 +106,7 @@ class SecureUserIdStore extends IdStoreBase
             'http_errors' => false,
         ]);
 
-        $statusCode = (int)$response->getStatusCode();
+        $statusCode = (int) $response->getStatusCode();
         if (($statusCode >= 200) && ($statusCode <= 299)) {
             $allUsersInfo = Json::decode($response->getBody());
         } else {

@@ -132,7 +132,7 @@ class FakeIdStore extends IdStoreBase
     {
         $employeeIds = [];
         foreach (array_keys($this->updatedSyncDateFor) as $employeeId) {
-            $employeeIds[] = (string)$employeeId;
+            $employeeIds[] = (string) $employeeId;
         }
         return $employeeIds;
     }
