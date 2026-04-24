@@ -133,7 +133,7 @@
   },
   {
     "name": "phpseclib/phpseclib",
-    "version": "3.0.50"
+    "version": "3.0.51"
   },
   {
     "name": "phpspec/php-diff",
