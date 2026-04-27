@@ -18,13 +18,8 @@ class m260427_000000_create_reset_table extends Migration
                 'id' => 'pk',
                 'uid' => 'char(32) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL',
                 'user_id' => 'int(11) NOT NULL',
-                'type' => "varchar(32) NOT NULL DEFAULT 'primary'",
-                'code' => 'varchar(64) DEFAULT NULL',
-                'attempts' => 'int(11) NOT NULL DEFAULT 0',
                 'expires' => 'datetime NOT NULL',
-                'disable_until' => 'datetime DEFAULT NULL',
                 'created' => 'datetime NOT NULL',
-                'email' => 'varchar(255) DEFAULT NULL',
             ],
             'ENGINE=InnoDB DEFAULT CHARSET=utf8'
         );

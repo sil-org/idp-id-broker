@@ -14,8 +14,7 @@ use yii\helpers\ArrayHelper;
  */
 class Reset extends ResetBase
 {
-    const int CODE_LENGTH = 6;
-    const string LIFETIME = '60 minutes';
+    public const string LIFETIME = '60 minutes';
 
     /**
      * {@inheritdoc}
@@ -32,18 +31,6 @@ class Reset extends ResetBase
                 ],
                 [
                     ['expires'], 'default', 'value' => self::calculateExpireTime(),
-                ],
-                [
-                    ['type'], 'default', 'value' => self::TYPE_PRIMARY,
-                ],
-                [
-                    ['attempts'], 'default', 'value' => 0,
-                ],
-                [
-                    ['code'], 'default', 'value' => self::generateCode(),
-                ],
-                [
-                    ['email'], 'email',
                 ],
             ],
             parent::rules()
@@ -118,16 +105,5 @@ class Reset extends ResetBase
     public function isExpired(): bool
     {
         return strtotime($this->expires) < time();
-    }
-
-    /**
-     * Generate a new verification code.
-     *
-     * @return string
-     */
-    private static function generateCode(): string
-    {
-        $codeLength = Yii::$app->params['reset']['codeLength'] ?? 6;
-        return Utils::getRandomDigits(static::CODE_LENGTH);
     }
 }

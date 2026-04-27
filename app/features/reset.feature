@@ -17,7 +17,7 @@ Feature: Password Reset API
         | property | value |
       And a reset record exists for employee "123"
       And the reset record has a non-empty uid
-      And the reset record has a non-empty code
+      And the reset record has an expiry in the future
 
   Scenario: Attempt to create a reset without providing employee_id
     When I provide an empty request body

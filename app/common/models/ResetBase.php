@@ -43,16 +43,10 @@ class ResetBase extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code', 'disable_until', 'email'], 'default', 'value' => null],
-            [['attempts'], 'default', 'value' => 0],
-            [['uid', 'user_id', 'type', 'expires', 'created'], 'required'],
-            [['user_id', 'attempts'], 'integer'],
-            [['type'], 'string'],
-            [['expires', 'disable_until', 'created'], 'safe'],
+            [['uid', 'user_id', 'expires', 'created'], 'required'],
+            [['user_id'], 'integer'],
+            [['expires', 'created'], 'safe'],
             [['uid'], 'string', 'max' => 32],
-            [['code'], 'string', 'max' => 64],
-            [['email'], 'string', 'max' => 255],
-            ['type', 'in', 'range' => array_keys(self::optsType())],
             [['uid'], 'unique'],
             [['user_id'], 'unique'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
@@ -68,13 +62,8 @@ class ResetBase extends \yii\db\ActiveRecord
             'id' => Yii::t('app', 'ID'),
             'uid' => Yii::t('app', 'Uid'),
             'user_id' => Yii::t('app', 'User ID'),
-            'type' => Yii::t('app', 'Type'),
-            'code' => Yii::t('app', 'Code'),
-            'attempts' => Yii::t('app', 'Attempts'),
             'expires' => Yii::t('app', 'Expires'),
-            'disable_until' => Yii::t('app', 'Disable Until'),
             'created' => Yii::t('app', 'Created'),
-            'email' => Yii::t('app', 'Email'),
         ];
     }
 
@@ -86,18 +75,5 @@ class ResetBase extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
-    }
-
-    /**
-     * Column type options for 'type'
-     * @return string[]
-     */
-    public static function optsType()
-    {
-        return [
-            self::TYPE_PRIMARY => Yii::t('app', 'primary'),
-            self::TYPE_METHOD => Yii::t('app', 'method'),
-            self::TYPE_SUPERVISOR => Yii::t('app', 'supervisor'),
-        ];
     }
 }

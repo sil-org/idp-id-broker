@@ -34,25 +34,13 @@ class ResetContext extends \FeatureContext
         $this->previousResetUid = $this->reset->uid;
     }
 
-    #[Then('the reset record has a non-empty code')]
-    public function theResetRecordHasANonEmptyCode(): void
+    #[Then('the reset record has an expiry in the future')]
+    public function theResetRecordHasAnExpiryInTheFuture(): void
     {
-        Assert::notEmpty($this->reset->code);
-    }
-
-    #[Then('the response uid matches the previously created reset')]
-    public function theResponseUidMatchesThePreviouslyCreatedReset(): void
-    {
-        $resBody = $this->getResponseBody();
-        Assert::keyExists($resBody, 'uid');
-        Assert::eq(
-            $resBody['uid'],
-            $this->previousResetUid,
-            sprintf(
-                'Expected reset uid "%s" but got "%s"',
-                $this->previousResetUid,
-                $resBody['uid']
-            )
+        Assert::greaterThan(
+            $this->reset->expires,
+            date('Y-m-d H:i:s'),
+            'Expires should be in the future: ' . $this->reset->expires
         );
     }
 
