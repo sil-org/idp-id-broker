@@ -20,6 +20,13 @@ use Yii;
  */
 class PasswordBase extends \yii\db\ActiveRecord
 {
+
+    /**
+     * ENUM field values
+     */
+    const HIBP_IS_PWNED_NO = 'no';
+    const HIBP_IS_PWNED_YES = 'yes';
+
     /**
      * {@inheritdoc}
      */
@@ -34,11 +41,14 @@ class PasswordBase extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['check_hibp_after'], 'default', 'value' => '0000-00-00'],
+            [['hibp_is_pwned'], 'default', 'value' => 'no'],
             [['user_id', 'hash', 'created_utc', 'expires_on', 'grace_period_ends_on'], 'required'],
             [['user_id'], 'integer'],
             [['created_utc', 'expires_on', 'grace_period_ends_on', 'check_hibp_after'], 'safe'],
             [['hibp_is_pwned'], 'string'],
             [['hash'], 'string', 'max' => 255],
+            ['hibp_is_pwned', 'in', 'range' => array_keys(self::optsHibpIsPwned())],
         ];
     }
 
@@ -67,5 +77,52 @@ class PasswordBase extends \yii\db\ActiveRecord
     public function getUsers()
     {
         return $this->hasMany(User::class, ['current_password_id' => 'id']);
+    }
+
+
+    /**
+     * column hibp_is_pwned ENUM value labels
+     * @return string[]
+     */
+    public static function optsHibpIsPwned()
+    {
+        return [
+            self::HIBP_IS_PWNED_NO => Yii::t('app', 'no'),
+            self::HIBP_IS_PWNED_YES => Yii::t('app', 'yes'),
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function displayHibpIsPwned()
+    {
+        return self::optsHibpIsPwned()[$this->hibp_is_pwned];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHibpIsPwnedNo()
+    {
+        return $this->hibp_is_pwned === self::HIBP_IS_PWNED_NO;
+    }
+
+    public function setHibpIsPwnedToNo()
+    {
+        $this->hibp_is_pwned = self::HIBP_IS_PWNED_NO;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHibpIsPwnedYes()
+    {
+        return $this->hibp_is_pwned === self::HIBP_IS_PWNED_YES;
+    }
+
+    public function setHibpIsPwnedToYes()
+    {
+        $this->hibp_is_pwned = self::HIBP_IS_PWNED_YES;
     }
 }

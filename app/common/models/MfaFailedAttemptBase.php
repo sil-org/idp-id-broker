@@ -15,6 +15,8 @@ use Yii;
  */
 class MfaFailedAttemptBase extends \yii\db\ActiveRecord
 {
+
+
     /**
      * {@inheritdoc}
      */
@@ -57,4 +59,5 @@ class MfaFailedAttemptBase extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Mfa::class, ['id' => 'mfa_id']);
     }
+
 }

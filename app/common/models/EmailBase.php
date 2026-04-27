@@ -21,6 +21,8 @@ use Yii;
  */
 class EmailBase extends \yii\db\ActiveRecord
 {
+
+
     /**
      * {@inheritdoc}
      */
@@ -35,6 +37,8 @@ class EmailBase extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['cc_address', 'bcc_address', 'text_body', 'html_body', 'updated_at', 'send_after'], 'default', 'value' => null],
+            [['attempts_count'], 'default', 'value' => 0],
             [['to_address', 'subject', 'created_at'], 'required'],
             [['text_body', 'html_body'], 'string'],
             [['attempts_count', 'updated_at', 'created_at', 'send_after'], 'integer'],
@@ -61,4 +65,5 @@ class EmailBase extends \yii\db\ActiveRecord
             'send_after' => Yii::t('app', 'Send After'),
         ];
     }
+
 }

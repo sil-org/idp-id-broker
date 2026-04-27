@@ -21,6 +21,8 @@ use Yii;
  */
 class MethodBase extends \yii\db\ActiveRecord
 {
+
+
     /**
      * {@inheritdoc}
      */
@@ -35,6 +37,8 @@ class MethodBase extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['verification_code', 'verification_attempts', 'verification_expires'], 'default', 'value' => null],
+            [['verified'], 'default', 'value' => 0],
             [['uid', 'user_id', 'value', 'created'], 'required'],
             [['user_id', 'verified', 'verification_attempts'], 'integer'],
             [['verification_expires', 'created'], 'safe'],
@@ -75,4 +79,5 @@ class MethodBase extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
+
 }

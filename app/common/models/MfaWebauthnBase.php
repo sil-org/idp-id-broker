@@ -18,6 +18,8 @@ use Yii;
  */
 class MfaWebauthnBase extends \yii\db\ActiveRecord
 {
+
+
     /**
      * {@inheritdoc}
      */
@@ -32,6 +34,7 @@ class MfaWebauthnBase extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['key_handle_hash', 'last_used_utc'], 'default', 'value' => null],
             [['mfa_id', 'label', 'created_utc'], 'required'],
             [['mfa_id'], 'integer'],
             [['created_utc', 'last_used_utc'], 'safe'],
@@ -65,4 +68,5 @@ class MfaWebauthnBase extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Mfa::class, ['id' => 'mfa_id']);
     }
+
 }

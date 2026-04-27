@@ -17,6 +17,8 @@ use Yii;
  */
 class InviteBase extends \yii\db\ActiveRecord
 {
+
+
     /**
      * {@inheritdoc}
      */
@@ -62,4 +64,5 @@ class InviteBase extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
+
 }

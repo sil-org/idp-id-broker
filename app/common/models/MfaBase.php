@@ -24,6 +24,17 @@ use Yii;
  */
 class MfaBase extends \yii\db\ActiveRecord
 {
+
+    /**
+     * ENUM field values
+     */
+    const TYPE_TOTP = 'totp';
+    const TYPE_U2F = 'u2f';
+    const TYPE_BACKUPCODE = 'backupcode';
+    const TYPE_MANAGER = 'manager';
+    const TYPE_WEBAUTHN = 'webauthn';
+    const TYPE_RECOVERY = 'recovery';
+
     /**
      * {@inheritdoc}
      */
@@ -38,12 +49,14 @@ class MfaBase extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['external_uuid', 'label', 'last_used_utc', 'key_handle_hash'], 'default', 'value' => null],
             [['user_id', 'type', 'verified', 'created_utc'], 'required'],
             [['user_id', 'verified'], 'integer'],
             [['type'], 'string'],
             [['created_utc', 'last_used_utc'], 'safe'],
             [['external_uuid', 'label'], 'string', 'max' => 64],
             [['key_handle_hash'], 'string', 'max' => 255],
+            ['type', 'in', 'range' => array_keys(self::optsType())],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
@@ -104,5 +117,108 @@ class MfaBase extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+
+    /**
+     * column type ENUM value labels
+     * @return string[]
+     */
+    public static function optsType()
+    {
+        return [
+            self::TYPE_TOTP => Yii::t('app', 'totp'),
+            self::TYPE_U2F => Yii::t('app', 'u2f'),
+            self::TYPE_BACKUPCODE => Yii::t('app', 'backupcode'),
+            self::TYPE_MANAGER => Yii::t('app', 'manager'),
+            self::TYPE_WEBAUTHN => Yii::t('app', 'webauthn'),
+            self::TYPE_RECOVERY => Yii::t('app', 'recovery'),
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function displayType()
+    {
+        return self::optsType()[$this->type];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeTotp()
+    {
+        return $this->type === self::TYPE_TOTP;
+    }
+
+    public function setTypeToTotp()
+    {
+        $this->type = self::TYPE_TOTP;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeU2f()
+    {
+        return $this->type === self::TYPE_U2F;
+    }
+
+    public function setTypeToU2f()
+    {
+        $this->type = self::TYPE_U2F;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeBackupcode()
+    {
+        return $this->type === self::TYPE_BACKUPCODE;
+    }
+
+    public function setTypeToBackupcode()
+    {
+        $this->type = self::TYPE_BACKUPCODE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeManager()
+    {
+        return $this->type === self::TYPE_MANAGER;
+    }
+
+    public function setTypeToManager()
+    {
+        $this->type = self::TYPE_MANAGER;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeWebauthn()
+    {
+        return $this->type === self::TYPE_WEBAUTHN;
+    }
+
+    public function setTypeToWebauthn()
+    {
+        $this->type = self::TYPE_WEBAUTHN;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeRecovery()
+    {
+        return $this->type === self::TYPE_RECOVERY;
+    }
+
+    public function setTypeToRecovery()
+    {
+        $this->type = self::TYPE_RECOVERY;
     }
 }

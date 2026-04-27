@@ -17,6 +17,8 @@ use Yii;
  */
 class MfaBackupcodeBase extends \yii\db\ActiveRecord
 {
+
+
     /**
      * {@inheritdoc}
      */
@@ -31,6 +33,7 @@ class MfaBackupcodeBase extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['expires_utc'], 'default', 'value' => null],
             [['mfa_id', 'value', 'created_utc'], 'required'],
             [['mfa_id'], 'integer'],
             [['created_utc', 'expires_utc'], 'safe'],
@@ -62,4 +65,5 @@ class MfaBackupcodeBase extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Mfa::class, ['id' => 'mfa_id']);
     }
+
 }
