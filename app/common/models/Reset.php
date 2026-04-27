@@ -5,8 +5,8 @@ namespace common\models;
 use common\helpers\MySqlDateTime;
 use common\helpers\Utils;
 use Yii;
+use yii\db\Exception;
 use yii\helpers\ArrayHelper;
-use yii\web\ServerErrorHttpException;
 
 /**
  * Class Reset
@@ -39,6 +39,9 @@ class Reset extends ResetBase
                 [
                     ['code'], 'default', 'value' => self::generateCode(),
                 ],
+                [
+                    ['email'], 'email'
+                ],
             ],
             parent::rules()
         );
@@ -49,29 +52,22 @@ class Reset extends ResetBase
      */
     public function fields(): array
     {
-        return [
-            'uid',
-            'type',
-            'code',
-            'attempts',
-            'expires' => function ($model) {
-                return Utils::getIso8601($model->expires);
-            },
-            'created' => function ($model) {
-                return Utils::getIso8601($model->created);
-            },
-        ];
+        return [];
     }
 
     /**
-     * Find an existing reset for the given user or create a new one.
+     * Create a reset for the given user. If one exists, it will be reused.
      *
      * @param User $user
-     * @return Reset
-     * @throws ServerErrorHttpException
+     * @return void
+     * @throws Exception
      */
-    public static function findOrCreate(User $user): Reset
+    public static function create(User $user): void
     {
+        if ($user->isLocked()) {
+            return;
+        }
+
         $reset = self::findOne(['user_id' => $user->id]);
 
         if ($reset === null) {
@@ -86,27 +82,19 @@ class Reset extends ResetBase
                     'employee_id' => $user->employee_id,
                     'errors' => $reset->getFirstErrors(),
                 ]);
-                throw new ServerErrorHttpException('Unable to create reset record');
+                throw new Exception(implode(", ", $reset->getFirstErrors()));
             }
 
-            Yii::warning([
+            Yii::info([
                 'action' => 'create reset',
-                'status' => 'created',
-                'user_id' => $user->id,
-                'employee_id' => $user->employee_id,
-                'reset_uid' => $reset->uid,
-            ]);
-        } else {
-            Yii::warning([
-                'action' => 'find reset',
-                'status' => 'found',
+                'status' => 'success',
                 'user_id' => $user->id,
                 'employee_id' => $user->employee_id,
                 'reset_uid' => $reset->uid,
             ]);
         }
 
-        return $reset;
+        // TODO: send the reset email
     }
 
     /**

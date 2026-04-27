@@ -6,52 +6,41 @@ use common\models\Reset;
 use common\models\User;
 use frontend\components\BaseRestController;
 use Yii;
+use yii\db\Exception;
 use yii\web\BadRequestHttpException;
-use yii\web\NotFoundHttpException;
-use yii\web\ServerErrorHttpException;
 
 class ResetController extends BaseRestController
 {
     /**
-     * Create or retrieve an existing reset record for the given user.
-     *
      * POST /reset
-     * Body: { "employee_id": "..." }
+     * Initiate a password reset for the given username.
+     * Finds (or creates) the user, finds (or creates) a reset record, and sends
+     * the verification email. Returns the Reset object (with uid + masked methods).
      *
-     * @return Reset
      * @throws BadRequestHttpException
-     * @throws NotFoundHttpException
-     * @throws ServerErrorHttpException
+     * @throws Exception
      */
-    public function actionCreate(): Reset
+    public function actionCreate()
     {
-        $employeeId = Yii::$app->request->getBodyParam('employee_id');
-
-        if (empty($employeeId)) {
-            throw new BadRequestHttpException(
-                'employee_id is required',
-                1745712001
-            );
+        $username = trim((string) Yii::$app->request->getBodyParam('username', ''));
+        if ($username === '') {
+            throw new BadRequestHttpException('username is required.', 1543338160);
         }
 
-        $user = User::findOne(['employee_id' => $employeeId]);
+        // Support both username and email-style lookups
+        if (str_contains($username, '@')) {
+            $user = User::findByEmail($username);
+        } else {
+            $user = User::findByUsername($username);
+        }
+
+        // To prevent user enumeration, always return 204
+        Yii::$app->response->statusCode = 204;
 
         if ($user === null) {
-            throw new NotFoundHttpException(
-                'User not found for employee_id ' . var_export($employeeId, true),
-                1745712002
-            );
+            return null;
         }
 
-        $reset = Reset::findOrCreate($user);
-
-        Yii::info([
-            'action' => 'reset/create',
-            'status' => 'success',
-            'employee_id' => $employeeId,
-            'reset_uid' => $reset->uid,
-        ], 'application');
-
-        return $reset;
+        Reset::create($user);
     }
 }

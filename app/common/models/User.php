@@ -1518,4 +1518,9 @@ class User extends UserBase
 
         return join(',', $emails);
     }
+
+    public function isLocked(): bool
+    {
+        return $this->locked === 'yes';
+    }
 }

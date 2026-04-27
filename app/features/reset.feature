@@ -12,10 +12,9 @@ Feature: Password Reset API
         | property    | value |
         | employee_id | 123   |
     When I request "/reset" be created
-    Then the response status code should be 200
+    Then the response status code should be 204
       And the following data is returned:
         | property | value |
-        | type     | primary |
       And a reset record exists for employee "123"
       And the reset record has a non-empty uid
       And the reset record has a non-empty code
@@ -30,18 +29,9 @@ Feature: Password Reset API
         | property    | value     |
         | employee_id | not-found |
     When I request "/reset" be created
-    Then the response status code should be 404
+    Then the response status code should be 204
 
-  Scenario: Creating a reset for a user who already has a reset record returns the existing record
-    Given I provide the following valid data:
-        | property    | value |
-        | employee_id | 123   |
+  Scenario: Creating a reset for a user who already has a reset record
+    Given a user that has an existing reset record
     When I request "/reset" be created
-    Then the response status code should be 200
-      And the reset record has a non-empty uid
-    Given I provide the following valid data:
-        | property    | value |
-        | employee_id | 123   |
-    When I request "/reset" be created
-    Then the response status code should be 200
-      And the response uid matches the previously created reset
+    Then the response status code should be 204

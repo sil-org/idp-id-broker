@@ -338,7 +338,7 @@ return [
                 'codeLength'     => 6,
                 'lifetimeMinutes' => 60,
                 'maxAttempts'    => 10,
-                'gracePeriod'    => '-3 hours',
+                'gracePeriod'    => '-1 week', // time between expiration and deletion, relative to now (time of execution)
                 'disableDurationSeconds' => 900,
             ],
             Env::getArrayFromPrefix('RESET_')
