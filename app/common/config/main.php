@@ -333,5 +333,15 @@ return [
         'passwordMfaLifespanExtension'  => Env::get('PASSWORD_MFA_LIFESPAN_EXTENSION', '+4 years'),
         'passwordReuseLimit'            => Env::get('PASSWORD_REUSE_LIMIT', 10),
         'profileReviewInterval'         => Env::get('PROFILE_REVIEW_INTERVAL', '+6 months'),
+        'reset'                         => ArrayHelper::merge(
+            [
+                'codeLength'     => 6,
+                'lifetimeMinutes' => 60,
+                'maxAttempts'    => 10,
+                'gracePeriod'    => '-3 hours',
+                'disableDurationSeconds' => 900,
+            ],
+            Env::getArrayFromPrefix('RESET_')
+        ),
     ],
 ];

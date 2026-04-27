@@ -15,6 +15,7 @@ use common\models\MfaBackupcode;
 use common\models\MfaFailedAttempt;
 use common\models\MfaWebauthn;
 use common\models\Password;
+use common\models\Reset;
 use common\models\User;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
@@ -126,6 +127,7 @@ class FeatureContext extends YiiContext
         Mfa::deleteAll();
         Method::deleteAll();
         Invite::deleteAll();
+        Reset::deleteAll();
         EmailLog::deleteAll();
         User::deleteAll();
     }

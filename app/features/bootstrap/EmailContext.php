@@ -10,6 +10,7 @@ use common\models\Method;
 use common\models\Mfa;
 use common\models\MfaBackupcode;
 use common\models\MfaWebauthn;
+use common\models\Reset;
 use common\models\User;
 use Webmozart\Assert\Assert;
 use Behat\Step\Then;
@@ -1075,6 +1076,7 @@ class EmailContext extends YiiContext
         MfaBackupcode::deleteAll();
         Mfa::deleteAll();
         Invite::deleteAll();
+        Reset::deleteAll();
         EmailLog::deleteAll();
         Method::deleteAll();
         User::deleteAll();

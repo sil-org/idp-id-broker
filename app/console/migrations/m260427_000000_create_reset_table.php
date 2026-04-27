@@ -1,0 +1,53 @@
+<?php
+
+use yii\db\Migration;
+
+/**
+ * Handles the creation of table `reset`.
+ */
+class m260427_000000_create_reset_table extends Migration
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function safeUp()
+    {
+        $this->createTable(
+            'reset',
+            [
+                'id' => 'pk',
+                'uid' => 'char(32) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL',
+                'user_id' => 'int(11) NOT NULL',
+                'type' => "varchar(32) NOT NULL DEFAULT 'primary'",
+                'code' => 'varchar(64) DEFAULT NULL',
+                'attempts' => 'int(11) NOT NULL DEFAULT 0',
+                'expires' => 'datetime NOT NULL',
+                'disable_until' => 'datetime DEFAULT NULL',
+                'created' => 'datetime NOT NULL',
+                'email' => 'varchar(255) DEFAULT NULL',
+            ],
+            'ENGINE=InnoDB DEFAULT CHARSET=utf8'
+        );
+
+        $this->createIndex('reset_uid_unique', 'reset', 'uid', true);
+        $this->createIndex('reset_user_id_unique', 'reset', 'user_id', true);
+
+        $this->addForeignKey(
+            'fk_reset_user_id',
+            '{{reset}}',
+            'user_id',
+            '{{user}}',
+            'id',
+            'NO ACTION',
+            'NO ACTION'
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function safeDown()
+    {
+        $this->dropTable('reset');
+    }
+}
