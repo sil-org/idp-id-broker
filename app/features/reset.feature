@@ -21,9 +21,8 @@ Feature: Password Reset API
       And the reset record has a non-empty code
 
   Scenario: Attempt to create a reset without providing employee_id
-    Given I provide the following valid data:
-        | property | value |
-    When I request "/reset" be created
+    When I provide an empty request body
+    And I request "/reset" be created
     Then the response status code should be 400
 
   Scenario: Attempt to create a reset for a non-existent user
