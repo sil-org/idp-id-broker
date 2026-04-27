@@ -14,6 +14,9 @@ use yii\helpers\ArrayHelper;
  */
 class Reset extends ResetBase
 {
+    const int CODE_LENGTH = 6;
+    const string LIFETIME = '60 minutes';
+
     /**
      * {@inheritdoc}
      */
@@ -40,7 +43,7 @@ class Reset extends ResetBase
                     ['code'], 'default', 'value' => self::generateCode(),
                 ],
                 [
-                    ['email'], 'email'
+                    ['email'], 'email',
                 ],
             ],
             parent::rules()
@@ -104,8 +107,7 @@ class Reset extends ResetBase
      */
     public static function calculateExpireTime(): string
     {
-        $lifetimeMinutes = Yii::$app->params['reset']['lifetimeMinutes'] ?? 60;
-        return MySqlDateTime::relativeTime('+' . $lifetimeMinutes . ' minutes');
+        return MySqlDateTime::relativeTime(self::LIFETIME);
     }
 
     /**
@@ -126,6 +128,6 @@ class Reset extends ResetBase
     private static function generateCode(): string
     {
         $codeLength = Yii::$app->params['reset']['codeLength'] ?? 6;
-        return Utils::getRandomDigits($codeLength);
+        return Utils::getRandomDigits(static::CODE_LENGTH);
     }
 }
