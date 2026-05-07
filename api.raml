@@ -13,6 +13,9 @@ securitySchemes:
             example: Bearer abc123
 securedBy: [ AuthzBearerToken ]
 
+annotationTypes:
+  deprecated: nil | string
+
 types:
   Authentication:
     type: object
@@ -70,6 +73,7 @@ types:
       personal_email?: string
       hide:
         enum: [ yes, no ]
+        (deprecated): The hide property will be removed in the next major version.
       member: string[]
       mfa:
         type: object
@@ -186,6 +190,7 @@ types:
       personal_email?: string
       hide:
         enum: [ yes, no ]
+        (deprecated): The hide property will be removed in the next major version.
       groups?: string
     example: |
       {
@@ -212,6 +217,7 @@ types:
       personal_email?: string
       hide?:
         enum: [ yes, no ]
+        (deprecated): The hide property will be removed in the next major version.
       groups?: string
     example: |
       {
