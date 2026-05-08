@@ -1749,6 +1749,7 @@
             "type": "string"
           },
           "hide": {
+            "deprecated": true,
             "enum": [
               "yes",
               "no"
@@ -1857,7 +1858,6 @@
           }
         },
         "required": [
-          "hide",
           "member",
           "mfa",
           "method",
@@ -1870,8 +1870,7 @@
           "first_name": "John",
           "last_name": "Smith",
           "username": "john_smith",
-          "email": "john_smith@example.com",
-          "hide": "no"
+          "email": "john_smith@example.com"
         },
         "type": "object",
         "properties": {
@@ -1914,6 +1913,7 @@
             "type": "string"
           },
           "hide": {
+            "deprecated": true,
             "enum": [
               "yes",
               "no"
@@ -1929,8 +1929,7 @@
           "first_name",
           "last_name",
           "username",
-          "email",
-          "hide"
+          "email"
         ]
       },
       "UserUpdate": {
@@ -1975,6 +1974,7 @@
             "type": "string"
           },
           "hide": {
+            "deprecated": true,
             "enum": [
               "yes",
               "no"
