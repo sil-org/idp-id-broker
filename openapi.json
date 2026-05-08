@@ -1,0 +1,2288 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ID Broker",
+    "version": "8"
+  },
+  "servers": [],
+  "paths": {
+    "/authentication": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "The given credentials were acceptable/valid (i.e. - the authentication succeeded). The body of the response will have the attributes of the authenticated User.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The given credentials were NOT acceptable/valid (i.e. - the authentication failed).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The rpOrigin does not match any of the configured values.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "The invite has expired. A new code has been generated and emailed to the user.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server-side error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "POST_authentication",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Authentication"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "rpOrigin",
+            "in": "query",
+            "required": true,
+            "description": "relying party origin",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/user": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Get a list of the existing users.",
+        "operationId": "GET_user",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "A comma-delimited list of fields to include for each user.",
+            "schema": {
+              "default": "uuid,employee_id,first_name,last_name,display_name,username,email,active,locked,password",
+              "type": "string"
+            }
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "description": "Search user by username.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Search user by email.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Partial text search across multiple fields: 'employee_id', 'first_name',\n'last_name', 'display_name', 'username', 'email', and 'personal_email'\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mask",
+            "in": "query",
+            "description": "Mask personal information (method options, personal_email) for privacy.\nDefault is 'yes'.\n",
+            "schema": {
+              "enum": [
+                "yes",
+                "no"
+              ],
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "The new user record was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The given user data does not satisfy some validation rule.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server-side error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Create a new user record.",
+        "operationId": "POST_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreation"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/user/{employee_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "The corresponding user record (matching on the `employee_id` URL parameter).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No user record was found with that `employee_id`."
+          }
+        },
+        "description": "Get information about a specific user.",
+        "operationId": "GET_user-employee_id"
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "description": "The corresponding user record (matching on the `employee_id` URL parameter) was updated to match the given data.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No user record was found with that `employee_id`."
+          },
+          "422": {
+            "description": "The given user data does not satisfy some validation rule.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server-side error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Update a user record.",
+        "operationId": "PUT_user-employee_id",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/user/{employee_id}/update-last-login": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Successfully updated the last login time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "employee_id": "12345",
+                    "last_login_utc": "2024-09-18T12:34:56Z"
+                  },
+                  "properties": {
+                    "employee_id": {
+                      "type": "string"
+                    },
+                    "last_login_utc": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "employee_id",
+                    "last_login_utc"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. The user with the specified `employeeId` was not found."
+          },
+          "500": {
+            "description": "Server error. Failed to update the last login time."
+          }
+        },
+        "description": "Update the last login timestamp of a user based on their employee ID.",
+        "operationId": "PUT_user-employee_id-update-last-login"
+      },
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/user/{employee_id}/mfa": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MfaResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User not found for given `employee_id`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get a list of configured MFA devices for user",
+        "operationId": "GET_user-employee_id-mfa",
+        "parameters": [
+          {
+            "name": "rpOrigin",
+            "in": "query",
+            "description": "The Relying Party origin url (only needed for WebAuthn)",
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/user/{employee_id}/method": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MethodResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User not found for given `employee_id`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get a list of verified and unverified recovery methods for user",
+        "operationId": "GET_user-employee_id-method"
+      },
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/user/{employee_id}/password": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "The password for the user with that `employee_id` was successfully updated.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No user record was found with that `employee_id`."
+          },
+          "409": {
+            "description": "A recently-used password was given.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "name": "Conflict",
+                  "message": "May not be reused yet.",
+                  "code": 1542395933,
+                  "status": 409
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The given password does not meet some requirement (such as if an empty string was given).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server-side error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Set the password for a User.",
+        "operationId": "PUT_user-employee_id-password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "password": "correcthorsebatterystaple"
+              },
+              "schema": {
+                "properties": {
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "password"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/user/{employee_id}/password/assess": {
+      "put": {
+        "responses": {
+          "204": {
+            "description": "The `password` is valid for the user with the given `employee_id`.\n"
+          },
+          "404": {
+            "description": "No user found with given `employee_id`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A recently-used password was given.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "name": "Conflict",
+                  "message": "May not be reused yet.",
+                  "code": 1542395933,
+                  "status": 409
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The given password does not meet some requirement (such as if an empty string was given).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server-side error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Validate a potential new password. Does not save the password.",
+        "operationId": "PUT_user-employee_id-password-assess",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "password": "correcthorsebatterystaple"
+              },
+              "schema": {
+                "properties": {
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "password"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/mfa": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "The new mfa record was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaCreationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The given mfa data does not satisfy some validation rule.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "An MFA of the requested type already exists. Note that this would only be returned for 'totp' or 'webauthn'. The code types ('backupcode' and 'manager') reuse the existing MFA and create new codes.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The server encountered an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Create a new mfa record.",
+        "operationId": "POST_mfa",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MfaCreation"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "rpOrigin",
+            "in": "query",
+            "description": "The Relying Party origin url (only needed for WebAuthn)",
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/mfa/{id}": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid employee_id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "MFA record not found or mismatched employee_id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The server encountered an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Update an MFA label",
+        "operationId": "PUT_mfa-id",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "employee_id": "12345",
+                "label": "My blue USB key"
+              },
+              "schema": {
+                "properties": {
+                  "employee_id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "employee_id",
+                  "label"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "Successful deletion of record"
+          },
+          "400": {
+            "description": "`employee_id` was not provided or it did not match an employee record\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The MFA record was not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unable to delete the MFA record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Delete an MFA configuration",
+        "operationId": "DELETE_mfa-id",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "employee_id": "12345"
+              },
+              "schema": {
+                "properties": {
+                  "employee_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "employee_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/mfa/{id}/verify": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Value provided passed verification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Value provided failed verification or was unacceptable for some other reason (such as an invalid `employee_id`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No MFA record found with that `id` and `employee_id`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many failed attempts for this MFA record recently.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Verify the value provided for this MFA device.",
+        "operationId": "POST_mfa-id-verify",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "employee_id": "12345",
+                "value": "01234987"
+              },
+              "schema": {
+                "properties": {
+                  "employee_id": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "employee_id",
+                  "value"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "rpOrigin",
+            "in": "query",
+            "description": "The Relying Party origin url (only needed for WebAuthn)",
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/mfa/{id}/verify/registration": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Value provided passed verification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Value provided failed verification or was unacceptable for some other reason (such as an invalid `employee_id`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No MFA record found with that `id` and `employee_id`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many failed attempts for this MFA record recently.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Verify the registration of a new mfa webauthn credential.",
+        "operationId": "POST_mfa-id-verify-registration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "employee_id": "12345",
+                "value": "01234987",
+                "label": "Yubikey"
+              },
+              "schema": {
+                "properties": {
+                  "employee_id": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "employee_id",
+                  "value",
+                  "label"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "rpOrigin",
+            "in": "query",
+            "required": true,
+            "description": "The Relying Party origin url (only needed for WebAuthn)",
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/mfa/{mfaId}/webauthn/{webauthnId}": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Webauthn label successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebauthnResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or blank label value or invalid employee_id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No MFA record found with that `mfa_id` or no webauthn record found with that `id` and that `mfa_id`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Update the label of a MFA webauthn credential.",
+        "operationId": "PUT_mfa-mfaId-webauthn-webauthnId",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "employee_id": "12345",
+                "label": "My First Security Key"
+              },
+              "schema": {
+                "properties": {
+                  "employee_id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "employee_id",
+                  "label"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "Successful deletion of record"
+          },
+          "400": {
+            "description": "invalid employee_id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The MFA record was not of type webauthn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No MFA record found with that `mfa_id` or no webauthn record found with that `id` and that `mfa_id`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unable to delete the webauthn credential or the MFA record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Delete a webauthn credential from an MFA. If it is the last credential, the whole MFA will be deleted.\n",
+        "operationId": "DELETE_mfa-mfaId-webauthn-webauthnId",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "employee_id": "abc123"
+              },
+              "schema": {
+                "properties": {
+                  "employee_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "employee_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "parameters": [
+        {
+          "name": "webauthnId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "mfaId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/method": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Recovery method created and email sent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MethodResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "New method matches an already existing verified method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A model validation error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Database or other system error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Create a new recovery method and send verification email. At this point, all methods are email, so 'value' is always an email address.\n",
+        "operationId": "POST_method",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Method"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/method/{uid}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Recovery method found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MethodResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found or method not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Retrieve a specific, verified recovery method.",
+        "operationId": "GET_method-uid",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "employee_id": "12345"
+              },
+              "schema": {
+                "properties": {
+                  "employee_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "employee_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "Recovery method found and deleted"
+          },
+          "404": {
+            "description": "User not found or method not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Delete failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Delete a specific recovery method.",
+        "operationId": "DELETE_method-uid",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "employee_id": "12345"
+              },
+              "schema": {
+                "properties": {
+                  "employee_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "employee_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "parameters": [
+        {
+          "name": "uid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/method/{uid}/verify": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Provided code matches original code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MethodResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid code"
+          },
+          "404": {
+            "description": "User not found or method not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Expired verification code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many verification attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Database or other system error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Verify the recovery method by a matching code.",
+        "operationId": "PUT_method-uid-verify",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "code": "987654"
+              },
+              "schema": {
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "parameters": [
+        {
+          "name": "uid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/method/{uid}/resend": {
+      "put": {
+        "responses": {
+          "204": {
+            "description": "Method found and email sent"
+          },
+          "400": {
+            "description": "Method already verified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found or method not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Resend the method verification email",
+        "operationId": "PUT_method-uid-resend",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "employee_id": "12345"
+              },
+              "schema": {
+                "properties": {
+                  "employee_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "employee_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "parameters": [
+        {
+          "name": "uid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/email": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewEmailCreated"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request was either missing the Authorization header or used an invalid token",
+            "content": {
+              "application/json": {
+                "example": {
+                  "name": "Unauthorized",
+                  "message": "Your request was made with invalid credentials.",
+                  "code": 0,
+                  "status": 401
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request data does not satisfy some validation rule.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "name": "Unprocessable entity",
+                  "message": "To Address cannot be blank.",
+                  "code": 0,
+                  "status": 422
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server-side error occurred.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "name": "Internal Server Error",
+                  "message": "Some error message.",
+                  "code": 0,
+                  "status": 500
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Queues an email for later sending",
+        "operationId": "POST_email",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "to_address": "to@example.org",
+                "subject": "Text only",
+                "text_body": "Email content"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/NewEmailRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Authentication": {
+        "type": "object",
+        "example": {
+          "username": "john_smith",
+          "password": "correcthorsebatterystaple"
+        },
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "invite": {
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "example": {
+          "name": "Bad Request",
+          "message": "",
+          "code": 0,
+          "status": 400
+        },
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "message",
+          "code",
+          "status"
+        ]
+      },
+      "UserResponse": {
+        "description": "Information on user record. Password is not included if a password has not been assigned to the user. Method options are included only if `method.review` is 'yes' and only in response to `POST /authentication`, otherwise it will be an empty list.\n",
+        "example": {
+          "uuid": "11111111-aaaa-1111-aaaa-111111111111",
+          "employee_id": "12345",
+          "first_name": "John",
+          "last_name": "Smith",
+          "display_name": "John Smith",
+          "username": "john_smith",
+          "email": "john_smith@example.com",
+          "active": "yes",
+          "locked": "no",
+          "last_login_utc": "2017-05-24T14:04:51Z",
+          "created_utc": "2017-05-24T14:04:51Z",
+          "deactivated_utc": null,
+          "hide": "no",
+          "member": [],
+          "mfa": {
+            "prompt": "yes",
+            "add": "no",
+            "active": "yes",
+            "options": [
+              {
+                "id": 123,
+                "type": "totp",
+                "label": "Google Authenticator",
+                "created_utc": "2017-10-24T20:40:47Z",
+                "last_used_utc": null,
+                "data": {
+                  "count": 10
+                }
+              },
+              {
+                "id": 432,
+                "type": "webauthn",
+                "label": "Blue YubiKey",
+                "created_utc": "2017-10-24T20:40:47Z",
+                "last_used_utc": null,
+                "data": []
+              },
+              {
+                "id": 345,
+                "type": "backupcode",
+                "label": "2SV #1",
+                "created_utc": "2017-10-24T20:40:47Z",
+                "last_used_utc": null,
+                "data": []
+              }
+            ]
+          },
+          "password": {
+            "created_utc": "2017-05-24T14:04:51Z",
+            "expires_on": "2018-05-24T23:59:59Z"
+          },
+          "method": {
+            "add": "no",
+            "options": [
+              {
+                "id": "0YrSiNp2P6sfkleepNNvFYMQWuLfssve",
+                "value": "email@example.org",
+                "verified": true,
+                "created": "2017-10-24T20:40:47Z"
+              }
+            ]
+          },
+          "profile_review": "yes"
+        },
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string"
+          },
+          "employee_id": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "active": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "locked": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "last_login_utc": {
+            "type": "string"
+          },
+          "created_utc": {
+            "type": "string"
+          },
+          "deactivated_utc": {
+            "type": "string"
+          },
+          "manager_email": {
+            "type": "string"
+          },
+          "personal_email": {
+            "type": "string"
+          },
+          "hide": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "member": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mfa": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "description": "Flag to indicate that the user must be prompted to provide an mfa before login",
+                "enum": [
+                  "yes",
+                  "no"
+                ],
+                "type": "string"
+              },
+              "add": {
+                "description": "Flag to indicate whether to remind the user to add an MFA option",
+                "enum": [
+                  "yes",
+                  "no"
+                ],
+                "type": "string"
+              },
+              "active": {
+                "description": "Flag to indicate whether the user has at least one active MFA option",
+                "enum": [
+                  "yes",
+                  "no"
+                ],
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MfaResponse"
+                }
+              }
+            },
+            "required": [
+              "prompt",
+              "add",
+              "active",
+              "options"
+            ]
+          },
+          "method": {
+            "type": "object",
+            "properties": {
+              "add": {
+                "description": "Flag to indicate whether to remind the user to add a recovery method",
+                "enum": [
+                  "yes",
+                  "no"
+                ],
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MethodResponse"
+                }
+              }
+            },
+            "required": [
+              "add",
+              "options"
+            ]
+          },
+          "password": {
+            "type": "object",
+            "properties": {
+              "created_utc": {
+                "type": "string"
+              },
+              "expires_on": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "created_utc",
+              "expires_on"
+            ]
+          },
+          "profile_review": {
+            "description": "Flag to indicate whether to remind the user to review their mfa options and recovery methods.\n",
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "require_mfa": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "hide",
+          "member",
+          "mfa",
+          "method",
+          "profile_review"
+        ]
+      },
+      "UserCreation": {
+        "example": {
+          "employee_id": "12345",
+          "first_name": "John",
+          "last_name": "Smith",
+          "username": "john_smith",
+          "email": "john_smith@example.com",
+          "hide": "no"
+        },
+        "type": "object",
+        "properties": {
+          "employee_id": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "active": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "locked": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "manager_email": {
+            "type": "string"
+          },
+          "personal_email": {
+            "type": "string"
+          },
+          "hide": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "groups": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "employee_id",
+          "first_name",
+          "last_name",
+          "username",
+          "email",
+          "hide"
+        ]
+      },
+      "UserUpdate": {
+        "example": {
+          "active": "no"
+        },
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "active": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "locked": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "manager_email": {
+            "type": "string"
+          },
+          "personal_email": {
+            "type": "string"
+          },
+          "hide": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "groups": {
+            "type": "string"
+          }
+        }
+      },
+      "MfaCreation": {
+        "example": {
+          "employee_id": "12345",
+          "type": "backupcode"
+        },
+        "type": "object",
+        "properties": {
+          "employee_id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "backupcode",
+              "totp",
+              "webauthn",
+              "manager",
+              "recovery"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "recovery_email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "employee_id",
+          "type"
+        ]
+      },
+      "MfaCreationResponse": {
+        "example": {
+          "id": 3,
+          "data": [
+            "51231235",
+            "74475261",
+            "72412792",
+            "23221473",
+            "30936163",
+            "09641891",
+            "99517242",
+            "08751652",
+            "32842734",
+            "25937677"
+          ]
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "data"
+        ]
+      },
+      "MfaResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "type": {
+            "enum": [
+              "backupcode",
+              "totp",
+              "webauthn",
+              "manager",
+              "recovery"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "created_utc": {
+            "type": "string"
+          },
+          "last_used_utc": {
+            "type": "object"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "label",
+          "created_utc",
+          "last_used_utc",
+          "data"
+        ]
+      },
+      "WebauthnResponse": {
+        "example": "{\n  \"id\": 81,\n  \"mfa_id\": 8,\n  \"key_handle_hash\": \"1234567890123456789012345678901234567890ABC\",\n  \"label\": \"My First Security Key\",\n  \"created_utc\": \"2017-10-24T20:40:57Z\",\n  \"last_used_utc\": null,\n}\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "mfa_id": {
+            "type": "integer"
+          },
+          "key_handle_hash": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "created_utc": {
+            "type": "string"
+          },
+          "last_used_utc": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "mfa_id",
+          "key_handle_hash",
+          "label",
+          "created_utc",
+          "last_used_utc"
+        ]
+      },
+      "Method": {
+        "example": {
+          "employee_id": "12345",
+          "value": "email@example.org"
+        },
+        "type": "object",
+        "properties": {
+          "employee_id": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "employee_id",
+          "value"
+        ]
+      },
+      "MethodResponse": {
+        "example": {
+          "id": "0YrSiNp2P6sfkleepNNvFYMQWuLfssve",
+          "value": "email@example.org",
+          "verified": true,
+          "created": "2017-10-24T20:41:05Z"
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "created": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "value",
+          "verified",
+          "created"
+        ]
+      },
+      "NewEmailRequest": {
+        "type": "object",
+        "properties": {
+          "to_address": {
+            "type": "string"
+          },
+          "cc_address": {
+            "type": "string"
+          },
+          "bcc_address": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "text_body": {
+            "type": "string"
+          },
+          "html_body": {
+            "type": "string"
+          },
+          "send_after": {
+            "description": "send the message after this time (Unix epoch, UTC)",
+            "type": "integer"
+          },
+          "delay_seconds": {
+            "description": "number of seconds to delay sending",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "to_address",
+          "subject",
+          "text_body",
+          "html_body"
+        ]
+      },
+      "NewEmailCreated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "to_address": {
+            "type": "string"
+          },
+          "cc_address": {
+            "type": "string"
+          },
+          "bcc_address": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "text_body": {
+            "type": "string"
+          },
+          "html_body": {
+            "type": "string"
+          },
+          "attempts_count": {
+            "type": "integer"
+          },
+          "updated_at": {
+            "description": "UTC epoch",
+            "type": "integer"
+          },
+          "created_at": {
+            "description": "UTC epoch",
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "send_after": {
+            "description": "message will be sent after this time (Unix epoch, UTC)",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "to_address",
+          "subject",
+          "text_body",
+          "html_body",
+          "attempts_count",
+          "updated_at",
+          "created_at",
+          "error",
+          "send_after"
+        ]
+      }
+    },
+    "responses": {},
+    "parameters": {},
+    "examples": {},
+    "requestBodies": {},
+    "headers": {},
+    "securitySchemes": {
+      "AuthzBearerToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    },
+    "links": {},
+    "callbacks": {}
+  }
+}
