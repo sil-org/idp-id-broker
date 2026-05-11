@@ -51,10 +51,6 @@ psr2:
 quicktest:
 	docker compose run --rm test bash -c "vendor/bin/behat --stop-on-failure --strict --append-snippets"
 
-raml2html:
-	touch api.html
-	docker compose run --rm raml2html
-
 tables: db
 	docker compose run --rm cli ./yii migrate --interactive=0
 
