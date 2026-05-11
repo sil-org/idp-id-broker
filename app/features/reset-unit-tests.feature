@@ -17,6 +17,11 @@ Feature: Password Reset
     Then a "reset-self" email should be sent to their primary email
     And a "reset-on-behalf" email should be sent to "manager@example.com"
 
+  Scenario: Create a password reset for a user with no recovery options and no manager
+    Given there is a user in the database
+    When the user requests a password reset
+    Then a "reset-self" email should be sent to their primary email
+
   Scenario: Create a password reset for a user with a password recovery email
     Given there is a user in the database
     And the user has a password recovery email "recovery@example.com"
