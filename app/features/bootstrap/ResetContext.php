@@ -4,11 +4,11 @@ namespace Sil\SilIdBroker\Behat\Context;
 
 use Behat\Step\Given;
 use Behat\Step\Then;
+use Behat\Step\When;
 use common\models\Reset;
-use common\models\User;
 use Webmozart\Assert\Assert;
 
-class ResetContext extends \FeatureContext
+class ResetContext extends UnitTestsContext
 {
     /** @var string|null */
     protected ?string $previousResetUuid = null;
@@ -16,14 +16,17 @@ class ResetContext extends \FeatureContext
     /** @var Reset|null */
     protected ?Reset $reset = null;
 
-    #[Then('a reset record exists for employee :employeeId')]
-    public function aResetRecordExistsForEmployee(string $employeeId): void
+    #[Given('the user has a password recovery email :arg1')]
+    public function theUserHasAPasswordRecoveryEmail($arg1): void
     {
-        $user = User::findOne(['employee_id' => $employeeId]);
-        Assert::notNull($user, 'User not found for employee_id ' . $employeeId);
+        $this->createMethod($arg1, 1, $this->tempUser);
+    }
 
-        $this->reset = Reset::findOne(['user_id' => $user->id]);
-        Assert::notNull($this->reset, 'No reset record found for employee_id ' . $employeeId);
+    #[Then('a reset record exists for the user')]
+    public function aResetRecordExistsForTheUser(): void
+    {
+        $this->reset = Reset::findOne(['user_id' => $this->tempUser->id]);
+        Assert::notNull($this->reset, 'No reset record found');
     }
 
     #[Then('the reset record has a non-empty UUID')]
@@ -44,11 +47,27 @@ class ResetContext extends \FeatureContext
         );
     }
 
-    #[Given('a user that has an existing reset record')]
-    public function aUserThatHasAnExistingResetRecord(): void
+    #[When('the user requests a password reset')]
+    public function theUserRequestsAPasswordReset(): void
     {
-        $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
-        Reset::create($user);
-        Assert::notEmpty($user->reset);
+        Reset::create($this->tempUser);
     }
+
+    #[Then('a :template email should be sent to their primary email')]
+    public function aTemplateEmailShouldBeSentToTheirPrimaryEmail($template): void
+    {
+        $address = $this->tempUser->email;
+        $emails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser($template, $address, $this->tempUser);
+
+        Assert::greaterThan(count($emails), 0, sprintf('Did not find any %s emails sent to %s.', $template, $address));
+    }
+
+    #[Then('a :template email should be sent to :email')]
+    public function aTemplateEmailShouldBeSentToEmail($template, $email): void
+    {
+        $emails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser($template, $email, $this->tempUser);
+
+        Assert::greaterThan(count($emails), 0, sprintf('Did not find any %s emails sent to %s.', $template, $email));
+    }
+
 }

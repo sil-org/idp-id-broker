@@ -114,17 +114,17 @@ class Reset extends ResetBase
      */
     protected function send(): void
     {
-        Yii::debug("sending reset to employee '{$this->user->employee_id}' primary email: " . $this->user->email);
+        Yii::info("sending reset to employee '{$this->user->employee_id}' primary email: " . $this->user->email);
         $this->sendPrimary();
 
         $methods = $this->user->getVerifiedMethodOptions();
         if (empty($methods) && !empty($this->user->manager_email)) {
-            Yii::debug("sending reset to employee '{$this->user->employee_id}' manager: {$this->user->manager_email}");
+            Yii::info("sending reset to employee '{$this->user->employee_id}' manager: {$this->user->manager_email}");
             $this->sendManager();
             return;
         }
 
-        Yii::debug("sending reset to employee '{$this->user->employee_id}' password reset emails");
+        Yii::info("sending reset to employee '{$this->user->employee_id}' password reset emails");
         $this->sendMethods($methods);
     }
 
