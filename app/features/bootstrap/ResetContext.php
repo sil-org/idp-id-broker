@@ -11,7 +11,7 @@ use Webmozart\Assert\Assert;
 class ResetContext extends \FeatureContext
 {
     /** @var string|null */
-    protected ?string $previousResetUid = null;
+    protected ?string $previousResetUuid = null;
 
     /** @var Reset|null */
     protected ?Reset $reset = null;
@@ -26,12 +26,12 @@ class ResetContext extends \FeatureContext
         Assert::notNull($this->reset, 'No reset record found for employee_id ' . $employeeId);
     }
 
-    #[Then('the reset record has a non-empty uid')]
-    public function theResetRecordHasANonEmptyUid(): void
+    #[Then('the reset record has a non-empty UUID')]
+    public function theResetRecordHasANonEmptyUuid(): void
     {
-        Assert::notEmpty($this->reset->uid);
+        Assert::notEmpty($this->reset->uuid);
 
-        $this->previousResetUid = $this->reset->uid;
+        $this->previousResetUuid = $this->reset->uuid;
     }
 
     #[Then('the reset record has an expiry in the future')]

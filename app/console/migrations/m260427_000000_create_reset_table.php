@@ -16,7 +16,7 @@ class m260427_000000_create_reset_table extends Migration
             'reset',
             [
                 'id' => 'pk',
-                'uid' => 'char(32) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL',
+                'uuid' => 'char(64) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL',
                 'user_id' => 'int(11) NOT NULL',
                 'expires' => 'datetime NOT NULL',
                 'created' => 'datetime NOT NULL',
@@ -24,7 +24,7 @@ class m260427_000000_create_reset_table extends Migration
             'ENGINE=InnoDB DEFAULT CHARSET=utf8'
         );
 
-        $this->createIndex('reset_uid_unique', 'reset', 'uid', true);
+        $this->createIndex('reset_uuid_unique', 'reset', 'uuid', true);
         $this->createIndex('reset_user_id_unique', 'reset', 'user_id', true);
 
         $this->addForeignKey(

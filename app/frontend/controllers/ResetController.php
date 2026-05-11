@@ -15,7 +15,7 @@ class ResetController extends BaseRestController
      * POST /reset
      * Initiate a password reset for the given username.
      * Finds (or creates) the user, finds (or creates) a reset record, and sends
-     * the verification email. Returns the Reset object (with uid + masked methods).
+     * the verification email.
      *
      * @throws BadRequestHttpException
      * @throws Exception

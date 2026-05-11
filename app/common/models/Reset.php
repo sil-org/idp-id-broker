@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\helpers\MySqlDateTime;
-use common\helpers\Utils;
+use Ramsey\Uuid\Uuid;
 use Yii;
 use yii\db\Exception;
 use yii\helpers\ArrayHelper;
@@ -24,7 +24,7 @@ class Reset extends ResetBase
         return ArrayHelper::merge(
             [
                 [
-                    ['uid'], 'default', 'value' => Utils::generateRandomString(),
+                    'uuid', 'default', 'value' => Uuid::uuid4()->toString(),
                 ],
                 [
                     ['created'], 'default', 'value' => MySqlDateTime::now(),
@@ -80,7 +80,7 @@ class Reset extends ResetBase
                 'status' => 'success',
                 'user_id' => $user->id,
                 'employee_id' => $user->employee_id,
-                'reset_uid' => $reset->uid,
+                'reset_uuid' => $reset->uuid,
             ]);
         }
 
