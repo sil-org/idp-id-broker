@@ -44,12 +44,26 @@ class ResetContext extends UnitTestsContext
         Assert::true($this->reset->save(), 'failed to save a new Reset');
     }
 
+    #[Given('the user has requested a password reset')]
+    public function theUserHasRequestedAPasswordReset(): void
+    {
+        $this->reset = new Reset();
+        $this->reset->user_id = $this->tempUser->id;
+        Assert::true($this->reset->save(), 'failed to save a new Reset');
+    }
+
     #[When('the user requests a password reset')]
     public function theUserRequestsAPasswordReset(): void
     {
         $this->emailCount = 0;
         $this->fakeEmailer->forgetFakeEmailsSent();
         Reset::create($this->tempUser);
+    }
+
+    #[When('the user submits the reset for verification')]
+    public function theUserSubmitsTheResetForVerification(): void
+    {
+        $this->reset->verify();
     }
 
     #[Then('a reset record exists for the user')]
@@ -105,21 +119,6 @@ class ResetContext extends UnitTestsContext
             $this->emailCount,
             "Received more emails than expected. Got $receiveCount, expected $this->emailCount.",
         );
-    }
-
-    #[Given('the user has requested a password reset')]
-    public function theUserHasRequestedAPasswordReset(): void
-    {
-        $this->reset = new Reset();
-        $this->reset->user_id = $this->tempUser->id;
-        Assert::true($this->reset->save(), 'failed to save a new Reset');
-    }
-
-
-    #[When('the user submits the reset for verification')]
-    public function theUserSubmitsTheResetForVerification(): void
-    {
-        $this->reset->verify();
     }
 
     #[Then('the reset will become expired')]
