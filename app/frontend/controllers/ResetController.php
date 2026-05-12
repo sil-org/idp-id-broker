@@ -6,8 +6,9 @@ use common\models\Reset;
 use common\models\User;
 use frontend\components\BaseRestController;
 use Yii;
-use yii\db\Exception;
 use yii\web\BadRequestHttpException;
+use yii\web\GoneHttpException;
+use yii\web\NotFoundHttpException;
 
 class ResetController extends BaseRestController
 {
@@ -18,7 +19,7 @@ class ResetController extends BaseRestController
      * the verification email.
      *
      * @throws BadRequestHttpException
-     * @throws Exception
+     * @throws \Exception
      */
     public function actionCreate()
     {
@@ -43,5 +44,31 @@ class ResetController extends BaseRestController
         }
 
         Reset::create($user);
+    }
+
+    /**
+     * PUT /reset/{uuid}/verify
+     * Verifies a reset. If found, its expiration time will be set to the current time to prevent it from being used
+     * a second time.
+     * @throws GoneHttpException
+     * @throws \Exception
+     */
+    public function actionVerify(string $uuid): array
+    {
+        /** @var Reset $reset */
+        $reset = Reset::findOne(['uuid' => $uuid]);
+        if ($reset === null) {
+            throw new NotFoundHttpException();
+        }
+
+        if ($reset->isExpired()) {
+            throw new GoneHttpException();
+        }
+
+        $reset->verify();
+
+        return [
+            'employee_id' => $reset->user->employee_id,
+        ];
     }
 }

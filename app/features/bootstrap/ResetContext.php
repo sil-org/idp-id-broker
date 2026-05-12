@@ -106,4 +106,25 @@ class ResetContext extends UnitTestsContext
             "Received more emails than expected. Got $receiveCount, expected $this->emailCount.",
         );
     }
+
+    #[Given('the user has requested a password reset')]
+    public function theUserHasRequestedAPasswordReset(): void
+    {
+        $this->reset = new Reset();
+        $this->reset->user_id = $this->tempUser->id;
+        Assert::true($this->reset->save(), 'failed to save a new Reset');
+    }
+
+
+    #[When('the user submits the reset for verification')]
+    public function theUserSubmitsTheResetForVerification(): void
+    {
+        $this->reset->verify();
+    }
+
+    #[Then('the reset will become expired')]
+    public function theResetWillBecomeExpired(): void
+    {
+        Assert::true($this->reset->isExpired());
+    }
 }

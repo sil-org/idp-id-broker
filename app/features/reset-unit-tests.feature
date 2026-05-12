@@ -45,3 +45,9 @@ Feature: Password Reset
     Then a reset record exists for the user
     And the reset record has an expiry in the future
     And a "reset-self" email should be sent to their primary email
+
+  Scenario: Verify a password reset
+    Given there is a user in the database
+    And the user has requested a password reset
+    When the user submits the reset for verification
+    Then the reset will become expired

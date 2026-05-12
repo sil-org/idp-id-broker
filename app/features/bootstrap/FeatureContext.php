@@ -133,7 +133,12 @@ class FeatureContext extends YiiContext
     }
 
     #[When('/^I request "(.*)" be <?(created|updated|deleted|retrieved|headed|patched)>?$/')]
-    public function iRequestTheResourceBe($resource, $action)
+    public function iRequestTheResourceBe($resource, $action): void
+    {
+        $this->sendRequestAndRecordResponse($resource, $action);
+    }
+
+    public function sendRequestAndRecordResponse($resource, $action): void
     {
         $client = $this->buildClient();
 
@@ -807,5 +812,37 @@ class FeatureContext extends YiiContext
         $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
         Reset::create($user);
         Assert::notEmpty($user->reset);
+    }
+
+    #[Given('the reset has expired')]
+    public function theResetHasExpired(): void
+    {
+        $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
+        $reset = $user->reset;
+        $reset->expires = MySqlDateTime::now();
+        Assert::true($reset->save());
+    }
+
+    #[When('I send a reset verification request using the correct uuid')]
+    public function iSendAResetVerificationRequestUsingTheCorrectUuid(): void
+    {
+        $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
+        $reset = $user->reset;
+
+        $this->sendRequestAndRecordResponse("/reset/$reset->uuid/verify", self::UPDATED);
+    }
+
+    #[When('I send a reset verification request using an incorrect uuid')]
+    public function iSendAResetVerificationRequestUsingAnIncorrectUuid(): void
+    {
+        $this->sendRequestAndRecordResponse("/reset/0000/verify", self::UPDATED);
+    }
+
+    #[Then('the response should contain the employee_id of the user')]
+    public function theResponseShouldContainTheEmployee_IdOfTheUser(): void
+    {
+        $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
+        $respBody = $this->getResponseBody();
+        Assert::eq($respBody['employee_id'], $user->employee_id, "The response did not contain the employee_id.");
     }
 }
