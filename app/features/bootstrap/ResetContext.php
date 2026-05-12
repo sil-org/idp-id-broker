@@ -16,6 +16,8 @@ class ResetContext extends UnitTestsContext
     /** @var Reset|null */
     protected ?Reset $reset = null;
 
+    protected int $emailCount = 0;
+
     #[Given('the user has a password recovery email :arg1')]
     public function theUserHasAPasswordRecoveryEmail($arg1): void
     {
@@ -50,6 +52,8 @@ class ResetContext extends UnitTestsContext
     #[When('the user requests a password reset')]
     public function theUserRequestsAPasswordReset(): void
     {
+        $this->emailCount = 0;
+        $this->fakeEmailer->forgetFakeEmailsSent();
         Reset::create($this->tempUser);
     }
 
@@ -60,6 +64,7 @@ class ResetContext extends UnitTestsContext
         $emails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser($template, $address, $this->tempUser);
 
         Assert::greaterThan(count($emails), 0, sprintf('Did not find any %s emails sent to %s.', $template, $address));
+        $this->emailCount++;
     }
 
     #[Then('a :template email should be sent to :email')]
@@ -68,6 +73,17 @@ class ResetContext extends UnitTestsContext
         $emails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser($template, $email, $this->tempUser);
 
         Assert::greaterThan(count($emails), 0, sprintf('Did not find any %s emails sent to %s.', $template, $email));
+        $this->emailCount++;
     }
 
+    #[Then('no other emails should be sent')]
+    public function noOtherEmailsShouldBeSent(): void
+    {
+        $receiveCount = count($this->fakeEmailer->getFakeEmailsSent());
+        Assert::eq(
+            $receiveCount,
+            $this->emailCount,
+            "Received more emails than expected. Got $receiveCount, expected $this->emailCount.",
+        );
+    }
 }
