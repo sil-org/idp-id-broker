@@ -31,3 +31,17 @@ Feature: Password Reset
     Then a "reset-self" email should be sent to their primary email
     And a "reset-self" email should be sent to "recovery@example.com"
     And no other emails should be sent
+
+  Scenario: Create a password reset for a user who has one already
+    Given there is a user in the database with a valid password reset
+    When the user requests a password reset
+    Then a reset record exists for the user
+    And the reset record has an expiry in the future
+    And a "reset-self" email should be sent to their primary email
+
+  Scenario: Create a password reset for a user who has an expired reset
+    Given there is a user in the database with an expired password reset
+    When the user requests a password reset
+    Then a reset record exists for the user
+    And the reset record has an expiry in the future
+    And a "reset-self" email should be sent to their primary email

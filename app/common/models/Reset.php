@@ -61,6 +61,13 @@ class Reset extends ResetBase
 
         $reset = self::findOne(['user_id' => $user->id]);
 
+        if ($reset !== null && $reset->isExpired()) {
+            if ($reset->delete() === false) {
+                Yii::error("failed to delete reset for employee_id: " . $reset->user->employee_id);
+            }
+            $reset = null;
+        }
+
         if ($reset === null) {
             $reset = new Reset();
             $reset->user_id = $user->id;
@@ -105,7 +112,7 @@ class Reset extends ResetBase
      */
     public function isExpired(): bool
     {
-        return strtotime($this->expires) < time();
+        return strtotime($this->expires) <= time();
     }
 
     /**

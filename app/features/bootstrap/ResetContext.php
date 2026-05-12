@@ -5,6 +5,7 @@ namespace Sil\SilIdBroker\Behat\Context;
 use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
+use common\helpers\MySqlDateTime;
 use common\models\Reset;
 use Webmozart\Assert\Assert;
 
@@ -22,6 +23,33 @@ class ResetContext extends UnitTestsContext
     public function theUserHasAPasswordRecoveryEmail($arg1): void
     {
         $this->createMethod($arg1, 1, $this->tempUser);
+    }
+
+    #[Given('there is a user in the database with a valid password reset')]
+    public function thereIsAUserInTheDatabaseWithAValidPasswordReset(): void
+    {
+        $this->thereIsAUserInTheDatabase();
+        $this->reset = new Reset();
+        $this->reset->user_id = $this->tempUser->id;
+        Assert::true($this->reset->save(), 'failed to save a new Reset');
+    }
+
+    #[Given('there is a user in the database with an expired password reset')]
+    public function thereIsAUserInTheDatabaseWithAnExpiredPasswordReset(): void
+    {
+        $this->thereIsAUserInTheDatabase();
+        $this->reset = new Reset();
+        $this->reset->user_id = $this->tempUser->id;
+        $this->reset->expires = MySqlDateTime::now();
+        Assert::true($this->reset->save(), 'failed to save a new Reset');
+    }
+
+    #[When('the user requests a password reset')]
+    public function theUserRequestsAPasswordReset(): void
+    {
+        $this->emailCount = 0;
+        $this->fakeEmailer->forgetFakeEmailsSent();
+        Reset::create($this->tempUser);
     }
 
     #[Then('a reset record exists for the user')]
@@ -47,14 +75,6 @@ class ResetContext extends UnitTestsContext
             date('Y-m-d H:i:s'),
             'Expires should be in the future: ' . $this->reset->expires
         );
-    }
-
-    #[When('the user requests a password reset')]
-    public function theUserRequestsAPasswordReset(): void
-    {
-        $this->emailCount = 0;
-        $this->fakeEmailer->forgetFakeEmailsSent();
-        Reset::create($this->tempUser);
     }
 
     #[Then('a :template email should be sent to their primary email')]
