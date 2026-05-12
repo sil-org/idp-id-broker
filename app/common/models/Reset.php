@@ -30,7 +30,7 @@ class Reset extends ResetBase
                     ['created'], 'default', 'value' => MySqlDateTime::now(),
                 ],
                 [
-                    ['expires'], 'default', 'value' => self::calculateExpireTime(),
+                    ['expires'], 'default', 'value' => static::calculateExpireTime(),
                 ],
             ],
             parent::rules()
@@ -42,7 +42,18 @@ class Reset extends ResetBase
      */
     public function fields(): array
     {
+        // Prevent any properties of this class from being returned in a JSON response.
         return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels(): array
+    {
+        return array_merge(parent::attributeLabels(), [
+            'uuid' => Yii::t('app', 'UUID'),
+        ]);
     }
 
     /**
@@ -94,7 +105,7 @@ class Reset extends ResetBase
      */
     public static function calculateExpireTime(): string
     {
-        return MySqlDateTime::relativeTime(self::LIFETIME);
+        return MySqlDateTime::relativeTime(static::LIFETIME);
     }
 
     /**

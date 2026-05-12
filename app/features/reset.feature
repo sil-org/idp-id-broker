@@ -13,8 +13,6 @@ Feature: Password Reset API
         | employee_id | 123   |
     When I request "/reset" be created
     Then the response status code should be 204
-      And the following data is returned:
-        | property | value |
       And a reset record exists for employee "123"
       And the reset record has a non-empty UUID
       And the reset record has an expiry in the future
@@ -29,9 +27,13 @@ Feature: Password Reset API
         | property    | value     |
         | employee_id | not-found |
     When I request "/reset" be created
+    # Respond identically whether the user exists or not, to hide which users exist.
     Then the response status code should be 204
 
   Scenario: Creating a reset for a user who already has a reset record
     Given a user that has an existing reset record
+      And I provide the following valid data:
+          | property    | value |
+          | employee_id | 123   |
     When I request "/reset" be created
     Then the response status code should be 204
