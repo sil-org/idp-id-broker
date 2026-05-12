@@ -210,7 +210,6 @@ class Reset extends ResetBase
     {
         $this->expires = MySqlDateTime::now();
         if (!$this->save()) {
-            print_r($this->getFirstErrors());
             Yii::error("failed to expire reset: " . implode(", ", $this->getFirstErrors()));
         }
     }
