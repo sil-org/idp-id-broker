@@ -37,7 +37,8 @@ use yii\helpers\Html as yHtml;
 <p>
     <?= yHtml::a(yHtml::encode($resetUrl), $resetUrl) ?>
 </p>
-<p>This link is valid for <?= yHtml::encode($lifetime) ?>.
+<p>
+    This link is valid for <?= yHtml::encode($lifetime) ?>.
 </p>
 <p>
     To maintain security, please don't forward this email to anyone.
