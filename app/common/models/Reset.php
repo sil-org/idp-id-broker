@@ -75,7 +75,7 @@ class Reset extends ResetBase
             $reset = new Reset();
             $reset->user_id = $user->id;
 
-            if (!$reset->save()) {
+            if (!$reset->insert()) {
                 Yii::error([
                     'action' => 'create reset',
                     'status' => 'error',
