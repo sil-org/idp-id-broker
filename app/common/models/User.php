@@ -128,6 +128,18 @@ class User extends UserBase
             }
         }
 
+        $reset = $this->reset;
+        if ($reset !== null && !$reset->delete()) {
+            \Yii::error([
+                'action' => 'delete reset record before deleting user',
+                'status' => 'error',
+                'error' => $reset->getFirstErrors(),
+                'reset_id' => $reset->id,
+                'user_id' => $this->id,
+            ]);
+            return false;
+        }
+
         /*
          * Delete email logs last in case other deletions trigger new emails
          */

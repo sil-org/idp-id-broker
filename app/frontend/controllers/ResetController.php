@@ -13,8 +13,8 @@ class ResetController extends BaseRestController
 {
     /**
      * POST /reset
-     * Initiate a password reset for the given username.
-     * Finds (or creates) the user, finds (or creates) a reset record, and sends
+     * Initiate a password reset for the given username, which can contain the actual username or the primary email
+     * address (the 'email' property). It finds (or creates) the user, finds (or creates) a reset record, and sends
      * the verification email.
      *
      * @throws BadRequestHttpException
@@ -27,7 +27,7 @@ class ResetController extends BaseRestController
             throw new BadRequestHttpException('username is required.', 1543338160);
         }
 
-        // Support both username and email-style lookups
+        // Support both username and email lookups
         if (str_contains($username, '@')) {
             $user = User::findByEmail($username);
         } else {

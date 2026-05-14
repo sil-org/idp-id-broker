@@ -1671,17 +1671,17 @@
       },
       "ResetCreation": {
         "example": {
-          "username": "john_doe"
+          "employee_id": "12345"
         },
         "type": "object",
         "properties": {
-          "username": {
+          "employee_id": {
             "type": "string",
-            "description": "username or email"
+            "description": "The employee ID of the user requesting a password reset."
           }
         },
         "required": [
-          "username"
+          "employee_id"
         ]
       },
       "UserResponse": {
