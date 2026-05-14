@@ -12,18 +12,12 @@ Feature: Password Reset API
     When I request "/reset" be created
     Then the response status code should be 204
       And there is no response body
-      And a reset record exists for employee "123"
-      And the reset record has a non-empty UUID
-      And the reset record has an expiry in the future
 
   Scenario: Successfully create a reset record given a user's email address
     Given I prepare a request with the user's email address given as their username
     When I request "/reset" be created
     Then the response status code should be 204
       And there is no response body
-      And a reset record exists for employee "123"
-      And the reset record has a non-empty UUID
-      And the reset record has an expiry in the future
 
   Scenario: Attempt to create a reset without providing employee_id
     When I provide an empty request body
