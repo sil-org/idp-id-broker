@@ -1727,7 +1727,7 @@
         "properties": {
           "username": {
             "type": "string",
-            "description": "username or email"
+            "description": "The username or email of the user requesting a password reset."
           }
         },
         "required": [

@@ -33,8 +33,8 @@ class m260427_000000_create_reset_table extends Migration
             'user_id',
             '{{user}}',
             'id',
-            'CASCADE',
-            'CASCADE'
+            'NO ACTION',
+            'NO ACTION'
         );
     }
 

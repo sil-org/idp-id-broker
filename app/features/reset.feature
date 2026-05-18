@@ -8,13 +8,16 @@ Feature: Password Reset API
       And I add a user with an "employee_id" of "123"
 
   Scenario: Successfully create a reset record for an existing user
-    Given I provide the following valid data:
-        | property    | value |
-        | employee_id | 123   |
+    Given I prepare a request with the user's username
     When I request "/reset" be created
     Then the response status code should be 204
-      And the following data is returned:
-        | property | value |
+      And there is no response body
+
+  Scenario: Successfully create a reset record given a user's email address
+    Given I prepare a request with the user's email address given as their username
+    When I request "/reset" be created
+    Then the response status code should be 204
+      And there is no response body
 
   Scenario: Attempt to create a reset without providing employee_id
     When I provide an empty request body
@@ -22,14 +25,16 @@ Feature: Password Reset API
     Then the response status code should be 400
 
   Scenario: Attempt to create a reset for a non-existent user
-    Given I provide the following valid data:
-        | property    | value     |
-        | employee_id | not-found |
+    Given I provide the following data:
+        | property | value     |
+        | username | not-found |
     When I request "/reset" be created
+    # Respond identically whether the user exists or not, to hide which users exist.
     Then the response status code should be 204
 
   Scenario: Creating a reset for a user who already has a reset record
     Given a user that has an existing reset record
+      And I prepare a request with the user's username
     When I request "/reset" be created
     Then the response status code should be 204
 
