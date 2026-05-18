@@ -48,7 +48,7 @@ Feature: Password Reset API
     Given a user that has an existing reset record
     And the reset has expired
     When I send a reset verification request using the correct uuid
-    Then the response status code should be 410
+    Then the response status code should be 404
 
   Scenario: Attempt to validate a reset using an invalid UUID
     Given a user that has an existing reset record

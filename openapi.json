@@ -140,16 +140,6 @@
               }
             }
           },
-          "410": {
-            "description": "Reset has expired",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
           "500": {
             "description": "A server-side error occurred.",
             "content": {
