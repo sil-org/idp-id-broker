@@ -15,6 +15,7 @@ use common\models\MfaBackupcode;
 use common\models\MfaFailedAttempt;
 use common\models\MfaWebauthn;
 use common\models\Password;
+use common\models\Reset;
 use common\models\User;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
@@ -34,6 +35,8 @@ class FeatureContext extends YiiContext
     private $response;
     private $resBody = [];
 
+    /** @var User */
+    private $testUser;
     /** @var User */
     private $userFromDb;
     /** @var User */
@@ -57,12 +60,13 @@ class FeatureContext extends YiiContext
     #[Given('I add a user with a(n) :property of :value')]
     public function iAddAUserWithAnOf($property, $value)
     {
+        $username = 'john_smith';
         $sampleUserData = [
             'employee_id' => '10000',
             'first_name' => 'John',
             'last_name' => 'Smith',
             'display_name' => 'John Smith',
-            'username' => 'john_smith',
+            'username' => $username,
             'email' => 'john_smith@example.org',
         ];
         $sampleUserData[$property] = $value;
@@ -78,6 +82,10 @@ class FeatureContext extends YiiContext
         $this->iProvideTheFollowingValidData(new TableNode($dataForTableNode));
         $this->iRequestTheResourceBe('/user', self::CREATED);
         $this->theResponseStatusCodeShouldBe(200);
+
+        // This works because the database is shared by both containers (the test runner and the app container)
+        $this->testUser = User::findByUsername($username);
+        Assert::notNull($this->testUser, 'Creation of the test user failed or the test is accessing the wrong database');
     }
 
     #[Then('I should receive :numRecords record(s)')]
@@ -126,6 +134,7 @@ class FeatureContext extends YiiContext
         Mfa::deleteAll();
         Method::deleteAll();
         Invite::deleteAll();
+        Reset::deleteAll();
         EmailLog::deleteAll();
         User::deleteAll();
     }
@@ -276,6 +285,12 @@ class FeatureContext extends YiiContext
                          : Assert::contains($this->resBody[$property], $contents);
     }
 
+    #[Then('there is no response body')]
+    public function thereIsNoResponseBody(): void
+    {
+        Assert::isEmpty($this->resBody);
+    }
+
     #[Then('the user store is still empty')]
     public function thereAreStillNoUsers()
     {
@@ -329,6 +344,7 @@ class FeatureContext extends YiiContext
     #[Given('I provide the following (valid) data:')]
     public function iProvideTheFollowingValidData(TableNode $data)
     {
+        $this->reqBody = [];
         foreach ($data as $row) {
             $this->reqBody[$row['property']] = ($row['value'] === 'null' ? null : $row['value']);
         }
@@ -791,5 +807,27 @@ class FeatureContext extends YiiContext
     {
         $user = User::findOne(['username' => $this->reqBody['username']]);
         Assert::lessThanEq(strtotime($user->currentPassword->expires_on), time());
+    }
+
+    #[Given('I prepare a request with the user\'s username')]
+    public function iPrepareARequestWithTheUsersUsername(): void
+    {
+        $this->reqBody = [
+            'username' => $this->testUser->username,
+        ];
+    }
+
+    #[Given('I prepare a request with the user\'s email address given as their username')]
+    public function iPrepareARequestWithTheUsersEmailAddress(): void
+    {
+        $this->reqBody = [
+            'username' => $this->testUser->email,
+        ];
+    }
+
+    #[When('I provide an empty request body')]
+    public function iProvideAnEmptyRequestBody(): void
+    {
+        $this->cleanRequestBody();
     }
 }

@@ -84,6 +84,46 @@
         ]
       }
     },
+    "/reset": {
+      "post": {
+        "responses": {
+          "204": {
+            "description": "Reset created if user exists. No system-level errors occurred.\n"
+          },
+          "401": {
+            "description": "Unauthorized\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server-side error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "POST_reset",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetCreation"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
     "/user": {
       "get": {
         "responses": {
@@ -1627,6 +1667,21 @@
           "message",
           "code",
           "status"
+        ]
+      },
+      "ResetCreation": {
+        "example": {
+          "employee_id": "12345"
+        },
+        "type": "object",
+        "properties": {
+          "employee_id": {
+            "type": "string",
+            "description": "The employee ID of the user requesting a password reset."
+          }
+        },
+        "required": [
+          "employee_id"
         ]
       },
       "UserResponse": {

@@ -82,6 +82,11 @@ return [
                 'PUT     method/' . UID_ROUTE_PATTERN . '/verify' => 'method/verify',
                 'DELETE  method/' . UID_ROUTE_PATTERN             => 'method/delete',
 
+                /*
+                 * Reset routes
+                 */
+                'POST reset' => 'reset/create',
+
                 'POST email' => 'email/queue',
 
                 'site/status' => 'site/status',

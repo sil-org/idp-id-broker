@@ -71,3 +71,7 @@ default:
       paths:
         - "features/ses-mailer-unit-tests.feature"
       contexts: [Sil\SilIdBroker\Behat\Context\SesMailerUnitTestsContext]
+    reset_features:
+      paths:
+        - "features/reset.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\ResetContext]
