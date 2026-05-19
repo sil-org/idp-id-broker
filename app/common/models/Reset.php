@@ -61,10 +61,11 @@ class Reset extends ResetBase
      * Create a reset for the given user. If one exists, it will be reused.
      *
      * @param User $user
+     * @param bool $includeManager
      * @return void
      * @throws Exception
      */
-    public static function create(User $user): void
+    public static function create(User $user, bool $includeManager): void
     {
         if ($user->isLocked()) {
             return;
@@ -83,27 +84,26 @@ class Reset extends ResetBase
             $reset = new Reset();
             $reset->user_id = $user->id;
 
-            if (!$reset->insert()) {
-                Yii::error([
-                    'action' => 'create reset',
-                    'status' => 'error',
-                    'user_id' => $user->id,
-                    'employee_id' => $user->employee_id,
-                    'errors' => $reset->getFirstErrors(),
-                ]);
-                throw new Exception(implode(", ", $reset->getFirstErrors()));
-            }
-
-            Yii::info([
+            $params = [
                 'action' => 'create reset',
+                'include_manager' => $includeManager,
                 'status' => 'success',
                 'user_id' => $user->id,
                 'employee_id' => $user->employee_id,
-                'reset_uuid' => $reset->uuid,
-            ]);
+            ];
+
+            if (!$reset->insert()) {
+                $params['errors'] = $reset->getFirstErrors();
+                $params['status'] = 'error';
+                Yii::error($params);
+                throw new Exception(implode(", ", $reset->getFirstErrors()));
+            }
+
+            $params['reset_uuid'] = $reset->uuid;
+            Yii::info($params);
         }
 
-        $reset->send();
+        $reset->send($includeManager);
     }
 
     /**
@@ -128,21 +128,18 @@ class Reset extends ResetBase
 
     /**
      * Send the reset email
+     * @param bool $includeManager
      * @throws Exception
      */
-    protected function send(): void
+    protected function send(bool $includeManager): void
     {
-        Yii::info("sending reset to employee '{$this->user->employee_id}' primary email: " . $this->user->email);
         $this->sendPrimary();
 
         $methods = $this->user->getVerifiedMethodOptions();
-        if (empty($methods) && !empty($this->user->manager_email)) {
-            Yii::info("sending reset to employee '{$this->user->employee_id}' manager: {$this->user->manager_email}");
+        if (empty($methods) && !empty($this->user->manager_email) || $includeManager) {
             $this->sendManager();
-            return;
         }
 
-        Yii::info("sending reset to employee '{$this->user->employee_id}' password reset emails");
         $this->sendMethods($methods);
     }
 
@@ -152,6 +149,8 @@ class Reset extends ResetBase
      */
     protected function sendPrimary(): void
     {
+        Yii::info("sending reset to employee '{$this->user->employee_id}' primary email: " . $this->user->email);
+
         /* @var $emailer Emailer */
         $emailer = Yii::$app->emailer;
         $emailer->sendMessageTo(EmailLog::MESSAGE_TYPE_RESET_SELF, $this->user, $this->dataForEmail());
@@ -163,6 +162,8 @@ class Reset extends ResetBase
      */
     protected function sendManager(): void
     {
+        Yii::info("sending reset to employee '{$this->user->employee_id}' manager: {$this->user->manager_email}");
+
         if (empty($this->user->manager_email)) {
             throw new Exception('User does not have manager_email', 1461173406);
         }
@@ -184,6 +185,8 @@ class Reset extends ResetBase
     protected function sendMethods(array $methods): void
     {
         foreach ($methods as $method) {
+            Yii::info("sending reset to employee '{$this->user->employee_id}' password reset email $method->value");
+
             /* @var $emailer Emailer */
             $emailer = Yii::$app->emailer;
             $emailer->sendMessageTo(

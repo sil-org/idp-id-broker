@@ -27,6 +27,8 @@ class ResetController extends BaseRestController
             throw new BadRequestHttpException('username is required.', 1543338160);
         }
 
+        $includeManager = trim((string) Yii::$app->request->getBodyParam('include_manager', 'no'));
+
         // Support both username and email lookups
         if (str_contains($username, '@')) {
             $user = User::findByEmail($username);
@@ -42,7 +44,7 @@ class ResetController extends BaseRestController
             return null;
         }
 
-        Reset::create($user);
+        Reset::create($user, $includeManager === 'yes');
     }
 
     /**
