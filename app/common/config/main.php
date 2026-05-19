@@ -331,6 +331,7 @@ return [
         'passwordGracePeriodExtension'  => '+7 days',
         'passwordLifespan'              => Env::get('PASSWORD_LIFESPAN', '+1 year'),
         'passwordMfaLifespanExtension'  => Env::get('PASSWORD_MFA_LIFESPAN_EXTENSION', '+4 years'),
+        'passwordProfileUrl'            => $passwordProfileUrl,
         'passwordReuseLimit'            => Env::get('PASSWORD_REUSE_LIMIT', 10),
         'profileReviewInterval'         => Env::get('PROFILE_REVIEW_INTERVAL', '+6 months'),
     ],

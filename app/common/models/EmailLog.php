@@ -34,7 +34,9 @@ class EmailLog extends EmailLogBase
     public const MESSAGE_TYPE_MFA_RECOVERY_HELP = 'mfa-recovery-help';
     public const MESSAGE_TYPE_PASSWORD_EXPIRING = 'password-expiring';
     public const MESSAGE_TYPE_PASSWORD_EXPIRED = 'password-expired';
-    public const MESSAGE_TYPE_PASSWORD_PWNED = "password-pwned";
+    public const MESSAGE_TYPE_PASSWORD_PWNED = 'password-pwned';
+    public const MESSAGE_TYPE_RESET_ON_BEHALF = 'reset-on-behalf';
+    public const MESSAGE_TYPE_RESET_SELF = 'reset-self';
 
     /**
      * @inheritdoc

@@ -65,3 +65,5 @@ testcli: appfortests tablesfortests mfaapi
 
 testdb:
 	docker compose up -d testdb
+
+.PHONY: db

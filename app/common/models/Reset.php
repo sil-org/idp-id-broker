@@ -2,10 +2,11 @@
 
 namespace common\models;
 
+use common\components\Emailer;
 use common\helpers\MySqlDateTime;
+use Exception;
 use Ramsey\Uuid\Uuid;
 use Yii;
-use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -71,6 +72,13 @@ class Reset extends ResetBase
 
         $reset = self::findOne(['user_id' => $user->id]);
 
+        if ($reset !== null && $reset->isExpired()) {
+            if ($reset->delete() === false) {
+                Yii::error("failed to delete reset for employee_id: " . $reset->user->employee_id);
+            }
+            $reset = null;
+        }
+
         if ($reset === null) {
             $reset = new Reset();
             $reset->user_id = $user->id;
@@ -95,7 +103,7 @@ class Reset extends ResetBase
             ]);
         }
 
-        // TODO: send the reset email
+        $reset->send();
     }
 
     /**
@@ -115,6 +123,98 @@ class Reset extends ResetBase
      */
     public function isExpired(): bool
     {
-        return strtotime($this->expires) < time();
+        return strtotime($this->expires) <= time();
     }
+
+    /**
+     * Send the reset email
+     * @throws Exception
+     */
+    protected function send(): void
+    {
+        Yii::info("sending reset to employee '{$this->user->employee_id}' primary email: " . $this->user->email);
+        $this->sendPrimary();
+
+        $methods = $this->user->getVerifiedMethodOptions();
+        if (empty($methods) && !empty($this->user->manager_email)) {
+            Yii::info("sending reset to employee '{$this->user->employee_id}' manager: {$this->user->manager_email}");
+            $this->sendManager();
+            return;
+        }
+
+        Yii::info("sending reset to employee '{$this->user->employee_id}' password reset emails");
+        $this->sendMethods($methods);
+    }
+
+    /**
+     * Send reset email to the user's primary email.
+     * @return void
+     */
+    protected function sendPrimary(): void
+    {
+        /* @var $emailer Emailer */
+        $emailer = Yii::$app->emailer;
+        $emailer->sendMessageTo(EmailLog::MESSAGE_TYPE_RESET_SELF, $this->user, $this->dataForEmail());
+    }
+
+    /**
+     * Send reset email to the user's manager_email.
+     * @throws Exception
+     */
+    protected function sendManager(): void
+    {
+        if (empty($this->user->manager_email)) {
+            throw new Exception('User does not have manager_email', 1461173406);
+        }
+
+        /* @var $emailer Emailer */
+        $emailer = Yii::$app->emailer;
+        $emailer->sendMessageTo(
+            EmailLog::MESSAGE_TYPE_RESET_ON_BEHALF,
+            null,
+            $this->dataForEmail($this->user->manager_email),
+        );
+    }
+
+    /**
+     * Send reset email to the user's password recovery emails.
+     * @param Method[] $methods
+     * @return void
+     */
+    protected function sendMethods(array $methods): void
+    {
+        foreach ($methods as $method) {
+            /* @var $emailer Emailer */
+            $emailer = Yii::$app->emailer;
+            $emailer->sendMessageTo(
+                EmailLog::MESSAGE_TYPE_RESET_SELF,
+                // Don't log this as a user email because the Emailer won't log the email address in that case.
+                // If non_user_address validation is changed to allow this, this should be changed to `$this->user`.
+                null,
+                $this->dataForEmail($method->value),
+            );
+        }
+    }
+
+    /**
+     * Get the data items needed to render the email template. Provide the toAddress if the email is being sent
+     * to an address other than the user's primary email.
+     * @param string|null $toAddress
+     * @return array
+     */
+    protected function dataForEmail(?string $toAddress = null): array
+    {
+        $resetUrl = sprintf('%s/password/reset/%s/verify/0', \Yii::$app->params['passwordProfileUrl'], $this->uuid);
+        $data = [
+            'resetUrl' => $resetUrl,
+            'lifetime' => self::LIFETIME,
+            'displayName' => $this->user->getDisplayName(),
+            'firstName' => $this->user->first_name,
+        ];
+        if (!empty($toAddress)) {
+            $data['toAddress'] = $toAddress;
+        }
+        return $data;
+    }
+
 }

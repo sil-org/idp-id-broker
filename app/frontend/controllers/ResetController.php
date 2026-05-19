@@ -38,6 +38,7 @@ class ResetController extends BaseRestController
         Yii::$app->response->statusCode = 204;
 
         if ($user === null) {
+            Yii::info("password reset attempted, but username '$username' not found");
             return null;
         }
 

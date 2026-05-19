@@ -288,6 +288,8 @@ class Emailer extends Component
             EmailLog::MESSAGE_TYPE_PASSWORD_PWNED => $this->subjectForPasswordPwned,
             EmailLog::MESSAGE_TYPE_REFRESH_BACKUP_CODES => $this->subjectForRefreshBackupCodes,
             EmailLog::MESSAGE_TYPE_WELCOME => $this->subjectForWelcome,
+            EmailLog::MESSAGE_TYPE_RESET_ON_BEHALF => '{idpDisplayName} password reset request for {firstName}',
+            EmailLog::MESSAGE_TYPE_RESET_SELF => '{idpDisplayName} password reset request',
         ];
 
         $this->hrNotificationsEmail ??= '';

@@ -4,11 +4,12 @@ namespace Sil\SilIdBroker\Behat\Context;
 
 use Behat\Step\Given;
 use Behat\Step\Then;
+use Behat\Step\When;
+use common\helpers\MySqlDateTime;
 use common\models\Reset;
-use common\models\User;
 use Webmozart\Assert\Assert;
 
-class ResetContext extends \FeatureContext
+class ResetContext extends UnitTestsContext
 {
     /** @var string|null */
     protected ?string $previousResetUuid = null;
@@ -16,14 +17,46 @@ class ResetContext extends \FeatureContext
     /** @var Reset|null */
     protected ?Reset $reset = null;
 
-    #[Then('a reset record exists for employee :employeeId')]
-    public function aResetRecordExistsForEmployee(string $employeeId): void
-    {
-        $user = User::findOne(['employee_id' => $employeeId]);
-        Assert::notNull($user, 'User not found for employee_id ' . $employeeId);
+    protected int $emailCount = 0;
 
-        $this->reset = Reset::findOne(['user_id' => $user->id]);
-        Assert::notNull($this->reset, 'No reset record found for employee_id ' . $employeeId);
+    #[Given('the user has a password recovery email :arg1')]
+    public function theUserHasAPasswordRecoveryEmail($arg1): void
+    {
+        $this->createMethod($arg1, 1, $this->tempUser);
+    }
+
+    #[Given('there is a user in the database with a valid password reset')]
+    public function thereIsAUserInTheDatabaseWithAValidPasswordReset(): void
+    {
+        $this->thereIsAUserInTheDatabase();
+        $this->reset = new Reset();
+        $this->reset->user_id = $this->tempUser->id;
+        Assert::true($this->reset->save(), 'failed to save a new Reset');
+    }
+
+    #[Given('there is a user in the database with an expired password reset')]
+    public function thereIsAUserInTheDatabaseWithAnExpiredPasswordReset(): void
+    {
+        $this->thereIsAUserInTheDatabase();
+        $this->reset = new Reset();
+        $this->reset->user_id = $this->tempUser->id;
+        $this->reset->expires = MySqlDateTime::now();
+        Assert::true($this->reset->save(), 'failed to save a new Reset');
+    }
+
+    #[When('the user requests a password reset')]
+    public function theUserRequestsAPasswordReset(): void
+    {
+        $this->emailCount = 0;
+        $this->fakeEmailer->forgetFakeEmailsSent();
+        Reset::create($this->tempUser);
+    }
+
+    #[Then('a reset record exists for the user')]
+    public function aResetRecordExistsForTheUser(): void
+    {
+        $this->reset = Reset::findOne(['user_id' => $this->tempUser->id]);
+        Assert::notNull($this->reset, 'No reset record found');
     }
 
     #[Then('the reset record has a non-empty UUID')]
@@ -44,11 +77,33 @@ class ResetContext extends \FeatureContext
         );
     }
 
-    #[Given('a user that has an existing reset record')]
-    public function aUserThatHasAnExistingResetRecord(): void
+    #[Then('a :template email should be sent to their primary email')]
+    public function aTemplateEmailShouldBeSentToTheirPrimaryEmail($template): void
     {
-        $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
-        Reset::create($user);
-        Assert::notEmpty($user->reset);
+        $address = $this->tempUser->email;
+        $emails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser($template, $address, $this->tempUser);
+
+        Assert::greaterThan(count($emails), 0, sprintf('Did not find any %s emails sent to %s.', $template, $address));
+        $this->emailCount++;
+    }
+
+    #[Then('a :template email should be sent to :email')]
+    public function aTemplateEmailShouldBeSentToEmail($template, $email): void
+    {
+        $emails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser($template, $email, $this->tempUser);
+
+        Assert::greaterThan(count($emails), 0, sprintf('Did not find any %s emails sent to %s.', $template, $email));
+        $this->emailCount++;
+    }
+
+    #[Then('no other emails should be sent')]
+    public function noOtherEmailsShouldBeSent(): void
+    {
+        $receiveCount = count($this->fakeEmailer->getFakeEmailsSent());
+        Assert::eq(
+            $receiveCount,
+            $this->emailCount,
+            "Received more emails than expected. Got $receiveCount, expected $this->emailCount.",
+        );
     }
 }
