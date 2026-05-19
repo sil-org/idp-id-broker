@@ -869,7 +869,7 @@ class FeatureContext extends YiiContext
     }
 
     #[Then('the response should contain the employee_id of the user')]
-    public function theResponseShouldContainTheEmployee_IdOfTheUser(): void
+    public function theResponseShouldContainTheEmployeeIdOfTheUser(): void
     {
         $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
         $respBody = $this->getResponseBody();
