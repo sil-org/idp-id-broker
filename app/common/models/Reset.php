@@ -75,7 +75,6 @@ class Reset extends ResetBase
         if ($reset !== null && $reset->isExpired()) {
             if ($reset->delete() === false) {
                 Yii::error("failed to delete reset for employee_id: " . $reset->user->employee_id);
-                throw new Exception('Failed to delete expired reset.');
             }
             $reset = null;
         }
