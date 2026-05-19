@@ -85,8 +85,12 @@ return [
                 /*
                  * Reset routes
                  */
-                'POST reset' => 'reset/create',
+                'POST reset'               => 'reset/create',
+                'PUT /reset/<uuid>/verify' => 'reset/verify',
 
+                /*
+                 * Email routes
+                 */
                 'POST email' => 'email/queue',
 
                 'site/status' => 'site/status',

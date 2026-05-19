@@ -37,3 +37,20 @@ Feature: Password Reset API
       And I prepare a request with the user's username
     When I request "/reset" be created
     Then the response status code should be 204
+
+  Scenario: Correctly verifying a reset
+    Given a user that has an existing reset record
+    When I send a reset verification request using the correct uuid
+    Then the response status code should be 200
+    And the response should contain the employee_id of the user
+
+  Scenario: Attempt to validate an expired reset
+    Given a user that has an existing reset record
+    And the reset has expired
+    When I send a reset verification request using the correct uuid
+    Then the response status code should be 404
+
+  Scenario: Attempt to validate a reset using an invalid UUID
+    Given a user that has an existing reset record
+    When I send a reset verification request using an incorrect uuid
+    Then the response status code should be 404

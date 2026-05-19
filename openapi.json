@@ -124,6 +124,46 @@
         }
       }
     },
+    "/reset/{uuid}/verify": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Reset was found and is valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResetVerifyResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server-side error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "PUT_reset_verify",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
     "/user": {
       "get": {
         "responses": {
@@ -1682,6 +1722,21 @@
         },
         "required": [
           "username"
+        ]
+      },
+      "ResetVerifyResponse": {
+        "example": {
+          "employee_id": "12345"
+        },
+        "type": "object",
+        "properties": {
+          "employee_id": {
+            "type": "string",
+            "description": "user's employee ID"
+          }
+        },
+        "required": [
+          "employee_id"
         ]
       },
       "UserResponse": {
