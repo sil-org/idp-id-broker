@@ -60,7 +60,7 @@ user's password or the hash of their password) from ever being included in an
 email.
 
 ## API Documentation
-The API is described by [openapi.json](openapi.json).
+The API is described by [openapi.yaml](openapi.yaml).
 
 ## Running tests interactively locally
 1. Run `make testcli` to build and start needed containers and drop you in a shell
