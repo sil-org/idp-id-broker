@@ -26,7 +26,7 @@ paste_backlog_issue_link_here
 ---
 
 ### PR Checklist
-- [ ] Documentation (README, local.env.dist, openapi.json, etc.)
+- [ ] Documentation (README, local.env.dist, openapi.yaml, etc.)
 - [ ] Tests created or updated
 - [ ] Run `make composershow`
 - [ ] Run `make psr2`
