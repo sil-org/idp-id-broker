@@ -54,8 +54,10 @@ paths:
       parameters:
       - name: rpOrigin
         in: query
-        required: true
-        description: 'relying party origin'
+        required: false
+        description: >-
+          Webouthn Relying Party origin. Required for normal authentication 
+          but optional for invite (new user) flow.
         schema:
           type: string
   /reset:
@@ -144,12 +146,13 @@ paths:
       - name: mask
         in: query
         description: >-
-          Mask personal information (method options, personal_email) for privacy. Default is 'yes'.
+          Mask personal information (method options, personal_email) for privacy. Default is 'no'.
         schema:
           enum:
           - 'yes'
           - 'no'
           type: string
+          default: 'no'
     post:
       responses:
         '200':
@@ -472,7 +475,7 @@ paths:
       parameters:
       - name: rpOrigin
         in: query
-        description: 'The Relying Party origin url (only needed for WebAuthn)'
+        description: 'The Relying Party origin URL (only needed for WebAuthn)'
         schema:
           default: ''
           type: string
@@ -595,14 +598,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Verify the value provided for this MFA device.'
+      description: >-
+        Verify the value provided for this MFA device. This endpoint is for 
+        TOTP verification only. Use /mfa/{id}/verify/registration for WebAuthn.
       operationId: POST_mfa-id-verify
       requestBody:
         content:
           application/json:
             example:
               employee_id: '12345'
-              value: 01234987
+              value: '01234987'
             schema:
               properties:
                 employee_id:
@@ -614,13 +619,6 @@ paths:
               - value
               type: object
         required: true
-      parameters:
-      - name: rpOrigin
-        in: query
-        description: 'The Relying Party origin url (only needed for WebAuthn)'
-        schema:
-          default: ''
-          type: string
     parameters:
     - name: id
       in: path
@@ -656,21 +654,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Verify the registration of a new mfa webauthn credential.'
+      description: 'Verify the registration of a new mfa WebAuthn credential.'
       operationId: POST_mfa-id-verify-registration
       requestBody:
         content:
           application/json:
-            example:
-              employee_id: '12345'
-              value: 01234987
-              label: Yubikey
             schema:
               properties:
                 employee_id:
                   type: string
                 value:
-                  type: string
+                  $ref: '#/components/schemas/CredentialCreationResponse'
                 label:
                   type: string
               required:
@@ -683,7 +677,7 @@ paths:
       - name: rpOrigin
         in: query
         required: true
-        description: 'The Relying Party origin url (only needed for WebAuthn)'
+        description: 'The Relying Party origin URL.'
         schema:
           default: ''
           type: string
@@ -697,11 +691,11 @@ paths:
     put:
       responses:
         '200':
-          description: 'Webauthn label successfully updated'
+          description: 'WebAuthn label successfully updated'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebauthnResponse'
+                $ref: '#/components/schemas/WebAuthnResponse'
         '400':
           description: 'Missing or blank label value or invalid employee_id'
           content:
@@ -709,7 +703,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: 'No MFA record found with that `mfa_id` or no webauthn record
+          description: 'No MFA record found with that `mfa_id` or no WebAuthn record
             found with that `id` and that `mfa_id`.'
           content:
             application/json:
@@ -721,7 +715,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Update the label of a MFA webauthn credential.'
+      description: 'Update the label of a MFA WebAuthn credential.'
       operationId: PUT_mfa-mfaId-webauthn-webauthnId
       requestBody:
         content:
@@ -758,20 +752,20 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: >-
-            No MFA record found with that `mfa_id` or no webauthn record
+            No MFA record found with that `mfa_id` or no WebAuthn record
             found with that `id` and that `mfa_id`.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
-          description: 'Unable to delete the webauthn credential or the MFA record'
+          description: 'Unable to delete the WebAuthn credential or the MFA record'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
       description: >-
-        Delete a webauthn credential from an MFA. If it is the last credential,
+        Delete a WebAuthn credential from an MFA. If it is the last credential,
         the whole MFA will be deleted.
       operationId: DELETE_mfa-mfaId-webauthn-webauthnId
       requestBody:
@@ -1058,6 +1052,21 @@ paths:
             schema:
               $ref: '#/components/schemas/NewEmailRequest'
         required: true
+  /site/status:
+    get:
+      description: >-
+        Returns the operational status of the server. Status codes other than
+        204 indicate the server is not healthy.
+      responses:
+        '204':
+          description: Server is healthy
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Authentication:
@@ -1460,7 +1469,7 @@ components:
       - created_utc
       - last_used_utc
       - data
-    WebauthnResponse:
+    WebAuthnResponse:
       example:
         id: 81
         mfa_id: 8
@@ -1489,6 +1498,48 @@ components:
       - label
       - created_utc
       - last_used_utc
+    CredentialCreationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        rawId:
+          type: string
+          format: byte
+        response:
+          $ref: '#/components/schemas/AuthenticatorAttestationResponse'
+        type:
+          type: string
+        clientExtensionResults:
+          type: object
+          properties:
+            appidExclude:
+              type: boolean
+        authenticatorAttachment:
+          type: string
+      required: ['id', 'type', 'rawId', 'response']
+    AuthenticatorAttestationResponse:
+      type: object
+      properties:
+        clientDataJSON:
+          type: string
+          format: byte
+        transports:
+          type: array
+          items:
+            type: string
+        authenticatorData:
+          type: string
+          format: byte
+        publicKey:
+          type: string
+          format: byte
+        publicKeyAlgorithm:
+          type: integer
+        attestationObject:
+          type: string
+          format: byte
+      required: ['clientDataJSON', 'authenticatorData', 'publicKey', 'publicKeyAlgorithm', 'attestationObject']
     Method:
       example:
         employee_id: '12345'
@@ -1524,6 +1575,9 @@ components:
       - verified
       - created
     NewEmailRequest:
+      description: >-
+        Request body for NewEmail. Required properties: to_address, subject, 
+        and one of text_body or html_body.
       type: object
       properties:
         to_address:
@@ -1535,8 +1589,10 @@ components:
         subject:
           type: string
         text_body:
+          description: 'Email text body, required if html_body is not provided.'
           type: string
         html_body:
+          description: 'HTML body, required if text_body is not provided.'
           type: string
         send_after:
           description: 'send the message after this time (Unix epoch, UTC)'
@@ -1547,8 +1603,6 @@ components:
       required:
       - to_address
       - subject
-      - text_body
-      - html_body
     NewEmailCreated:
       type: object
       properties:

@@ -24,7 +24,7 @@ class AuthenticationController extends BaseRestController
         $password = (string) Yii::$app->request->getBodyParam('password');
         $inviteCode = (string) Yii::$app->request->getBodyParam('invite');
 
-        // rpOrigin is needed for WebAuthn authentication
+        // rpOrigin is needed for WebAuthn authentication and is only optional for the invite (new user) flow
         $rpOrigin = \Yii::$app->request->get('rpOrigin', '');
         if ($rpOrigin != '' && !in_array($rpOrigin, \Yii::$app->params['authorizedRPOrigins'])) {
             $message = "Invalid rpOrigin. Received " . $rpOrigin . " authorized "

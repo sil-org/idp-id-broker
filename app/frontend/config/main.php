@@ -77,7 +77,6 @@ return [
                 'GET     user/<employeeId:\w+>/method'            => 'method/list',
                 'GET     method/' . UID_ROUTE_PATTERN             => 'method/view',
                 'POST    method'                                  => 'method/create',
-                'PUT     method/' . UID_ROUTE_PATTERN             => 'method/update',
                 'PUT     method/' . UID_ROUTE_PATTERN . '/resend' => 'method/resend',
                 'PUT     method/' . UID_ROUTE_PATTERN . '/verify' => 'method/verify',
                 'DELETE  method/' . UID_ROUTE_PATTERN             => 'method/delete',
