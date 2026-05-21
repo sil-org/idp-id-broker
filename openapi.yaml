@@ -1098,6 +1098,12 @@ components:
         username: john_doe
       type: object
       properties:
+        include_manager:
+          type: string
+          enum:
+          - 'no'
+          - 'yes'
+          description: "Whether to also send an email to the user's manager."
         username:
           type: string
           description: 'The username or email of the user requesting a password reset.'

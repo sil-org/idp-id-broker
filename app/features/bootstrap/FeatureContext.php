@@ -840,7 +840,7 @@ class FeatureContext extends YiiContext
     public function aUserThatHasAnExistingResetRecord(): void
     {
         $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
-        Reset::create($user);
+        Reset::create($user, false);
         Assert::notEmpty($user->reset);
     }
 

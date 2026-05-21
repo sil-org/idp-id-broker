@@ -52,12 +52,32 @@ class ResetContext extends UnitTestsContext
         Assert::true($this->reset->save(), 'failed to save a new Reset');
     }
 
+    #[Given('the user has no manager email')]
+    public function theUserHasNoManagerEmail(): void
+    {
+        Assert::isEmpty($this->tempUser->manager_email);
+    }
+
+    #[Given('the user has no password recovery methods')]
+    public function theUserHasNoPasswordRecoveryMethods(): void
+    {
+        Assert::isEmpty($this->tempUser->methods);
+    }
+
     #[When('the user requests a password reset')]
     public function theUserRequestsAPasswordReset(): void
     {
         $this->emailCount = 0;
         $this->fakeEmailer->forgetFakeEmailsSent();
-        Reset::create($this->tempUser);
+        Reset::create($this->tempUser, false);
+    }
+
+    #[When('the user requests a password reset with "include manager" enabled')]
+    public function theUserRequestsAPasswordResetWithIncludeManager(): void
+    {
+        $this->emailCount = 0;
+        $this->fakeEmailer->forgetFakeEmailsSent();
+        Reset::create($this->tempUser, true);
     }
 
     #[When('the user submits the reset for verification')]
