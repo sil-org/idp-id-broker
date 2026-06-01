@@ -793,6 +793,7 @@ Feature: User
         | token_hash        | abc123hash            |
         | token_expiry_utc  | 2099-01-01 12:00:00   |
         | token_type        | login                 |
+      And a record exists with an employee_id of "123"
       And the following data should be stored:
         | property          | value                 |
         | token_hash        | abc123hash            |
@@ -807,6 +808,7 @@ Feature: User
       And I clear the token fields
     When I request "/user/123" be updated
     Then the response status code should be 200
+      And a record exists with an employee_id of "123"
       And the following data should be stored:
         | property          | value |
         | token_hash        | NULL  |
