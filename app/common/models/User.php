@@ -200,6 +200,9 @@ class User extends UserBase
             'personal_email',
             'hide',
             'groups',
+            'access_token',
+            'access_token_expiration',
+            'auth_type',
         ];
 
         $scenarios[self::SCENARIO_UPDATE_PASSWORD] = ['password'];
@@ -243,6 +246,9 @@ class User extends UserBase
             ],
             [
                 ['active', 'locked', 'require_mfa', 'hide'], 'in', 'range' => ['yes', 'no'],
+            ],
+            [
+                'auth_type', 'in', 'range' => ['login', 'reset'], 'skipOnEmpty' => true,
             ],
             [
                 'email', 'email',
@@ -409,6 +415,14 @@ class User extends UserBase
         return User::findOne(['email' => $email]);
     }
 
+    public static function findByAccessToken(string $accessToken): ?self
+    {
+        return User::find()
+            ->where(['access_token' => $accessToken])
+            ->andWhere(['>', 'access_token_expiration', \common\helpers\MySqlDateTime::now()])
+            ->one();
+    }
+
     /**
      * Get the list of attributes about this User that are safe to include in
      * an email to them.
@@ -551,6 +565,9 @@ class User extends UserBase
                 return $model->getNagState() == NagState::NAG_PROFILE_REVIEW ? 'yes' : 'no';
             },
             'require_mfa',
+            'access_token',
+            'access_token_expiration',
+            'auth_type',
         ];
 
         if ($this->current_password_id !== null) {
@@ -875,6 +892,10 @@ class User extends UserBase
                 case 'username':
                 case 'email':
                     $query->andWhere([$name => $value]);
+                    break;
+                case 'access_token':
+                    $query->andWhere(['access_token' => $value])
+                          ->andWhere(['>', 'access_token_expiration', \common\helpers\MySqlDateTime::now()]);
                     break;
                 case 'search':
                     $query->andWhere(new OrCondition([

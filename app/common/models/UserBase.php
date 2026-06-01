@@ -33,6 +33,9 @@ use Yii;
  * @property string $nag_for_method_after
  * @property string|null $created_utc
  * @property string|null $deactivated_utc
+ * @property string|null $access_token
+ * @property string|null $access_token_expiration
+ * @property string|null $auth_type
  *
  * @property Password $currentPassword
  * @property EmailLog[] $emailLogs
@@ -60,9 +63,9 @@ class UserBase extends \yii\db\ActiveRecord
             [['uuid', 'employee_id', 'first_name', 'last_name', 'username', 'active', 'locked', 'last_changed_utc', 'last_synced_utc', 'review_profile_after', 'nag_for_mfa_after', 'nag_for_method_after'], 'required'],
             [['current_password_id'], 'integer'],
             [['active', 'locked', 'require_mfa', 'hide'], 'string'],
-            [['last_changed_utc', 'last_synced_utc', 'review_profile_after', 'last_login_utc', 'expires_on', 'nag_for_mfa_after', 'nag_for_method_after', 'created_utc', 'deactivated_utc'], 'safe'],
+            [['last_changed_utc', 'last_synced_utc', 'review_profile_after', 'last_login_utc', 'expires_on', 'nag_for_mfa_after', 'nag_for_method_after', 'created_utc', 'deactivated_utc', 'access_token_expiration'], 'safe'],
             [['uuid'], 'string', 'max' => 64],
-            [['employee_id', 'first_name', 'last_name', 'display_name', 'username', 'email', 'manager_email', 'groups', 'groups_external', 'personal_email'], 'string', 'max' => 255],
+            [['employee_id', 'first_name', 'last_name', 'display_name', 'username', 'email', 'manager_email', 'groups', 'groups_external', 'personal_email', 'access_token'], 'string', 'max' => 255],
             [['employee_id'], 'unique'],
             [['username'], 'unique'],
             [['email'], 'unique'],
@@ -102,6 +105,9 @@ class UserBase extends \yii\db\ActiveRecord
             'nag_for_method_after' => Yii::t('app', 'Nag For Method After'),
             'created_utc' => Yii::t('app', 'Created Utc'),
             'deactivated_utc' => Yii::t('app', 'Deactivated Utc'),
+            'access_token' => Yii::t('app', 'Access Token'),
+            'access_token_expiration' => Yii::t('app', 'Access Token Expiration'),
+            'auth_type' => Yii::t('app', 'Auth Type'),
         ];
     }
 

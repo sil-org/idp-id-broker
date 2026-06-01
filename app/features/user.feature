@@ -782,3 +782,78 @@ Feature: User
       | active | isOrIsNot |
       | no     | is NOT    |
       | yes    | is        |
+
+  Scenario: Set access_token fields on an existing user
+    Given a record does not exist with an employee_id of "123"
+      And the requester is authorized
+      And I provide the following valid data:
+        | property    | value                 |
+        | employee_id | 123                   |
+        | first_name  | Shep                  |
+        | last_name   | Clark                 |
+        | username    | shep_clark            |
+        | email       | shep_clark@example.org|
+      And I request "/user" be created
+      And the response status code should be 200
+      And a record exists with an employee_id of "123"
+      And I change the access_token to abc123hash
+      And I change the access_token_expiration to 2099-01-01 12:00:00
+      And I change the auth_type to login
+    When I request "/user/123" be updated
+    Then the response status code should be 200
+      And the following data is returned:
+        | property                 | value                 |
+        | access_token             | abc123hash            |
+        | access_token_expiration  | 2099-01-01 12:00:00   |
+        | auth_type                | login                 |
+      And the following data should be stored:
+        | property                 | value                 |
+        | access_token             | abc123hash            |
+        | access_token_expiration  | 2099-01-01 12:00:00   |
+        | auth_type                | login                 |
+
+  Scenario: Clear access_token fields by sending null
+    Given a record does not exist with an employee_id of "123"
+      And the requester is authorized
+      And I provide the following valid data:
+        | property    | value                 |
+        | employee_id | 123                   |
+        | first_name  | Shep                  |
+        | last_name   | Clark                 |
+        | username    | shep_clark            |
+        | email       | shep_clark@example.org|
+      And I request "/user" be created
+      And the response status code should be 200
+      And a record exists with an employee_id of "123"
+      And I change the access_token to abc123hash
+      And I change the access_token_expiration to 2099-01-01 12:00:00
+      And I change the auth_type to login
+      And I request "/user/123" be updated
+      And the response status code should be 200
+      And I change the access_token to null
+      And I change the access_token_expiration to null
+      And I change the auth_type to null
+    When I request "/user/123" be updated
+    Then the response status code should be 200
+      And the following data should be stored:
+        | property                 | value |
+        | access_token             | NULL  |
+        | access_token_expiration  | NULL  |
+        | auth_type                | NULL  |
+
+  Scenario: Reject an invalid auth_type value
+    Given a record does not exist with an employee_id of "123"
+      And the requester is authorized
+      And I provide the following valid data:
+        | property    | value                 |
+        | employee_id | 123                   |
+        | first_name  | Shep                  |
+        | last_name   | Clark                 |
+        | username    | shep_clark            |
+        | email       | shep_clark@example.org|
+      And I request "/user" be created
+      And the response status code should be 200
+      And I change the auth_type to invalid_value
+    When I request "/user/123" be updated
+    Then the response status code should be 422
+      And the property message should contain "Auth Type"

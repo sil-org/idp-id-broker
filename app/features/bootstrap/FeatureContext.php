@@ -875,4 +875,20 @@ class FeatureContext extends YiiContext
         $respBody = $this->getResponseBody();
         Assert::eq($respBody['employee_id'], $user->employee_id, "The response did not contain the employee_id.");
     }
+
+    #[Given('the access_token is set to :token with expiration in the :tense for user :employeeId')]
+    public function theAccessTokenIsSetWithExpiration(string $token, string $tense, string $employeeId): void
+    {
+        $user = User::findOne(['employee_id' => $employeeId]);
+        Assert::notNull($user, "User with employee_id $employeeId not found");
+
+        $expiration = $tense === 'future'
+            ? MySqlDateTime::relativeTime('+1 day')
+            : MySqlDateTime::relativeTime('-1 day');
+
+        $user->access_token = $token;
+        $user->access_token_expiration = $expiration;
+        $user->scenario = User::SCENARIO_UPDATE_USER;
+        Assert::true($user->save(), var_export($user->getErrors(), true));
+    }
 }

@@ -65,5 +65,28 @@ Feature: User Search
       | search   |
 
 
+  Scenario: Find a user by access_token with a future expiration
+    Given the requester is authorized
+      And a record exists with an employee_id of "2105"
+      And the access_token is set to "tok123hash" with expiration in the future for user "2105"
+    When I provide a access_token query property of "tok123hash"
+      And I search by access_token
+    Then the response status code should be 200
+      And I should receive 1 users
+      And user 2105 is returned
 
-#  TODO: Limit the columns returned
+  Scenario: Do not return a user when the access_token has expired
+    Given the requester is authorized
+      And a record exists with an employee_id of "2105"
+      And the access_token is set to "tok456hash" with expiration in the past for user "2105"
+    When I provide a access_token query property of "tok456hash"
+      And I search by access_token
+    Then the response status code should be 200
+      And no users are returned
+
+  Scenario: Do not return a user when the access_token does not match
+    Given the requester is authorized
+    When I provide a access_token query property of "nonexistent_token"
+      And I search by access_token
+    Then the response status code should be 200
+      And no users are returned
