@@ -558,7 +558,9 @@ class User extends UserBase
             },
             'require_mfa',
             'token_hash',
-            'token_expiry_utc',
+            'token_expiry_utc' => function (self $model) {
+                return $model->token_expiry_utc === null ? null : Utils::getIso8601($model->token_expiry_utc);
+            },
             'token_type',
         ];
 
