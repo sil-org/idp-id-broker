@@ -5,6 +5,7 @@ namespace common\models;
 use Closure;
 use common\components\Emailer;
 use common\components\HIBP;
+use common\components\MailAdmin;
 use common\components\Sheets;
 use common\helpers\MySqlDateTime;
 use common\helpers\Utils;
@@ -803,6 +804,22 @@ class User extends UserBase
              */
             if ($this->personal_email && $this->email) {
                 $data['ccAddress'] = $this->personal_email;
+            }
+            if (\Yii::$app->params['userMailAdminsCcOnInvite']) {
+                $mailAdminEmails = MailAdmin::getEmailsFor($this->email);
+                if (empty($mailAdminEmails)) {
+                    $fallback = \Yii::$app->params['userMailAdminsCcFallback'] ?? '';
+                    if (!empty($fallback)) {
+                        $mailAdminEmails = [$fallback];
+                    }
+                }
+                if (!empty($mailAdminEmails)) {
+                    $ccAddresses = array_filter(array_merge(
+                        [$data['ccAddress'] ?? ''],
+                        $mailAdminEmails
+                    ));
+                    $data['ccAddress'] = implode(',', $ccAddresses);
+                }
             }
             $emailer->sendMessageTo(
                 EmailLog::MESSAGE_TYPE_INVITE,

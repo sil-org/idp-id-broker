@@ -159,6 +159,12 @@ services:
     working_dir: /dynamo
     command: bash -c "pwd && ls -al && php restart.php"
 
+  apimock:
+    image: mockoon/cli:9
+    command: ["--data", "data", "--port", "80"]
+    volumes:
+      - ./apimock/account-mail-admins.json:/data:readonly
+
   test:
     image: ghcr.io/sil-org/php8:8.3
     platform: linux/amd64
@@ -168,6 +174,8 @@ services:
     mem_limit: 200m
     working_dir: /app
     depends_on:
+      apimock:
+        condition: service_started
       appfortests:
         condition: service_healthy
       mfaapi:

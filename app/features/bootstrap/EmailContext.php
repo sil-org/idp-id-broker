@@ -69,6 +69,7 @@ class EmailContext extends YiiContext
     public const METHOD_EMAIL_ADDRESS = 'method@example.com';
     public const MANAGER_EMAIL = 'manager@example.com';
     public const RECOVERY_EMAIL = 'recovery@example.com';
+    public const NO_MAIL_ADMINS_EMAIL = 'no_mail_admins@example.com';
 
 
     #[Then('a(n) :messageType email should have been sent to them')]
@@ -122,7 +123,7 @@ class EmailContext extends YiiContext
         $this->tempUser = $this->createNewUser(true);
     }
 
-    protected function createNewUser($withPersonalEmail = false)
+    protected function createNewUser($withPersonalEmail = false, $email = null)
     {
         $employeeId = uniqid();
         $properties = [
@@ -130,7 +131,7 @@ class EmailContext extends YiiContext
             'first_name' => 'Test',
             'last_name' => 'User',
             'username' => 'test_user_' . $employeeId,
-            'email' => 'test_user_' . $employeeId . '@example.com',
+            'email' => $email ?? ('test_user_' . $employeeId . '@example.com'),
             'manager_email' => self::MANAGER_EMAIL,
         ];
         if ($withPersonalEmail) {
@@ -877,6 +878,27 @@ class EmailContext extends YiiContext
         Assert::contains(current($this->matchingFakeEmails)['bcc_address'], $address, 'address not on bcc line');
     }
 
+    protected function assertEmailCc($address)
+    {
+        Assert::greaterThan(count($this->matchingFakeEmails), 0);
+        Assert::keyExists(current($this->matchingFakeEmails), 'cc_address');
+        Assert::contains(current($this->matchingFakeEmails)['cc_address'], $address, 'address not on cc line');
+    }
+
+    protected function assertEmailNotCc($address)
+    {
+        Assert::greaterThan(count($this->matchingFakeEmails), 0);
+        $ccAddress = current($this->matchingFakeEmails)['cc_address'] ?? '';
+        Assert::notContains($ccAddress, $address, 'address unexpectedly on cc line');
+    }
+
+    protected function assertEmailHasNoCc()
+    {
+        Assert::greaterThan(count($this->matchingFakeEmails), 0);
+        $ccAddress = current($this->matchingFakeEmails)['cc_address'] ?? '';
+        Assert::isEmpty($ccAddress, 'expected no cc address, but found: ' . $ccAddress);
+    }
+
     #[Then('a Method Verify email is sent to that method')]
     public function aMethodVerifyEmailIsSentToThatMethod()
     {
@@ -1172,5 +1194,59 @@ class EmailContext extends YiiContext
                 )
             );
         }
+    }
+
+    #[Given('we are configured to CC mail admins on invite emails')]
+    public function weAreConfiguredToCcMailAdminsOnInviteEmails(): void
+    {
+        \Yii::$app->params['userMailAdminsCcOnInvite'] = true;
+    }
+
+    #[Given('we are configured NOT to CC mail admins on invite emails')]
+    public function weAreConfiguredNotToCcMailAdminsOnInviteEmails(): void
+    {
+        \Yii::$app->params['userMailAdminsCcOnInvite'] = false;
+    }
+
+    #[Given('we are configured to CC :address as the mail admin fallback')]
+    public function weAreConfiguredToCcAsTheMailAdminFallback($address): void
+    {
+        \Yii::$app->params['userMailAdminsCcFallback'] = $address;
+    }
+
+    #[When('that user whose account has no mail admins is created')]
+    public function thatUserWhoseAccountHasNoMailAdminsIsCreated(): void
+    {
+        Assert::null($this->tempUser, 'The user should not have existed yet.');
+        // Unique address that still matches the "no mail admins" rule in the API mock.
+        $email = str_replace('@', '_' . uniqid() . '@', self::NO_MAIL_ADMINS_EMAIL);
+        $this->tempUser = $this->createNewUser(false, $email);
+    }
+
+    #[Then('the email address :address should have been CCed')]
+    public function theEmailAddressShouldHaveBeenCced($address): void
+    {
+        $this->assertEmailSent(EmailLog::MESSAGE_TYPE_INVITE, $this->tempUser->email);
+        $this->assertEmailCc($address);
+    }
+
+    #[Then('the email address :address should NOT have been CCed')]
+    public function theEmailAddressShouldNotHaveBeenCced($address): void
+    {
+        $this->assertEmailSent(EmailLog::MESSAGE_TYPE_INVITE, $this->tempUser->email);
+        $this->assertEmailNotCc($address);
+    }
+
+    #[Then('the invite email should also CC the personal email')]
+    public function theInviteEmailShouldAlsoCcThePersonalEmail(): void
+    {
+        $this->assertEmailCc($this->tempUser->personal_email);
+    }
+
+    #[Then('the invite email should have no one CCed')]
+    public function theInviteEmailShouldHaveNoOneCced(): void
+    {
+        $this->assertEmailSent(EmailLog::MESSAGE_TYPE_INVITE, $this->tempUser->email);
+        $this->assertEmailHasNoCc();
     }
 }
