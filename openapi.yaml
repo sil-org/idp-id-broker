@@ -1400,6 +1400,18 @@ components:
           type: string
         groups:
           type: string
+        token_hash:
+          type: string
+          nullable: true
+        token_expiry_utc:
+          type: string
+          nullable: true
+        token_type:
+          enum:
+          - 'login'
+          - 'reset'
+          type: string
+          nullable: true
     MfaCreation:
       example:
         employee_id: '12345'
