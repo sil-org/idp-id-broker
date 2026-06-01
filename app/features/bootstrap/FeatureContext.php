@@ -876,8 +876,8 @@ class FeatureContext extends YiiContext
         Assert::eq($respBody['employee_id'], $user->employee_id, "The response did not contain the employee_id.");
     }
 
-    #[Given('the access_token is set to :token with expiration in the :tense for user :employeeId')]
-    public function theAccessTokenIsSetWithExpiration(string $token, string $tense, string $employeeId): void
+    #[Given('the token_hash is set to :token with expiration in the :tense for user :employeeId')]
+    public function theTokenHashIsSetWithExpiration(string $token, string $tense, string $employeeId): void
     {
         $user = User::findOne(['employee_id' => $employeeId]);
         Assert::notNull($user, "User with employee_id $employeeId not found");
@@ -886,9 +886,42 @@ class FeatureContext extends YiiContext
             ? MySqlDateTime::relativeTime('+1 day')
             : MySqlDateTime::relativeTime('-1 day');
 
-        $user->access_token = $token;
-        $user->access_token_expiration = $expiration;
+        $user->token_hash = $token;
+        $user->token_expiry_utc = $expiration;
         $user->scenario = User::SCENARIO_UPDATE_USER;
         Assert::true($user->save(), var_export($user->getErrors(), true));
+    }
+
+    #[Given('a user with employee_id :employeeId has been created')]
+    public function aUserWithEmployeeIdHasBeenCreated(string $employeeId): void
+    {
+        User::deleteAll(['employee_id' => $employeeId]);
+        $this->theRequesterIsAuthorized();
+        $this->reqBody = [
+            'employee_id' => $employeeId,
+            'first_name' => 'Shep',
+            'last_name' => 'Clark',
+            'username' => 'shep_clark',
+            'email' => 'shep_clark@example.org',
+        ];
+        $this->iRequestTheResourceBe('/user', self::CREATED);
+        $this->theResponseStatusCodeShouldBe(200);
+        $this->reqBody = [];
+    }
+
+    #[Given('I set the token fields to hash :hash expiry :expiry and type :type')]
+    public function iSetTheTokenFields(string $hash, string $expiry, string $type): void
+    {
+        $this->reqBody['token_hash'] = $hash;
+        $this->reqBody['token_expiry_utc'] = $expiry;
+        $this->reqBody['token_type'] = $type;
+    }
+
+    #[Given('I clear the token fields')]
+    public function iClearTheTokenFields(): void
+    {
+        $this->reqBody['token_hash'] = null;
+        $this->reqBody['token_expiry_utc'] = null;
+        $this->reqBody['token_type'] = null;
     }
 }
