@@ -791,7 +791,7 @@ Feature: User
       And the following data is returned:
         | property          | value                 |
         | token_hash        | abc123hash            |
-        | token_expiry_utc  | 2099-01-01 12:00:00   |
+        | token_expiry_utc  | 2099-01-01T12:00:00Z  |
         | token_type        | login                 |
       And a record exists with an employee_id of "123"
       And the following data should be stored:
