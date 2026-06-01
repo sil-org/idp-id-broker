@@ -1297,6 +1297,18 @@ components:
           - 'yes'
           - 'no'
           type: string
+        token_hash:
+          type: string
+          nullable: true
+        token_expiry_utc:
+          type: string
+          nullable: true
+        token_type:
+          enum:
+          - 'login'
+          - 'reset'
+          type: string
+          nullable: true
       required:
       - member
       - mfa
