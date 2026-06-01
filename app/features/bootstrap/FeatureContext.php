@@ -910,9 +910,9 @@ class FeatureContext extends YiiContext
     }
 
     #[Given('I set the token fields to hash :hash expiry :expiry and type :type')]
-    public function iSetTheTokenFields(string $hash, string $expiry, string $type): void
+    public function iSetTheTokenFields(string $tokenHash, string $expiry, string $type): void
     {
-        $this->reqBody['token_hash'] = $hash;
+        $this->reqBody['token_hash'] = $tokenHash;
         $this->reqBody['token_expiry_utc'] = $expiry;
         $this->reqBody['token_type'] = $type;
     }
