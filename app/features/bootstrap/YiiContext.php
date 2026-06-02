@@ -40,11 +40,15 @@ class YiiContext implements Context
 
         Yii::$app->set('emailer', $this->fakeEmailer);
 
-        // Reset between scenarios so these can't leak via the shared application instance.
-        Yii::$app->params['userMailAdminsCcOnInvite'] = false;
-        Yii::$app->params['userMailAdminsCcFallback'] = '';
-
         $this->addFakeLogTarget();
+    }
+
+    #[BeforeScenario]
+    public function resetParameters()
+    {
+        // Reset between scenarios so these can't leak via the shared application instance.
+        Yii::$app->params['accountMailAdminsCcOnInvite'] = false;
+        Yii::$app->params['accountMailAdminsCcFallback'] = '';
     }
 
     protected function addFakeLogTarget()

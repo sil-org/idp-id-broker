@@ -268,9 +268,7 @@ class SesMessage extends BaseMessage
      */
     private static function formatAddresses(string|array $email): array
     {
-        if (is_string($email)) {
-            $email = array_map('trim', explode(',', $email));
-        }
+        $email = is_array($email) ? $email : [$email];
 
         if (array_is_list($email)) {
             return $email;

@@ -19,8 +19,8 @@ class MailAdmin
      */
     public static function getEmailsFor(string $accountEmail): array
     {
-        $apiUrl = Yii::$app->params['userMailAdminsApiUrl'] ?? '';
-        $apiKey = Yii::$app->params['userMailAdminsApiKey'] ?? '';
+        $apiUrl = Yii::$app->params['accountMailAdminsApiUrl'] ?? '';
+        $apiKey = Yii::$app->params['accountMailAdminsApiKey'] ?? '';
 
         if (empty($apiUrl) || empty($accountEmail)) {
             return [];

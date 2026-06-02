@@ -251,6 +251,24 @@ class EmailClientContext extends YiiContext
         self::assertStringContainsString('<!DOCTYPE html', $asString);
     }
 
+    #[When('we get a message for an email with multiple comma-separated cc addresses')]
+    public function testGetMessageSplitsCommaSeparatedCcAddresses()
+    {
+        $email = new Email();
+
+        $email->attributes = [
+            'to_address' => $this->stubToAddress,
+            'cc_address' => 'cc1@example.org,cc2@example.org',
+            'subject' => $this->stubSubject,
+            'text_body' => $this->stubTextBody,
+            'html_body' => $this->stubHtmlBody,
+        ];
+
+        Assert::true($email->save(), current($email->getFirstErrors()));
+
+        Assert::count($email->getMessage()->getCc(), 2, 'cc_address should split into two recipients');
+    }
+
     #[When('we send queued emails')]
     public function testSendQueuedEmails()
     {

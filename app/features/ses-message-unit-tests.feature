@@ -60,12 +60,6 @@ Feature: SesMessage Unit Tests
     When I set the cc address to "cc@example.com"
     Then the cc address should contain "cc@example.com"
 
-  Scenario: Testing CC address with multiple comma-separated addresses
-    Given I have a new SesMessage
-    When I set the cc address to "cc1@example.com,cc2@example.com"
-    Then the cc address should contain "cc1@example.com"
-    And the cc address should contain "cc2@example.com"
-
   Scenario: Testing BCC address
     Given I have a new SesMessage
     When I set the bcc address to "bcc@example.com"

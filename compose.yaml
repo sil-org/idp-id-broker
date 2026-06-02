@@ -159,11 +159,17 @@ services:
     working_dir: /dynamo
     command: bash -c "pwd && ls -al && php restart.php"
 
-  apimock:
+  mail-admin:
     image: mockoon/cli:9
     command: ["--data", "data", "--port", "80"]
     volumes:
-      - ./apimock/account-mail-admins.json:/data:readonly
+      - ./app/features/mocks/account-mail-admins.json:/data:readonly
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/account-mail-admins || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
 
   test:
     image: ghcr.io/sil-org/php8:8.3
@@ -174,8 +180,8 @@ services:
     mem_limit: 200m
     working_dir: /app
     depends_on:
-      apimock:
-        condition: service_started
+      mail-admin:
+        condition: service_healthy
       appfortests:
         condition: service_healthy
       mfaapi:

@@ -281,6 +281,10 @@ return [
             ],
             Env::getArrayFromPrefix('ABANDONED_USER_')
         ),
+        'accountMailAdminsApiKey'       => Env::get('ACCOUNT_MAIL_ADMINS_API_KEY'),
+        'accountMailAdminsApiUrl'       => Env::get('ACCOUNT_MAIL_ADMINS_API_URL'),
+        'accountMailAdminsCcFallback'   => Env::get('ACCOUNT_MAIL_ADMINS_CC_FALLBACK', ''),
+        'accountMailAdminsCcOnInvite'   => Env::get('ACCOUNT_MAIL_ADMINS_CC_ON_INVITE', false),
         'authorizedRPOrigins'           => Env::getArray('RP_ORIGINS'),
         'authorizedTokens'              => Env::getArray('API_ACCESS_KEYS'),
         'contingentUserDuration'        => Env::get('CONTINGENT_USER_DURATION', '+4 weeks'),
@@ -334,9 +338,5 @@ return [
         'passwordProfileUrl'            => $passwordProfileUrl . "/#",
         'passwordReuseLimit'            => Env::get('PASSWORD_REUSE_LIMIT', 10),
         'profileReviewInterval'         => Env::get('PROFILE_REVIEW_INTERVAL', '+6 months'),
-        'userMailAdminsApiKey'          => Env::get('USER_MAIL_ADMINS_API_KEY'),
-        'userMailAdminsApiUrl'          => Env::get('USER_MAIL_ADMINS_API_URL'),
-        'userMailAdminsCcFallback'      => Env::get('USER_MAIL_ADMINS_CC_FALLBACK', ''),
-        'userMailAdminsCcOnInvite'      => Env::get('USER_MAIL_ADMINS_CC_ON_INVITE', false),
     ],
 ];

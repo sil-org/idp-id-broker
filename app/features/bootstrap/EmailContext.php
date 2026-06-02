@@ -878,24 +878,26 @@ class EmailContext extends YiiContext
         Assert::contains(current($this->matchingFakeEmails)['bcc_address'], $address, 'address not on bcc line');
     }
 
-    protected function assertEmailCc($address)
+    protected function getCcAddress(): string
     {
         Assert::greaterThan(count($this->matchingFakeEmails), 0);
-        Assert::keyExists(current($this->matchingFakeEmails), 'cc_address');
-        Assert::contains(current($this->matchingFakeEmails)['cc_address'], $address, 'address not on cc line');
+        $firstEmail = array_values($this->matchingFakeEmails)[0];
+        return $firstEmail['cc_address'] ?? '';
+    }
+
+    protected function assertEmailCc($address)
+    {
+        Assert::contains($this->getCcAddress(), $address, 'address not on cc line');
     }
 
     protected function assertEmailNotCc($address)
     {
-        Assert::greaterThan(count($this->matchingFakeEmails), 0);
-        $ccAddress = current($this->matchingFakeEmails)['cc_address'] ?? '';
-        Assert::notContains($ccAddress, $address, 'address unexpectedly on cc line');
+        Assert::notContains($this->getCcAddress(), $address, 'address unexpectedly on cc line');
     }
 
     protected function assertEmailHasNoCc()
     {
-        Assert::greaterThan(count($this->matchingFakeEmails), 0);
-        $ccAddress = current($this->matchingFakeEmails)['cc_address'] ?? '';
+        $ccAddress = $this->getCcAddress();
         Assert::isEmpty($ccAddress, 'expected no cc address, but found: ' . $ccAddress);
     }
 
@@ -1199,19 +1201,19 @@ class EmailContext extends YiiContext
     #[Given('we are configured to CC mail admins on invite emails')]
     public function weAreConfiguredToCcMailAdminsOnInviteEmails(): void
     {
-        \Yii::$app->params['userMailAdminsCcOnInvite'] = true;
+        \Yii::$app->params['accountMailAdminsCcOnInvite'] = true;
     }
 
     #[Given('we are configured NOT to CC mail admins on invite emails')]
     public function weAreConfiguredNotToCcMailAdminsOnInviteEmails(): void
     {
-        \Yii::$app->params['userMailAdminsCcOnInvite'] = false;
+        \Yii::$app->params['accountMailAdminsCcOnInvite'] = false;
     }
 
     #[Given('we are configured to CC :address as the mail admin fallback')]
     public function weAreConfiguredToCcAsTheMailAdminFallback($address): void
     {
-        \Yii::$app->params['userMailAdminsCcFallback'] = $address;
+        \Yii::$app->params['accountMailAdminsCcFallback'] = $address;
     }
 
     #[When('that user whose account has no mail admins is created')]

@@ -28,6 +28,10 @@ Feature: Email Client
     When we get message renders as HTML and text
     Then there is no error
 
+  Scenario: testGetMessageSplitsCommaSeparatedCcAddresses
+    When we get a message for an email with multiple comma-separated cc addresses
+    Then there is no error
+
   Scenario: testSendQueuedEmails
     When we send queued emails
     Then there is no error
