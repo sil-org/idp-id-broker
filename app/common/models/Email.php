@@ -71,7 +71,7 @@ class Email extends EmailBase
             return;
         }
         $validator = new \yii\validators\EmailValidator();
-        foreach (array_map('trim', explode(',', $value)) as $address) {
+        foreach ($this->splitAddresses($value) as $address) {
             if (!$validator->validate($address)) {
                 $this->addError(
                     $attribute,
@@ -80,6 +80,16 @@ class Email extends EmailBase
                 return;
             }
         }
+    }
+
+    /**
+     * Split a comma-separated address string into trimmed individual addresses.
+     *
+     * @return string[]
+     */
+    private function splitAddresses(string $addresses): array
+    {
+        return array_map('trim', explode(',', $addresses));
     }
 
     public function behaviors()
@@ -197,7 +207,7 @@ class Email extends EmailBase
          */
 
         if ($this->cc_address) {
-            $mailer->setCc(array_map('trim', explode(',', $this->cc_address)));
+            $mailer->setCc($this->splitAddresses($this->cc_address));
         }
 
         if ($this->bcc_address) {
