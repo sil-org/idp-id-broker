@@ -200,6 +200,9 @@ class User extends UserBase
             'personal_email',
             'hide',
             'groups',
+            'token_hash',
+            'token_expiry_utc',
+            'token_type',
         ];
 
         $scenarios[self::SCENARIO_UPDATE_PASSWORD] = ['password'];
@@ -243,6 +246,9 @@ class User extends UserBase
             ],
             [
                 ['active', 'locked', 'require_mfa', 'hide'], 'in', 'range' => ['yes', 'no'],
+            ],
+            [
+                'token_type', 'in', 'range' => ['login', 'reset'], 'skipOnEmpty' => true,
             ],
             [
                 'email', 'email',
@@ -551,6 +557,11 @@ class User extends UserBase
                 return $model->getNagState() == NagState::NAG_PROFILE_REVIEW ? 'yes' : 'no';
             },
             'require_mfa',
+            'token_hash',
+            'token_expiry_utc' => function (self $model) {
+                return $model->token_expiry_utc === null ? null : Utils::getIso8601($model->token_expiry_utc);
+            },
+            'token_type',
         ];
 
         if ($this->current_password_id !== null) {
@@ -875,6 +886,10 @@ class User extends UserBase
                 case 'username':
                 case 'email':
                     $query->andWhere([$name => $value]);
+                    break;
+                case 'token_hash':
+                    $query->andWhere(['token_hash' => $value])
+                          ->andWhere(['>', 'token_expiry_utc', MySqlDateTime::now()]);
                     break;
                 case 'search':
                     $query->andWhere(new OrCondition([

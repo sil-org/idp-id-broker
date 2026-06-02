@@ -782,3 +782,42 @@ Feature: User
       | active | isOrIsNot |
       | no     | is NOT    |
       | yes    | is        |
+
+  Scenario: Set token_hash fields on an existing user
+    Given a user with employee_id "123" has been created
+      And I set the token fields to hash "abc123hash" expiry "2099-01-01 12:00:00" and type "login"
+    When I request "/user/123" be updated
+    Then the response status code should be 200
+      And the following data is returned:
+        | property          | value                 |
+        | token_hash        | abc123hash            |
+        | token_expiry_utc  | 2099-01-01T12:00:00Z  |
+        | token_type        | login                 |
+      And a record exists with an employee_id of "123"
+      And the following data should be stored:
+        | property          | value                 |
+        | token_hash        | abc123hash            |
+        | token_expiry_utc  | 2099-01-01 12:00:00   |
+        | token_type        | login                 |
+
+  Scenario: Clear token_hash fields by sending null
+    Given a user with employee_id "123" has been created
+      And I set the token fields to hash "abc123hash" expiry "2099-01-01 12:00:00" and type "login"
+      And I request "/user/123" be updated
+      And the response status code should be 200
+      And I clear the token fields
+    When I request "/user/123" be updated
+    Then the response status code should be 200
+      And a record exists with an employee_id of "123"
+      And the following data should be stored:
+        | property          | value |
+        | token_hash        | NULL  |
+        | token_expiry_utc  | NULL  |
+        | token_type        | NULL  |
+
+  Scenario: Reject an invalid token_type value
+    Given a user with employee_id "123" has been created
+      And I change the token_type to invalid_value
+    When I request "/user/123" be updated
+    Then the response status code should be 422
+      And the property message should contain "Token Type"

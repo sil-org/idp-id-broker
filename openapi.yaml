@@ -150,6 +150,11 @@ paths:
           - 'yes'
           - 'no'
           type: string
+      - name: token_hash
+        in: query
+        description: >-
+          Search the token_hash column. Only rows with `token_expiry_utc` in the future are included
+          in the query.
     post:
       responses:
         '200':
@@ -1297,6 +1302,18 @@ components:
           - 'yes'
           - 'no'
           type: string
+        token_hash:
+          type: string
+          nullable: true
+        token_expiry_utc:
+          type: string
+          nullable: true
+        token_type:
+          enum:
+          - 'login'
+          - 'reset'
+          type: string
+          nullable: true
       required:
       - member
       - mfa
@@ -1388,6 +1405,18 @@ components:
           type: string
         groups:
           type: string
+        token_hash:
+          type: string
+          nullable: true
+        token_expiry_utc:
+          type: string
+          nullable: true
+        token_type:
+          enum:
+          - 'login'
+          - 'reset'
+          type: string
+          nullable: true
     MfaCreation:
       example:
         employee_id: '12345'
