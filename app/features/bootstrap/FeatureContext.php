@@ -882,6 +882,8 @@ class FeatureContext extends YiiContext
         $user = User::findOne(['employee_id' => $employeeId]);
         Assert::notNull($user, "User with employee_id $employeeId not found");
 
+        Assert::oneOf($tense, ['future', 'past'], 'Expiration tense must be "future" or "past".');
+
         $expiration = $tense === 'future'
             ? MySqlDateTime::relativeTime('+1 day')
             : MySqlDateTime::relativeTime('-1 day');

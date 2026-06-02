@@ -150,6 +150,11 @@ paths:
           - 'yes'
           - 'no'
           type: string
+      - name: token_hash
+        in: query
+        description: >-
+          Search the token_hash column. Only rows with `token_expiry_utc` in the future are included
+          in the query.
     post:
       responses:
         '200':

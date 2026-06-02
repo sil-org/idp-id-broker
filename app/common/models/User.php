@@ -889,7 +889,7 @@ class User extends UserBase
                     break;
                 case 'token_hash':
                     $query->andWhere(['token_hash' => $value])
-                          ->andWhere(['>', 'token_expiry_utc', \common\helpers\MySqlDateTime::now()]);
+                          ->andWhere(['>', 'token_expiry_utc', MySqlDateTime::now()]);
                     break;
                 case 'search':
                     $query->andWhere(new OrCondition([
