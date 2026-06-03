@@ -123,8 +123,8 @@ class Password extends PasswordBase
     private function expires(): Closure
     {
         return function () {
-            if (!empty($this->expires_on)) {
-                return $this->expires_on;
+            if ($this->hibp_is_pwned === 'yes') {
+                return MySqlDateTime::relativeTime('+5 minutes');
             }
 
             $lifespan = Yii::$app->params['passwordLifespan'];
@@ -141,11 +141,27 @@ class Password extends PasswordBase
     private function gracePeriodEnds(): Closure
     {
         return function () {
+            if ($this->hibp_is_pwned === 'yes') {
+                return MySqlDateTime::relativeTime(\Yii::$app->params['hibpGracePeriod']);
+            }
+
             $gracePeriod = Yii::$app->params['passwordExpirationGracePeriod'];
             $gracePeriodEnds = strtotime($gracePeriod, strtotime($this->expires_on));
+            $nowPlusExtension = strtotime(\Yii::$app->params['passwordGracePeriodExtension']);
 
-            if ($gracePeriodEnds < time()) {
-                $gracePeriodEnds = strtotime(\Yii::$app->params['passwordGracePeriodExtension']);
+            /*
+             * If grace period has ended or will end in the near future, bump it out to allow
+             * time for the user to change their password.
+             */
+            if ($gracePeriodEnds < $nowPlusExtension) {
+                $gracePeriodEnds = $nowPlusExtension;
+
+                \Yii::warning([
+                    'action' => 'extend grace period',
+                    'status' => 'success',
+                    'username' => $this->username,
+                    'grace_period_ends_on' => $this->currentPassword->grace_period_ends_on,
+                ]);
             }
 
             return MySqlDateTime::formatDate($gracePeriodEnds);
