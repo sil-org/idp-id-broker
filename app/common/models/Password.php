@@ -105,6 +105,7 @@ class Password extends PasswordBase
                 'class' => AttributeBehavior::className(),
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'expires_on',
+                    ActiveRecord::EVENT_BEFORE_UPDATE => 'expires_on',
                 ],
                 'value' => $this->expires(),
             ],
@@ -112,6 +113,7 @@ class Password extends PasswordBase
                 'class' => AttributeBehavior::className(),
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'grace_period_ends_on',
+                    ActiveRecord::EVENT_BEFORE_UPDATE => 'grace_period_ends_on',
                 ],
                 'value' => $this->gracePeriodEnds(),
             ],
@@ -121,9 +123,18 @@ class Password extends PasswordBase
     private function expires(): Closure
     {
         return function () {
-            $lifespan = Yii::$app->params['passwordLifespan'];
+            if (!empty($this->expires_on)) {
+                return $this->expires_on;
+            }
 
-            return MySqlDateTime::formatDate(strtotime($lifespan, strtotime($this->created_utc)));
+            $lifespan = Yii::$app->params['passwordLifespan'];
+            $expiresOn = strtotime($lifespan, strtotime($this->created_utc));
+
+            if ($this->user->getVerifiedMfaOptionsCount() > 0) {
+                $expiresOn = strtotime(Yii::$app->params['passwordMfaLifespanExtension'], $expiresOn);
+            }
+
+            return MySqlDateTime::formatDate($expiresOn);
         };
     }
 
@@ -131,8 +142,13 @@ class Password extends PasswordBase
     {
         return function () {
             $gracePeriod = Yii::$app->params['passwordExpirationGracePeriod'];
+            $gracePeriodEnds = strtotime($gracePeriod, strtotime($this->expires_on));
 
-            return MySqlDateTime::formatDate(strtotime($gracePeriod, strtotime($this->expires_on)));
+            if ($gracePeriodEnds < time()) {
+                $gracePeriodEnds = strtotime(\Yii::$app->params['passwordGracePeriodExtension']);
+            }
+
+            return MySqlDateTime::formatDate($gracePeriodEnds);
         };
     }
 
@@ -161,40 +177,23 @@ class Password extends PasswordBase
 
         return $labels;
     }
-
+    
     /**
-     * Returns a date extended by the MFA Lifespan Extension, if applicable
-     * @param string $date date in yyyy-mm-dd format
-     * @return string conditionally extended and converted to ISO8601 format
-     */
-    protected function getMfaExtendedDate($date)
-    {
-        $dateIso = $date . 'T23:59:59Z';
-        if ($this->user->getVerifiedMfaOptionsCount() > 0) {
-            $extended = strtotime(\Yii::$app->params['passwordMfaLifespanExtension'], strtotime($dateIso));
-            return Utils::getIso8601($extended);
-        }
-        return $dateIso;
-    }
-
-    /**
-     * If password is pwned, return actual expires_on.
-     * Otherwise calculate expires_on date based on if user has MFA configured
+     * Returns expires_on (end of day)
      * @return string
      */
     public function getExpiresOn()
     {
-        return $this->hibp_is_pwned == 'yes' ? $this->expires_on : $this->getMfaExtendedDate($this->expires_on);
+        return $this->expires_on . 'T23:59:59Z';
     }
 
     /**
-     * If password is pwned, return actual grace_period_ends_on.
-     * Otherwise calculate grace_period_ends_on based on if user has MFA configured
+     * Returns grace_period_ends_on (end of day)
      * @return string
      */
     public function getGracePeriodEndsOn()
     {
-        return $this->hibp_is_pwned == 'yes' ? $this->grace_period_ends_on : $this->getMfaExtendedDate($this->grace_period_ends_on);
+        return $this->grace_period_ends_on . 'T23:59:59Z';
     }
 
     /**
