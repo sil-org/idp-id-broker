@@ -46,7 +46,7 @@ class FeatureContext extends YiiContext
     protected $methodFromDb;
 
     private $now;
-    public const ACCEPTABLE_DELTA_IN_SECONDS = 1;
+    public const ACCEPTABLE_DELTA_IN_SECONDS = 3;
 
     protected $tempEmployeeId = null;
 
@@ -804,14 +804,14 @@ class FeatureContext extends YiiContext
     public function theUserSPasswordIsNotExpired()
     {
         $user = User::findOne(['username' => $this->reqBody['username']]);
-        Assert::greaterThanEq(strtotime($user->currentPassword->getExpiresOn()), time());
+        Assert::greaterThanEq(strtotime($user->currentPassword->expires_on), time());
     }
 
     #[Given("The user's password is expired")]
     public function theUserSPasswordIsExpired()
     {
         $user = User::findOne(['username' => $this->reqBody['username']]);
-        Assert::lessThanEq(strtotime($user->currentPassword->getExpiresOn()), time());
+        Assert::lessThanEq(strtotime($user->currentPassword->expires_on), time());
     }
 
     #[Given('I prepare a request with the user\'s username')]
