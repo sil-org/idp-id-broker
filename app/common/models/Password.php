@@ -123,7 +123,10 @@ class Password extends PasswordBase
     private function expires(): Closure
     {
         return function () {
-            if ($this->hibp_is_pwned === 'yes') {
+            $oldHIPB = $this->getOldAttribute('hibp_is_pwned');
+            if ($this->hibp_is_pwned === 'yes' && $oldHIPB !== 'yes') {
+                return $this->expires_on;
+            } elseif ($this->hibp_is_pwned === 'yes') {
                 return MySqlDateTime::relativeTime('+5 minutes');
             }
 
@@ -159,8 +162,8 @@ class Password extends PasswordBase
                 \Yii::warning([
                     'action' => 'extend grace period',
                     'status' => 'success',
-                    'username' => $this->username,
-                    'grace_period_ends_on' => $this->currentPassword->grace_period_ends_on,
+                    'username' => $this->user->username,
+                    'grace_period_ends_on' => $this->grace_period_ends_on,
                 ]);
             }
 
