@@ -3,6 +3,7 @@
 namespace Sil\SilIdBroker\Behat\Context;
 
 use Behat\Behat\Context\Context;
+use Behat\Hook\AfterScenario;
 use Behat\Hook\BeforeScenario;
 use Behat\Hook\BeforeSuite;
 use Sil\Psr3Adapters\Psr3StdOutLogger;
@@ -19,6 +20,8 @@ class YiiContext implements Context
 
     /** @var FakeLogTarget */
     protected $fakeLogTarget;
+
+    private array $savedParams = [];
 
     private static $application;
 
@@ -41,6 +44,25 @@ class YiiContext implements Context
         Yii::$app->set('emailer', $this->fakeEmailer);
 
         $this->addFakeLogTarget();
+    }
+
+    #[BeforeScenario]
+    public function saveParameters()
+    {
+        // Snapshot params individual scenarios may toggle, then restore them in
+        // restoreParameters(), so a change can't leak via the shared (static) application
+        // instance — and config/test.env stays the single source of truth.
+        foreach (['accountMailAdminsCcOnInvite', 'accountMailAdminsCcFallback'] as $key) {
+            $this->savedParams[$key] = Yii::$app->params[$key] ?? null;
+        }
+    }
+
+    #[AfterScenario]
+    public function restoreParameters()
+    {
+        foreach ($this->savedParams as $key => $value) {
+            Yii::$app->params[$key] = $value;
+        }
     }
 
     protected function addFakeLogTarget()

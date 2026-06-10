@@ -42,9 +42,13 @@ class Email extends EmailBase
                     'attempts_count', 'default', 'value' => 0,
                 ],
                 [
-                    ['to_address', 'cc_address', 'bcc_address'],
+                    ['to_address', 'bcc_address'],
                     'email',
                     'message' => '{attribute} is not a valid email address: {value}',
+                ],
+                [
+                    'cc_address',
+                    'validateCommaSeparatedEmails',
                 ],
                 [
                     'text_body', 'required', 'when' => function ($model) {
@@ -53,6 +57,39 @@ class Email extends EmailBase
                 ],
             ]
         );
+    }
+
+    /**
+     * Validate an attribute that may hold one address or several comma-separated
+     * addresses (e.g. `cc_address`, which can CC the personal email plus the
+     * account's mail admins on an invite).
+     */
+    public function validateCommaSeparatedEmails($attribute)
+    {
+        $value = (string)$this->$attribute;
+        if ($value === '') {
+            return;
+        }
+        $validator = new \yii\validators\EmailValidator();
+        foreach ($this->splitAddresses($value) as $address) {
+            if (!$validator->validate($address)) {
+                $this->addError(
+                    $attribute,
+                    $this->getAttributeLabel($attribute) . ' is not a valid email address: ' . $value
+                );
+                return;
+            }
+        }
+    }
+
+    /**
+     * Split a comma-separated address string into trimmed individual addresses.
+     *
+     * @return string[]
+     */
+    private function splitAddresses(string $addresses): array
+    {
+        return array_map('trim', explode(',', $addresses));
     }
 
     public function behaviors()
@@ -170,7 +207,7 @@ class Email extends EmailBase
          */
 
         if ($this->cc_address) {
-            $mailer->setCc($this->cc_address);
+            $mailer->setCc($this->splitAddresses($this->cc_address));
         }
 
         if ($this->bcc_address) {
