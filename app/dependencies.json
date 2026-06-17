@@ -81,7 +81,7 @@
   },
   {
     "name": "guzzlehttp/psr7",
-    "version": "2.9.0"
+    "version": "2.11.0"
   },
   {
     "name": "http-interop/http-factory-guzzle",
@@ -245,7 +245,7 @@
   },
   {
     "name": "symfony/polyfill-php80",
-    "version": "v1.33.0"
+    "version": "v1.37.0"
   },
   {
     "name": "symfony/polyfill-php83",

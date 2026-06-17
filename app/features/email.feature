@@ -22,6 +22,49 @@ Feature: Email
         | NOT to send   | already exists  | has           | gets a password    | should NOT  |
         | NOT to send   | already exists  | has           | has non-pw changes | should NOT  |
 
+  Scenario Outline: When to CC mail admins on invite emails
+    Given we are configured to send invite emails
+      And we are configured <ccConfig> mail admins on invite emails
+      And a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user is created
+    Then an "invite" email should have been sent to them
+      And the email address "mailadmin@example.com" <shouldOrNot> have been CCed
+
+    Examples:
+        | ccConfig  | shouldOrNot |
+        | to CC     | should      |
+        | NOT to CC | should NOT  |
+
+  Scenario: CC both the personal email and the mail admin on an invite
+    Given we are configured to send invite emails
+      And we are configured to CC mail admins on invite emails
+      And a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user is created with a personal email address
+    Then an "invite" email should have been sent to them
+      And the email address "mailadmin@example.com" should have been CCed
+      And the invite email should also CC the personal email
+
+  Scenario: CC the fallback address when the account has no mail admins
+    Given we are configured to send invite emails
+      And we are configured to CC mail admins on invite emails
+      And we are configured to CC "google_admin@example.com" as the mail admin fallback
+      And a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user whose account has no mail admins is created
+    Then an "invite" email should have been sent to them
+      And the email address "google_admin@example.com" should have been CCed
+
+  Scenario: Do not CC anyone when there are no mail admins and no fallback is configured
+    Given we are configured to send invite emails
+      And we are configured to CC mail admins on invite emails
+      And a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user whose account has no mail admins is created
+    Then an "invite" email should have been sent to them
+      And the invite email should have no one CCed
+
   Scenario Outline: When to send password-changed emails
     Given we are configured <sendPwChgEml> password-changed emails
       And a specific user <userExistsOrNot>

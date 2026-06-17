@@ -5,6 +5,7 @@ namespace common\models;
 use Closure;
 use common\components\Emailer;
 use common\components\HIBP;
+use common\components\MailAdmin;
 use common\components\Sheets;
 use common\helpers\MySqlDateTime;
 use common\helpers\Utils;
@@ -807,13 +808,9 @@ class User extends UserBase
         if ($emailer->shouldSendInviteMessageTo($this, $isNewUser)) {
             $invite = Invite::findOrCreate($this->id);
             $data = ['inviteCode' => $invite->getCode()];
-            /*
-             * If both `personal_email` and `this_email` are valid, then this is a normal
-             * invite scenario. Otherwise, there's no need to include the 'cc' because the
-             * `personal_email` will be used for the 'to' address.
-             */
-            if ($this->personal_email && $this->email) {
-                $data['ccAddress'] = $this->personal_email;
+            $ccAddress = $this->getInviteCcAddress();
+            if ($ccAddress !== '') {
+                $data['ccAddress'] = $ccAddress;
             }
             $emailer->sendMessageTo(
                 EmailLog::MESSAGE_TYPE_INVITE,
@@ -830,6 +827,35 @@ class User extends UserBase
         if ($emailer->shouldSendWelcomeMessageTo($this, $changedAttributes)) {
             $emailer->sendMessageTo(EmailLog::MESSAGE_TYPE_WELCOME, $this);
         }
+    }
+
+    /**
+     * Build the CC for a new user's invite: the personal email (when applicable)
+     * plus, if enabled, the account's mail admins -- or the configured fallback
+     * when the Mail Admin lookup returns none.
+     *
+     * @return string Comma-separated CC addresses, or '' when there are none.
+     */
+    private function getInviteCcAddress(): string
+    {
+        $ccAddresses = [];
+        /*
+         * If both `personal_email` and `email` are valid, this is a normal invite
+         * scenario. Otherwise there's no need to CC, because `personal_email` will
+         * be used for the 'to' address.
+         */
+        if ($this->personal_email && $this->email) {
+            $ccAddresses[] = $this->personal_email;
+        }
+        if (\Yii::$app->params['accountMailAdminsCcOnInvite']) {
+            $mailAdminEmails = MailAdmin::getEmailsFor($this->email);
+            if (empty($mailAdminEmails)) {
+                $fallback = \Yii::$app->params['accountMailAdminsCcFallback'] ?? '';
+                $mailAdminEmails = $fallback === '' ? [] : [$fallback];
+            }
+            $ccAddresses = array_merge($ccAddresses, $mailAdminEmails);
+        }
+        return implode(',', array_filter($ccAddresses));
     }
 
     private function updatePassword(): bool
