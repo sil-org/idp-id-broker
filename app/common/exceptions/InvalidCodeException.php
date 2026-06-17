@@ -2,4 +2,6 @@
 
 namespace common\exceptions;
 
-class InvalidCodeException extends \Exception {}
+class InvalidCodeException extends \Exception
+{
+}
