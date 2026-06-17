@@ -152,7 +152,7 @@ class Mfa extends MfaBase
 
             // Update password expires_on and grace_period_ends_on if any verified mfa options
             if ($this->user->getVerifiedMfaOptionsCount() == 1 && $this->user->currentPassword !== null) {
-                $this->user->currentPassword->save();
+                $this->user->currentPassword->updateExpiry();
             }
         }
     }
@@ -203,7 +203,7 @@ class Mfa extends MfaBase
 
         // Check if any MFA, and roll back expiration date and update grace period as needed
         if ($this->user->getVerifiedMfaOptionsCount() == 0 && $this->user->currentPassword !== null) {
-            $this->user->currentPassword->save();
+            $this->user->currentPassword->updateExpiry();
         }
     }
 
