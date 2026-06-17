@@ -199,15 +199,16 @@ class Password extends PasswordBase
 
     /**
      * Update expires_on and grace_period_ends_on fields
-     * @return void 
+     * @return void
      */
-    public function updateExpiry() {
+    public function updateExpiry()
+    {
         $this->expires_on = self::expires()();
         $this->grace_period_ends_on = self::gracePeriodEnds()();
         $this->setScenario(self::SCENARIO_UPDATE_METADATA);
         $this->save();
     }
-    
+
     /**
      * Returns expires_on (end of day)
      * @return string
