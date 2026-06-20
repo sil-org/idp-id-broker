@@ -125,6 +125,7 @@ class Password extends PasswordBase
         return function () {
             $oldHIPB = $this->getOldAttribute('hibp_is_pwned');
             if ($this->hibp_is_pwned === 'yes' && $oldHIPB !== 'yes') {
+                // Password is already marked as pwned, don't adjust time
                 return $this->expires_on;
             } elseif ($this->hibp_is_pwned === 'yes') {
                 return MySqlDateTime::relativeTime('+5 minutes');
