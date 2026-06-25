@@ -1012,7 +1012,16 @@ class EmailContext extends YiiContext
 
         $currentPassword = $this->tempUser->currentPassword;
         $currentPassword->password = base64_encode(random_bytes(33)); // Needed to pass validation
-        $currentPassword->expires_on = MySqlDateTime::relative($n . ' days');
+
+        $lifespan = strtotime('-'.ltrim(\Yii::$app->params['passwordLifespan'], '+'));
+
+        if ($this->tempUser->getVerifiedMfaOptionsCount() > 0) {
+            $lifespan = strtotime('-'.ltrim(\Yii::$app->params['passwordMfaLifespanExtension'], '+'), $lifespan);
+        }
+
+        $createdOn = strtotime($n.' days', $lifespan);
+        $currentPassword->created_utc = MySqlDateTime::formatDate($createdOn);
+
         Assert::true(
             $currentPassword->save(),
             'Failed to save updated password expiration date. '

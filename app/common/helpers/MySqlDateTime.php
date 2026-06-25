@@ -133,4 +133,56 @@ class MySqlDateTime
     {
         return self::isBefore($eventTime, $now);
     }
+
+    /**
+     * Convert a simple PHP relative string like "+1 year" or "-2 months" to a MySQL interval fragment:
+     * returns e.g. "+ INTERVAL 1 YEAR" or "- INTERVAL 2 MONTH", or null if it can't parse.
+     *
+     * Supports: seconds/minutes/hours/days/weeks/months/years (singular/plural/short forms).
+     * 
+     * @param string $difference 
+     * @return null|string 
+     */
+    public static function interval(string $difference): ?string
+    {
+        $difference = trim($difference);
+        if (!preg_match('/^([+-]?\d+)\s*([a-zA-Z]+)$/', $difference, $m)) {
+            return null;
+        }
+        $n = (int)$m[1];
+        $unit = strtolower($m[2]);
+
+        $map = [
+            's' => 'SECOND', 'sec' => 'SECOND', 'second' => 'SECOND', 'seconds' => 'SECOND',
+            'm' => 'MINUTE', 'min' => 'MINUTE', 'minute' => 'MINUTE', 'minutes' => 'MINUTE',
+            'h' => 'HOUR', 'hour' => 'HOUR', 'hours' => 'HOUR',
+            'd' => 'DAY', 'day' => 'DAY', 'days' => 'DAY',
+            'w' => 'WEEK', 'week' => 'WEEK', 'weeks' => 'WEEK',
+            'month' => 'MONTH', 'months' => 'MONTH',
+            'y' => 'YEAR', 'yr' => 'YEAR', 'year' => 'YEAR', 'years' => 'YEAR',
+        ];
+
+        if (!isset($map[$unit])) {
+            return null;
+        }
+
+        $mysqlUnit = $map[$unit];
+        $sign = $n < 0 ? '-' : '+';
+        return sprintf("%s INTERVAL %d %s", $sign, abs($n), $mysqlUnit);
+    }
+
+    /**
+     * Invert a fragment like "+ INTERVAL 1 YEAR" -> "- INTERVAL 1 YEAR"
+     */
+    public static function invertInterval(?string $fragment): ?string
+    {
+        if ($fragment === null) {
+            return null;
+        }
+        if (preg_match('/^([+-])\s+INTERVAL\s+(\d+)\s+([A-Z]+)$/', $fragment, $m)) {
+            $op = $m[1] === '+' ? '-' : '+';
+            return sprintf("%s INTERVAL %s %s", $op, $m[2], $m[3]);
+        }
+        return null;
+    }
 }
