@@ -66,6 +66,8 @@ class EmailContext extends YiiContext
 
     private ?EmailLog $tempEmailLog;
 
+    private string $fallback = '';
+
     public const METHOD_EMAIL_ADDRESS = 'method@example.com';
     public const MANAGER_EMAIL = 'manager@example.com';
     public const RECOVERY_EMAIL = 'recovery@example.com';
@@ -1213,7 +1215,7 @@ class EmailContext extends YiiContext
     #[Given('we are configured to CC :address as the mail admin fallback')]
     public function weAreConfiguredToCcAsTheMailAdminFallback($address): void
     {
-        \Yii::$app->params['accountMailAdminsCcFallback'] = $address;
+        $this->fallback = $address;
     }
 
     #[When('that user whose account has no mail admins is created')]
@@ -1222,6 +1224,7 @@ class EmailContext extends YiiContext
         Assert::null($this->tempUser, 'The user should not have existed yet.');
         // Unique address that still matches the "no mail admins" rule in the API mock.
         $email = str_replace('@', '_' . uniqid() . '@', self::NO_MAIL_ADMINS_EMAIL);
+        \Yii::$app->params['accountMailAdminsCcFallback'] = $this->fallback;
         $this->tempUser = $this->createNewUser(false, $email);
     }
 
