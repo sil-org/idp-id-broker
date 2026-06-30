@@ -848,8 +848,9 @@ class User extends UserBase
             $ccAddresses[] = $this->personal_email;
         }
         if (\Yii::$app->params['accountMailAdminsCcOnInvite']) {
-            $mailAdminEmails = MailAdmin::getEmailsFor($this->email);
-            if (empty($mailAdminEmails)) {
+            if (!empty($this->email)) {
+                $mailAdminEmails = MailAdmin::getEmailsFor($this->email);
+            } else {
                 $fallback = \Yii::$app->params['accountMailAdminsCcFallback'] ?? '';
                 $mailAdminEmails = $fallback === '' ? [] : [$fallback];
             }
