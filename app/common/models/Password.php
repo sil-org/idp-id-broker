@@ -95,14 +95,14 @@ class Password extends PasswordBase
     {
         return [
             'createdTracker' => [
-                'class' => AttributeBehavior::className(),
+                'class' => AttributeBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'created_utc',
                 ],
                 'value' => MySqlDateTime::now(),
             ],
             'expirationTracker' => [
-                'class' => AttributeBehavior::className(),
+                'class' => AttributeBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'expires_on',
                     ActiveRecord::EVENT_BEFORE_UPDATE => 'expires_on',
@@ -110,7 +110,7 @@ class Password extends PasswordBase
                 'value' => $this->expires(),
             ],
             'gracePeriodTracker' => [
-                'class' => AttributeBehavior::className(),
+                'class' => AttributeBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'grace_period_ends_on',
                     ActiveRecord::EVENT_BEFORE_UPDATE => 'grace_period_ends_on',
@@ -233,7 +233,7 @@ class Password extends PasswordBase
      */
     public function getUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
     /**

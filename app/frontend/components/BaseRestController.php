@@ -14,7 +14,7 @@ class BaseRestController extends Controller
         $behaviors = parent::behaviors();
 
         // Use request header-> 'Authorization: Bearer <token>'
-        $behaviors['authenticator']['class'] = HttpBearerAuth::className();
+        $behaviors['authenticator']['class'] = HttpBearerAuth::class;
 
         return $behaviors;
     }
