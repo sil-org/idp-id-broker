@@ -39,12 +39,12 @@ if [[ -n "$SSL_CA_BASE64" ]]; then
     fi
 fi
 
-$config "$APP_HOME"/yii migrate --interactive=0
-
 if [[ $RUN_TASK ]]; then
   $config ./yii $RUN_TASK
   exit $?
 fi
+
+$config "$APP_HOME"/yii migrate --interactive=0
 
 make-ssl-cert generate-default-snakeoil
 
