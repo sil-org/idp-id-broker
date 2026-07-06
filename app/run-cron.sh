@@ -27,5 +27,10 @@ fi
 echo '* * * * * root '"$APP_HOME"'/yii send/send-queued-email > /proc/1/fd/1 2>&1' > /etc/crontab
 chmod 0644 /etc/crontab
 
+if [[ -n "$CRON_TASK" ]]; then
+    echo "$TASK_SCHEDULE"' root '"$APP_HOME"'/yii '"$CRON_TASK"' > /proc/1/fd/1 2>&1' > /etc/crontab
+fi
+
+
 # run cron in foreground so output is logged
 cron -f
