@@ -51,3 +51,10 @@ Feature: Unit Tests for the Mfa model
       And that user also has a manager rescue mfa option
     When I verify a backup code
     Then I see that the user no longer has a manager rescue mfa option
+
+  Scenario: Removing an old unverified totp option succeeds even when its backend record is already gone
+    Given I have a user with an unverified totp mfa option
+      And that totp mfa option is old and its backend record no longer exists
+    When old unverified mfa records are removed
+    Then that totp mfa option should no longer exist
+      And no mfa deletion error should have been logged

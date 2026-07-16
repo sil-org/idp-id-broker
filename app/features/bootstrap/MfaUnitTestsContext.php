@@ -2,6 +2,7 @@
 
 namespace Sil\SilIdBroker\Behat\Context;
 
+use common\helpers\MySqlDateTime;
 use common\models\Mfa;
 use common\models\MfaBackupcode;
 use Webmozart\Assert\Assert;
@@ -185,5 +186,39 @@ class MfaUnitTestsContext extends UnitTestsContext
     {
         $mfa = Mfa::findOne(['user_id' => $this->tempUser->id, 'type' => Mfa::TYPE_MANAGER]);
         Assert::null($mfa);
+    }
+
+    #[Given('that totp mfa option is old and its backend record no longer exists')]
+    public function thatTotpMfaOptionIsOldAndItsBackendRecordNoLongerExists()
+    {
+        $this->mfa->external_uuid = '11111111-2222-4333-8444-555555555555';
+        $this->mfa->created_utc = MySqlDateTime::relativeTime('-1 year');
+        Assert::true($this->mfa->save(), 'Could not set up the old totp mfa option.');
+    }
+
+    #[When('old unverified mfa records are removed')]
+    public function oldUnverifiedMfaRecordsAreRemoved()
+    {
+        Mfa::removeOldUnverifiedRecords();
+    }
+
+    #[Then('that totp mfa option should no longer exist')]
+    public function thatTotpMfaOptionShouldNoLongerExist()
+    {
+        Assert::null(
+            Mfa::findOne($this->mfaId),
+            'The old, unverified totp mfa option should have been deleted.'
+        );
+    }
+
+    #[Then('no mfa deletion error should have been logged')]
+    public function noMfaDeletionErrorShouldHaveBeenLogged()
+    {
+        \Yii::getLogger()->flush();
+        $loggedMessagesJson = $this->fakeLogTarget->getLoggedMessagesJson();
+        Assert::false(
+            str_contains($loggedMessagesJson, '404 Not Found'),
+            'A 404 error was logged while deleting old mfa records: ' . $loggedMessagesJson
+        );
     }
 }
