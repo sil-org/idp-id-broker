@@ -144,7 +144,14 @@ class Email extends EmailBase
             return $this->send();
         } catch (Exception $e) {
             /*
-             * Send failed, attempt to queue
+             * Send failed. Retain the message in the queue and increment the attempts count.
+             * Note: the `attempts_count` column is only one byte, capping the value at 128. This can cause a
+             * permanent failure to send due to a database failure message (SQLSTATE[22003]: Numeric value out
+             * of range). This bug is being left in place intentionally. In a case where a lengthy outage
+             * accumulates a lot of unsent messages, clearing the outage would release a flood of messages if not
+             * for this bug. That would likely cause Gmail to block the account for rate limiting. So if this bug
+             * is fixed, there should be some additional solution put in place for slowly clearing out the backlog,
+             * or maybe even just clearing the backlog without sending the messages.
              */
             $this->attempts_count += 1;
             $this->updated_at = time();

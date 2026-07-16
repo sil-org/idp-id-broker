@@ -169,3 +169,16 @@ the new one here, then remove the old one from the Google Cloud Console. In
 other words, you can wait to delete the previous Key from that Service Account
 until you have deployed the new credentials, if desired, to avoid service
 interruption.
+
+## Known issues
+
+### Email retry attempts count overflow
+
+The email table `attempts_count` column is only one byte, capping the value at 128. This can cause a
+permanent failure to send due to a database failure message (SQLSTATE[22003]: Numeric value out
+of range). This bug is being left in place intentionally. In a case where a lengthy outage
+accumulates a lot of unsent messages, clearing the outage would release a flood of messages if not
+for this bug. That would likely cause Gmail to block the account for rate limiting. So if this bug
+is fixed, there should be some additional solution put in place for slowly clearing out the backlog,
+or maybe even just clearing the backlog without sending the messages. See the `Email::retry()` method
+for details. (YouTrack issue IDP-710)
