@@ -89,7 +89,15 @@ class MfaApiClient
      */
     public function deleteTotp(string $uuid): bool
     {
-        $this->callApi('totp/' . $uuid, 'DELETE');
+        try {
+            $this->callApi('totp/' . $uuid, 'DELETE');
+        } catch (ClientException $e) {
+            if ($e->getCode() === 404) {
+                // The record is already gone, so treat the delete as successful.
+                return true;
+            }
+            throw $e;
+        }
         return true;
     }
 
