@@ -139,9 +139,9 @@ class MySqlDateTime
      * returns e.g. "+ INTERVAL 1 YEAR" or "- INTERVAL 2 MONTH", or null if it can't parse.
      *
      * Supports: seconds/minutes/hours/days/weeks/months/years (singular/plural/short forms).
-     * 
-     * @param string $difference 
-     * @return null|string 
+     *
+     * @param string $difference
+     * @return null|string
      */
     public static function interval(string $difference): ?string
     {
@@ -149,7 +149,7 @@ class MySqlDateTime
         if (!preg_match('/^([+-]?\d+)\s*([a-zA-Z]+)$/', $difference, $m)) {
             return null;
         }
-        $n = (int)$m[1];
+        $n = (int) $m[1];
         $unit = strtolower($m[2]);
 
         $map = [

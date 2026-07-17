@@ -66,7 +66,7 @@ class Email extends EmailBase
      */
     public function validateCommaSeparatedEmails($attribute)
     {
-        $value = (string)$this->$attribute;
+        $value = (string) $this->$attribute;
         if ($value === '') {
             return;
         }

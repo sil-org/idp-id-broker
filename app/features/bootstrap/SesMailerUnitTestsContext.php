@@ -23,7 +23,7 @@ class SesMailerUnitTestsContext extends YiiContext
     #[Given('I have a new SesMailer')]
     public function iHaveANewSesMailer()
     {
-        $this->mailer = new class () extends SesMailer {
+        $this->mailer = new class extends SesMailer {
             public function getEmailArgs($message): array
             {
                 return $this->buildEmailArgs($message);

@@ -73,15 +73,15 @@
   },
   {
     "name": "guzzlehttp/guzzle",
-    "version": "7.10.0"
+    "version": "7.12.1"
   },
   {
     "name": "guzzlehttp/promises",
-    "version": "2.3.0"
+    "version": "2.5.0"
   },
   {
     "name": "guzzlehttp/psr7",
-    "version": "2.11.0"
+    "version": "2.12.1"
   },
   {
     "name": "http-interop/http-factory-guzzle",
@@ -133,7 +133,7 @@
   },
   {
     "name": "phpseclib/phpseclib",
-    "version": "3.0.52"
+    "version": "3.0.55"
   },
   {
     "name": "phpspec/php-diff",

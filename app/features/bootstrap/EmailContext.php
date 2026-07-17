@@ -1013,13 +1013,13 @@ class EmailContext extends YiiContext
         $currentPassword = $this->tempUser->currentPassword;
         $currentPassword->password = base64_encode(random_bytes(33)); // Needed to pass validation
 
-        $lifespan = strtotime('-'.ltrim(\Yii::$app->params['passwordLifespan'], '+'));
+        $lifespan = strtotime('-' . ltrim(\Yii::$app->params['passwordLifespan'], '+'));
 
         if ($this->tempUser->getVerifiedMfaOptionsCount() > 0) {
-            $lifespan = strtotime('-'.ltrim(\Yii::$app->params['passwordMfaLifespanExtension'], '+'), $lifespan);
+            $lifespan = strtotime('-' . ltrim(\Yii::$app->params['passwordMfaLifespanExtension'], '+'), $lifespan);
         }
 
-        $createdOn = strtotime($n.' days', $lifespan);
+        $createdOn = strtotime($n . ' days', $lifespan);
         $currentPassword->created_utc = MySqlDateTime::formatDate($createdOn);
 
         Assert::true(
