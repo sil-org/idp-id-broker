@@ -52,7 +52,7 @@ class YiiContext implements Context
         // Snapshot params individual scenarios may toggle, then restore them in
         // restoreParameters(), so a change can't leak via the shared (static) application
         // instance — and config/test.env stays the single source of truth.
-        foreach (['accountMailAdminsCcOnInvite', 'accountMailAdminsCcFallback'] as $key) {
+        foreach (['accountMailAdminsCcOnInvite', 'accountMailAdminsCcFallback', 'passwordReuseLimit'] as $key) {
             $this->savedParams[$key] = Yii::$app->params[$key] ?? null;
         }
     }

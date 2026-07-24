@@ -17,6 +17,7 @@ use common\models\Password;
 use common\models\Reset;
 use common\models\User;
 use Webmozart\Assert\Assert;
+use yii\web\ConflictHttpException;
 
 class UnitTestsContext extends YiiContext
 {
@@ -33,6 +34,9 @@ class UnitTestsContext extends YiiContext
 
     /** @var User */
     protected $tempUser;
+
+    /** @var bool whether the most recent password submission was saved */
+    protected $passwordWasAccepted;
 
     /** @var bool whether the Mfa option is considered newly verified */
     protected $mfaIsNewlyVerified;
@@ -440,6 +444,35 @@ class UnitTestsContext extends YiiContext
     {
         $hash = $this->tempUser->currentPassword->hash;
         Assert::notEmpty($hash);
+    }
+
+    #[Given('the password reuse limit is :limit')]
+    public function thePasswordReuseLimitIs($limit)
+    {
+        \Yii::$app->params['passwordReuseLimit'] = $limit;
+    }
+
+    #[When('the user submits that same password again')]
+    public function theUserSubmitsThatSamePasswordAgain()
+    {
+        $this->tempUser = User::findOne($this->tempUser->id);
+        $this->tempUser->setScenario(User::SCENARIO_UPDATE_PASSWORD);
+        $this->tempUser->password = 'k23@U$%235u25@I2$o';
+
+        try {
+            $this->passwordWasAccepted = $this->tempUser->save();
+        } catch (ConflictHttpException $e) {
+            $this->passwordWasAccepted = false;
+        }
+    }
+
+    #[Then('the password should be rejected as recently used')]
+    public function thePasswordShouldBeRejectedAsRecentlyUsed()
+    {
+        Assert::false(
+            $this->passwordWasAccepted,
+            'The password was accepted even though it had been used recently.'
+        );
     }
 
     #[Given('that user has a password with a low hash cost')]

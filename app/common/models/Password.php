@@ -76,6 +76,11 @@ class Password extends PasswordBase
     {
         $reuseLimit = Yii::$app->params['passwordReuseLimit'];
 
+        // A numeric 0 becomes LIMIT 0, which checks no rows and silently allows reuse of the current password.
+        if (is_numeric($reuseLimit) && (int) $reuseLimit === 0) {
+            $reuseLimit = 1;
+        }
+
         /** @var Password[] $passwords */
         $passwords = Password::find()->where(['user_id' => $this->user_id])
                                      ->orderBy(['id' => SORT_DESC])
