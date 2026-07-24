@@ -40,6 +40,7 @@ Feature: User
         | property                |
         | current_password_id     |
         | password_expires_at_utc |
+        | token_hash              |
       And a record exists with an employee_id of "f6bf51f2-4ccc-4d85-8f75-02132c67af27"
       And the following data should be stored:
         | property            | value                 |
@@ -722,6 +723,7 @@ Feature: User
         | property                  |
         |   current_password_id     |
         |   password_expires_at_utc |
+        |   token_hash              |
       And the response should contain a member array with only these elements:
         | element              |
         |   it                 |
@@ -790,9 +792,11 @@ Feature: User
     Then the response status code should be 200
       And the following data is returned:
         | property          | value                 |
-        | token_hash        | abc123hash            |
         | token_expiry_utc  | 2099-01-01T12:00:00Z  |
         | token_type        | login                 |
+      And the following data is not returned:
+        | property          |
+        | token_hash        |
       And a record exists with an employee_id of "123"
       And the following data should be stored:
         | property          | value                 |
