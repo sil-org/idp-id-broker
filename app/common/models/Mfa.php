@@ -89,7 +89,9 @@ class Mfa extends MfaBase
                 ]);
             }
         }
-        if ($this->type === self::TYPE_BACKUPCODE || $this->type === self::TYPE_MANAGER) {
+        if ($this->type === self::TYPE_BACKUPCODE
+            || $this->type === self::TYPE_MANAGER
+            || $this->type === self::TYPE_RECOVERY) {
             $this->data += ['count' => count($this->mfaBackupcodes)];
         } elseif ($this->type === self::TYPE_WEBAUTHN) {
             $webauthns = $this->mfaWebauthns;

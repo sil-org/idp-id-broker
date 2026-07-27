@@ -276,7 +276,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MfaResponse'
+                  $ref: '#/components/schemas/UserMfaResponse'
         '400':
           description: 'User not found for given `employee_id`'
           content:
@@ -1143,6 +1143,8 @@ components:
         last_login_utc: '2017-05-24T14:04:51Z'
         created_utc: '2017-05-24T14:04:51Z'
         deactivated_utc: null
+        manager_email: the.boss@example.com
+        personal_email: my.email@example.com
         hide: 'no'
         member: []
         mfa:
@@ -1169,9 +1171,6 @@ components:
             created_utc: '2017-10-24T20:40:47Z'
             last_used_utc: null
             data: []
-        password:
-          created_utc: '2017-05-24T14:04:51Z'
-          expires_on: '2018-05-24T23:59:59Z'
         method:
           add: 'no'
           options:
@@ -1179,7 +1178,13 @@ components:
             value: email@example.org
             verified: true
             created: '2017-10-24T20:40:47Z'
+        password:
+          created_utc: '2017-05-24T14:04:51Z'
+          expires_on: '2018-05-24T23:59:59Z'
         profile_review: 'yes'
+        require_mfa: 'yes'
+        token_expiry_utc: '2020-01-01T01:01:01Z'
+        token_type: login
       type: object
       properties:
         uuid:
@@ -1256,7 +1261,7 @@ components:
             options:
               type: array
               items:
-                $ref: '#/components/schemas/MfaResponse'
+                $ref: '#/components/schemas/UserMfaResponse'
           required:
           - prompt
           - add
@@ -1438,6 +1443,11 @@ components:
       - employee_id
       - type
     MfaCreationResponse:
+      oneOf:
+        - $ref: '#/components/schemas/MfaCodeCreateResponse'
+        - $ref: '#/components/schemas/MfaTotpCreateResponse'
+        - $ref: '#/components/schemas/MfaWebAuthnCreateResponse'
+    MfaCodeCreateResponse:
       example:
         id: 3
         data:
@@ -1462,7 +1472,78 @@ components:
       required:
       - id
       - data
+    MfaTotpCreateResponse:
+      type: object
+      properties:
+        totpKey:
+          type: string
+          description: The TOTP secret key encoded as base32
+          example: 0123456789ABCDEF0123456789ABCDEF
+        otpAuthUrl:
+          type: string
+          description: >-
+            OTPAuthURL is an otpauth URI that contains the TOTP secret key. It may also contain metadata 
+            like issuer, algorithm, and number of digits.
+          example: 'otpauth://totp/idp:john_smith?secret=0123456789ABCDEF0123456789ABCDEF&issuer=SIL%20IdP'
+        imageUrl:
+          description: >-
+            ImageURL is a base64-encoded image in data URL format like "data:image/png;base64,iVBORw0KGgo...". 
+            The image is a QR code that contains the OTPAuthURL, which the user scans to store the shared 
+            secret key and metadata in their authenticator app.
+          example: 'data:image/png;base64,iVBORw0KGgo...'
+          type: string
+      required:
+        - totpKey
+        - otpAuthUrl
+        - imageUrl
+    MfaWebAuthnCreateResponse:
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the newly-created WebAuthn key
+          type: integer
+        data:
+          properties:
+            publicKey:
+              $ref: 'https://raw.githubusercontent.com/sil-org/serverless-mfa-api-go/refs/heads/main/openapi.yaml#/components/schemas/PublicKeyCredentialCreationOptions'
     MfaResponse:
+      description: >-
+        Information on a single MFA record. The `data` field will contain different
+        information depending on the type of MFA record.
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          enum:
+            - backupcode
+            - totp
+            - webauthn
+            - manager
+            - recovery
+          type: string
+        label:
+          type: string
+        created_utc:
+          type: string
+        last_used_utc:
+          type: object
+        data:
+          oneOf:
+            - $ref: '#/components/schemas/MfaDataBackupCode'
+            - $ref: '#/components/schemas/MfaDataTotp'
+            - $ref: '#/components/schemas/MfaDataWebAuthn'
+      required:
+        - id
+        - type
+        - label
+        - created_utc
+        - last_used_utc
+        - data
+    UserMfaResponse:
+      description: >-
+        Information on a single MFA record as included in a full list of a user's MFA records. The `data` field
+        will contain different information depending on the type of MFA record.
       type: object
       properties:
         id:
@@ -1483,8 +1564,9 @@ components:
           type: object
         data:
           oneOf:
-          - type: object
-          - type: array
+          - $ref: '#/components/schemas/MfaDataBackupCode'
+          - $ref: '#/components/schemas/MfaDataTotp'
+          - $ref: '#/components/schemas/MfaDataWebAuthnList'
       required:
       - id
       - type
@@ -1492,6 +1574,43 @@ components:
       - created_utc
       - last_used_utc
       - data
+    MfaDataBackupCode:
+      type: object
+      properties:
+        count:
+          description: The number of backup codes remaining
+          type: number
+    MfaDataTotp:
+      description: No data is returned for existing TOTP keys, only an empty array.
+      type: array
+      items:
+        type: string
+    MfaDataWebAuthn:
+      description: The data for a single WebAuthn key
+      type: object
+      properties:
+        id:
+          description: A numeric, unique identifier for this MFA key
+          type: integer
+        label:
+          description: The user-defined label for this MFA key
+          type: string
+        last_used_utc:
+          description: The last time this MFA key was used, in MySQL date-time format, UTC
+          example: '2026-05-22 12:49:30'
+          type: string
+        created_utc:
+          description: The time this MFA key was created, in MySQL date-time format, UTC
+          example: '2026-05-22 12:49:30'
+          type: string
+    MfaDataWebAuthnList:
+      description: The data for WebAuthn authentication and a list of all a user's WebAuthn keys
+      type: object
+      properties:
+        publicKey:
+          $ref: 'https://raw.githubusercontent.com/sil-org/serverless-mfa-api-go/refs/heads/main/openapi.yaml#/components/schemas/PublicKeyCredentialRequestOptions'
+      additionalProperties:
+        $ref: '#/components/schemas/MfaDataWebAuthn'
     WebauthnResponse:
       example:
         id: 81
