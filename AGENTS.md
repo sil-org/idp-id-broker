@@ -17,7 +17,7 @@
 - **Type Check / Compilation Lint:** (no local command)
 
 ## Testing & Quality Assurance
-- **Test Runner:** Behat (`app/behat.yml`, `behat/behat`)
+- **Test Runner:** Behat (`app/behat.yml`, `vendor/bin/behat`)
 - **Full Test Command:** `make test`
 - **Individual Test Command:** `docker compose run --rm test ./vendor/bin/behat features/user.feature:9`
 - **Linter/Formatter:** `friendsofphp/php-cs-fixer`
