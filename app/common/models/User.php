@@ -558,7 +558,6 @@ class User extends UserBase
                 return $model->getNagState() == NagState::NAG_PROFILE_REVIEW ? 'yes' : 'no';
             },
             'require_mfa',
-            'token_hash',
             'token_expiry_utc' => function (self $model) {
                 return $model->token_expiry_utc === null ? null : Utils::getIso8601($model->token_expiry_utc);
             },
