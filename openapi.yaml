@@ -1587,7 +1587,7 @@ components:
       properties:
         count:
           description: The number of backup codes remaining
-          type: number
+          type: integer
     MfaDataTotp:
       description: No data is returned for existing TOTP keys, only an empty array.
       type: array
