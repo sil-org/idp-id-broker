@@ -905,6 +905,8 @@ class User extends UserBase
                     ]));
                     break;
                 case 'fields':
+                // retain 'mask' for backward compatibility
+                case 'mask':
                     break;
                 default:
                     // if no criteria names match, this will ensure an empty result is returned
