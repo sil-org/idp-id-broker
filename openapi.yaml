@@ -1607,6 +1607,7 @@ components:
           description: The last time this MFA key was used, in MySQL date-time format, UTC
           example: '2026-05-22 12:49:30'
           type: string
+          nullable: true
         created_utc:
           description: The time this MFA key was created, in MySQL date-time format, UTC
           example: '2026-05-22 12:49:30'
