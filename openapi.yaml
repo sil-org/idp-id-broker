@@ -1475,27 +1475,35 @@ components:
     MfaTotpCreateResponse:
       type: object
       properties:
-        totpKey:
-          type: string
-          description: The TOTP secret key encoded as base32
-          example: 0123456789ABCDEF0123456789ABCDEF
-        otpAuthUrl:
-          type: string
-          description: >-
-            OTPAuthURL is an otpauth URI that contains the TOTP secret key. It may also contain metadata 
-            like issuer, algorithm, and number of digits.
-          example: 'otpauth://totp/idp:john_smith?secret=0123456789ABCDEF0123456789ABCDEF&issuer=SIL%20IdP'
-        imageUrl:
-          description: >-
-            ImageURL is a base64-encoded image in data URL format like "data:image/png;base64,iVBORw0KGgo...". 
-            The image is a QR code that contains the OTPAuthURL, which the user scans to store the shared 
-            secret key and metadata in their authenticator app.
-          example: 'data:image/png;base64,iVBORw0KGgo...'
-          type: string
+        id:
+          type: integer
+        data:
+          type: object
+          properties:
+            totpKey:
+              type: string
+              description: The TOTP secret key encoded as base32
+              example: 0123456789ABCDEF0123456789ABCDEF
+            otpAuthUrl:
+              type: string
+              description: >-
+                OTPAuthURL is an otpauth URI that contains the TOTP secret key. It may also contain metadata 
+                like issuer, algorithm, and number of digits.
+              example: 'otpauth://totp/idp:john_smith?secret=0123456789ABCDEF0123456789ABCDEF&issuer=SIL%20IdP'
+            imageUrl:
+              description: >-
+                ImageURL is a base64-encoded image in data URL format like "data:image/png;base64,iVBORw0KGgo...". 
+                The image is a QR code that contains the OTPAuthURL, which the user scans to store the shared 
+                secret key and metadata in their authenticator app.
+              example: 'data:image/png;base64,iVBORw0KGgo...'
+              type: string
+          required:
+            - totpKey
+            - otpAuthUrl
+            - imageUrl
       required:
-        - totpKey
-        - otpAuthUrl
-        - imageUrl
+        - id
+        - data
     MfaWebAuthnCreateResponse:
       type: object
       properties:
