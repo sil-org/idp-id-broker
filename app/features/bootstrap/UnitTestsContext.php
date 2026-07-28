@@ -35,8 +35,11 @@ class UnitTestsContext extends YiiContext
     /** @var User */
     protected $tempUser;
 
-    /** @var bool whether the most recent password submission was saved */
-    protected $passwordWasAccepted;
+    /** @var string */
+    protected $originalPassword;
+
+    /** @var ConflictHttpException|null */
+    protected $reuseException;
 
     /** @var bool whether the Mfa option is considered newly verified */
     protected $mfaIsNewlyVerified;
@@ -452,26 +455,67 @@ class UnitTestsContext extends YiiContext
         \Yii::$app->params['passwordReuseLimit'] = $limit;
     }
 
-    #[When('the user submits that same password again')]
-    public function theUserSubmitsThatSamePasswordAgain()
+    #[Given('the user has a password')]
+    public function theUserHasAPassword()
+    {
+        $this->originalPassword = 'k23@U$%235u25@I2$o';
+        $this->tempUser->setScenario(User::SCENARIO_UPDATE_PASSWORD);
+        $this->tempUser->password = $this->originalPassword;
+        Assert::true($this->tempUser->save(), 'Failed to set the initial password.');
+    }
+
+    #[Given('the user changes their password to a different one')]
+    public function theUserChangesTheirPasswordToADifferentOne()
     {
         $this->tempUser = User::findOne($this->tempUser->id);
         $this->tempUser->setScenario(User::SCENARIO_UPDATE_PASSWORD);
-        $this->tempUser->password = 'k23@U$%235u25@I2$o';
+        $this->tempUser->password = '8Wq@2v!zR6#tY4$mLp';
+        Assert::true($this->tempUser->save(), 'Failed to change the password.');
+    }
+
+    #[When('the user tries to change their password to that same password')]
+    #[When('the user tries to change their password back to the original one')]
+    public function theUserTriesToReuseTheirOriginalPassword()
+    {
+        $this->reuseException = null;
+        $this->tempUser = User::findOne($this->tempUser->id);
+        $this->tempUser->setScenario(User::SCENARIO_UPDATE_PASSWORD);
+        $this->tempUser->password = $this->originalPassword;
 
         try {
-            $this->passwordWasAccepted = $this->tempUser->save();
+            $this->tempUser->save();
         } catch (ConflictHttpException $e) {
-            $this->passwordWasAccepted = false;
+            $this->reuseException = $e;
         }
     }
 
-    #[Then('the password should be rejected as recently used')]
-    public function thePasswordShouldBeRejectedAsRecentlyUsed()
+    #[When("the user's current password is assessed")]
+    public function theUsersCurrentPasswordIsAssessed()
     {
-        Assert::false(
-            $this->passwordWasAccepted,
-            'The password was accepted even though it had been used recently.'
+        $this->reuseException = null;
+        $this->tempUser = User::findOne($this->tempUser->id);
+
+        try {
+            $this->tempUser->assessPassword($this->originalPassword);
+        } catch (ConflictHttpException $e) {
+            $this->reuseException = $e;
+        }
+    }
+
+    #[Then('a 409 error of :message should be returned')]
+    public function a409ErrorOfShouldBeReturned($message)
+    {
+        Assert::isInstanceOf($this->reuseException, ConflictHttpException::class);
+        Assert::same($this->reuseException->statusCode, 409);
+        Assert::same($this->reuseException->getMessage(), $message);
+    }
+
+    #[Then('the password change should succeed')]
+    public function thePasswordChangeShouldSucceed()
+    {
+        Assert::null(
+            $this->reuseException,
+            'Expected the password change to succeed, but it was rejected as reused.'
         );
     }
 

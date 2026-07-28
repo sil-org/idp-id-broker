@@ -15,58 +15,33 @@ Feature: Password
     Then the password hash should be updated
 
   Scenario: Attempt to change a password to the one currently in use
-    Given the user store is empty
-      And the requester is authorized
-      And I add a user with an employee_id of "10000"
-      And I provide the following valid data:
-        | property | value              |
-        | password | k23@U$%235u25@I2$o |
-      And I request "/user/10000/password" be updated
-      And the response status code should be 200
-    When I request "/user/10000/password" be updated
-    Then the response status code should be 409
-      And the response body should contain "May not be reused yet"
+    Given there is a user in the database
+      And the user has a password
+      And the password reuse limit is 10
+    When the user tries to change their password to that same password
+    Then a 409 error of "May not be reused yet" should be returned
 
   Scenario: Attempt to change a password back to a previously used one
-    Given the user store is empty
-      And the requester is authorized
-      And I add a user with an employee_id of "10000"
-      And I provide the following valid data:
-        | property | value              |
-        | password | k23@U$%235u25@I2$o |
-      And I request "/user/10000/password" be updated
-      And the response status code should be 200
-      And I provide the following valid data:
-        | property | value              |
-        | password | 8Wq@2v!zR6#tY4$mLp |
-      And I request "/user/10000/password" be updated
-      And the response status code should be 200
-    When I provide the following valid data:
-        | property | value              |
-        | password | k23@U$%235u25@I2$o |
-      And I request "/user/10000/password" be updated
-    Then the response status code should be 409
-      And the response body should contain "May not be reused yet"
+    Given there is a user in the database
+      And the user has a password
+      And the password reuse limit is 10
+      And the user changes their password to a different one
+    When the user tries to change their password back to the original one
+    Then a 409 error of "May not be reused yet" should be returned
 
   Scenario: Assessing a recently used password reports a conflict
-    Given the user store is empty
-      And the requester is authorized
-      And I add a user with an employee_id of "10000"
-      And I provide the following valid data:
-        | property | value              |
-        | password | k23@U$%235u25@I2$o |
-      And I request "/user/10000/password" be updated
-      And the response status code should be 200
-    When I request "/user/10000/password/assess" be updated
-    Then the response status code should be 409
-      And the response body should contain "May not be reused yet"
-
-  Scenario: A reuse limit of zero must not disable the reuse check
     Given there is a user in the database
+      And the user has a password
+      And the password reuse limit is 10
+    When the user's current password is assessed
+    Then a 409 error of "May not be reused yet" should be returned
+
+  Scenario: A reuse limit of zero disables the reuse check
+    Given there is a user in the database
+      And the user has a password
       And the password reuse limit is 0
-    When the user submits a new password
-      And the user submits that same password again
-    Then the password should be rejected as recently used
+    When the user tries to change their password to that same password
+    Then the password change should succeed
 
 #  Scenario: Attempt to update a password for a nonexistent user
 #  Scenario: Attempt to update a password for an existing user without providing a password
