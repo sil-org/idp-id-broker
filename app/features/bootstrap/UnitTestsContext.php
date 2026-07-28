@@ -502,11 +502,11 @@ class UnitTestsContext extends YiiContext
         }
     }
 
-    #[Then('a 409 error of :message should be returned')]
-    public function a409ErrorOfShouldBeReturned($message)
+    #[Then('a :statusCode error of :message should be returned')]
+    public function aErrorOfShouldBeReturned($statusCode, $message)
     {
         Assert::isInstanceOf($this->reuseException, ConflictHttpException::class);
-        Assert::same($this->reuseException->statusCode, 409);
+        Assert::same($this->reuseException->statusCode, (int) $statusCode);
         Assert::same($this->reuseException->getMessage(), $message);
     }
 
