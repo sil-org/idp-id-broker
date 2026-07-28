@@ -141,15 +141,6 @@ paths:
           'username', 'email', and 'personal_email'
         schema:
           type: string
-      - name: mask
-        in: query
-        description: >-
-          Mask personal information (method options, personal_email) for privacy. Default is 'yes'.
-        schema:
-          enum:
-          - 'yes'
-          - 'no'
-          type: string
       - name: token_hash
         in: query
         description: >-
@@ -1127,9 +1118,7 @@ components:
     UserResponse:
       description: >-
         Information on user record. Password is not included if a password
-        has not been assigned to the user. Method options are included only if `method.review`
-        is 'yes' and only in response to `POST /authentication`, otherwise it will
-        be an empty list.
+        has not been assigned to the user.
       example:
         uuid: 11111111-aaaa-1111-aaaa-111111111111
         employee_id: '12345'
@@ -1778,4 +1767,3 @@ components:
       name: Authorization
   links: {}
   callbacks: {}
-

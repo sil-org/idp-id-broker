@@ -538,14 +538,7 @@ class User extends UserBase
                 return $model->deactivated_utc === null ? null : Utils::getIso8601($model->deactivated_utc);
             },
             'manager_email',
-            'personal_email' => function (self $model) {
-                $maskParam = Yii::$app->request->queryParams['mask'] ?? 'no';
-                if ($maskParam === 'no') {
-                    return $model->personal_email;
-                } else {
-                    return Utils::maskEmail($model->personal_email);
-                }
-            },
+            'personal_email',
             'hide',
             'member' => function (self $model) {
                 return $model->getMemberList();
@@ -727,28 +720,9 @@ class User extends UserBase
      */
     public function getMethodFields()
     {
-        $maskParam = Yii::$app->request->queryParams['mask'] ?? 'no';
-
-        /*
-         * Provide method data when a profile review is requested OR
-         * if a `mask=yes` query parameter has been given.
-         */
-        $methods = [];
-        if ($maskParam === 'yes'
-            || ($this->getNagState() === NagState::NAG_PROFILE_REVIEW
-            && $this->scenario == self::SCENARIO_AUTHENTICATE)) {
-            $methods = $this->methods;
-        }
-
-        if ($maskParam === 'yes') {
-            foreach ($methods as $key => $method) {
-                $methods[$key]->value = $method->getMaskedValue();
-            }
-        }
-
         return [
             'add' => $this->getNagState() == NagState::NAG_ADD_METHOD ? 'yes' : 'no',
-            'options' => $methods,
+            'options' => $this->methods,
         ];
     }
 
@@ -931,7 +905,6 @@ class User extends UserBase
                     ]));
                     break;
                 case 'fields':
-                case 'mask':
                     break;
                 default:
                     // if no criteria names match, this will ensure an empty result is returned

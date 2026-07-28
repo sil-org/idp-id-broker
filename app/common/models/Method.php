@@ -73,15 +73,6 @@ class Method extends MethodBase
         ];
     }
 
-    /**
-     * @return string
-     * @throws \Exception
-     */
-    public function getMaskedValue()
-    {
-        return Utils::maskEmail($this->value);
-    }
-
     public function isVerified()
     {
         return $this->verified === 1 ? true : false;

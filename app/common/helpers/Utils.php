@@ -3,9 +3,6 @@
 namespace common\helpers;
 
 use yii\base\Security;
-use yii\helpers\Html;
-use yii\validators\EmailValidator;
-use yii\web\BadRequestHttpException;
 
 class Utils
 {
@@ -67,73 +64,5 @@ class Utils
         }
         $dt = date_create_from_format('U', $timestamp);
         return $dt->format(self::DT_ISO8601);
-    }
-
-    /**
-     * @param string $email an email address
-     * @return string with most letters changed to asterisks
-     * @throws BadRequestHttpException
-     */
-    public static function maskEmail($email)
-    {
-        if (empty($email)) {
-            return '';
-        }
-
-        $validator = new EmailValidator();
-        if (!$validator->validate($email)) {
-            \Yii::warning([
-                'action' => 'mask email',
-                'status' => 'error',
-                'error' => 'Invalid email address provided: ' . Html::encode($email),
-            ]);
-            throw new BadRequestHttpException('Invalid email address provided.', 1461459797);
-        }
-
-        [$part1, $domain] = explode('@', $email);
-        $newEmail = '';
-        $useRealChar = true;
-
-        /*
-         * Replace all characters with '*', except the first one, the last one,
-         * underscores, and each character that follows an underscore.
-         */
-        foreach (str_split($part1) as $nextChar) {
-            if ($useRealChar) {
-                $newEmail .= $nextChar;
-                $useRealChar = false;
-            } elseif ($nextChar === '_') {
-                $newEmail .= $nextChar;
-                $useRealChar = true;
-            } else {
-                $newEmail .= '*';
-            }
-        }
-
-        // replace the last * with the last real character
-        $newEmail = substr($newEmail, 0, -1);
-        $newEmail .= substr($part1, -1);
-        $newEmail .= '@';
-
-        /*
-         * Add an '*' for each of the characters of the domain, except
-         * for the first character of each part and the '.'
-         */
-        $domainParts = explode('.', $domain);
-        $countParts = count($domainParts);
-
-        // Leave the last part for later, to avoid adding a '.' after it.
-        for ($i = 0; $i < $countParts - 1; $i++) {
-            $nextPart = $domainParts[$i];
-            $newEmail .= substr($nextPart, 0, 1);
-            $newEmail .= str_repeat('*', strlen($nextPart) - 1);
-            $newEmail .= '.';
-        }
-
-        $nextPart = $domainParts[$countParts - 1];
-        $newEmail .= substr($nextPart, 0, 1);
-        $newEmail .= str_repeat('*', strlen($nextPart) - 1);
-
-        return $newEmail;
     }
 }
