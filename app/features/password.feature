@@ -14,6 +14,35 @@ Feature: Password
     When the user uses their password
     Then the password hash should be updated
 
+  Scenario: Attempt to change a password to the one currently in use
+    Given there is a user in the database
+      And the user has a password
+      And the password reuse limit is 10
+    When the user tries to change their password to that same password
+    Then a 409 error of "May not be reused yet" should be returned
+
+  Scenario: Attempt to change a password back to a previously used one
+    Given there is a user in the database
+      And the user has a password
+      And the password reuse limit is 10
+      And the user changes their password to a different one
+    When the user tries to change their password back to the original one
+    Then a 409 error of "May not be reused yet" should be returned
+
+  Scenario: Assessing a recently used password reports a conflict
+    Given there is a user in the database
+      And the user has a password
+      And the password reuse limit is 10
+    When the user's current password is assessed
+    Then a 409 error of "May not be reused yet" should be returned
+
+  Scenario: A reuse limit of zero disables the reuse check
+    Given there is a user in the database
+      And the user has a password
+      And the password reuse limit is 0
+    When the user tries to change their password to that same password
+    Then the password change should succeed
+
 #  Scenario: Attempt to update a password for a nonexistent user
 #  Scenario: Attempt to update a password for an existing user without providing a password
 #  Scenario: Attempt to update a password for an existing user without providing a valid password
@@ -34,9 +63,7 @@ Feature: Password
 #  Scenario: Attempt to create a password
 #  Scenario: Attempt to retrieve a password
 #  Scenario: Attempt to delete a password
-#  Scenario: Attempt to change the password of an existing user using the same password they already have.
 #  Scenario: consider invalid employee ids that test the type conversions of Yii and/or PHP, e.g., /user/[true|false|1|0]/password
 #  Scenario: ensure password_hash and last_changed date are the only things that change even when passed all attributes available on the table.
 # TODO: need to test the expiration date calculation
-# TODO: need to test the reuse limit
 # TODO: need to test grace period and grace period extension
