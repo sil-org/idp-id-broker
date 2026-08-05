@@ -905,7 +905,7 @@ class User extends UserBase
                     ]));
                     break;
                 case 'fields':
-                // retain 'mask' for backward compatibility
+                    // retain 'mask' for backward compatibility
                 case 'mask':
                     break;
                 default:
