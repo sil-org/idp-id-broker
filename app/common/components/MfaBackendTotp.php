@@ -50,8 +50,8 @@ class MfaBackendTotp extends Component implements MfaBackendInterface
             throw new NotFoundHttpException("User not found when trying to create new TOTP configuration");
         }
 
-        $idpName = \Yii::$app->params['idpDisplayName'];
-        return $this->client->createTotp($user->email, $idpName);
+        $idpDisplayName = \Yii::$app->params['idpDisplayName'];
+        return $this->client->createTotp($user->email, $idpDisplayName);
     }
 
     /**
