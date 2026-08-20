@@ -196,35 +196,20 @@ services:
     # docker compose run --rm test vendor/bin/behat --stop-on-failure features/user.feature
     # docker compose run --rm test vendor/bin/behat --stop-on-failure features/user.feature:306
 
-  phpmyadmin:
-    image: phpmyadmin:5
-    ports:
-      - "51141:80"
-    depends_on:
-      - db
-    env_file:
-      - path: ./local.env
-        required: false
-    environment:
-      PMA_HOST: db
-      PMA_USER: user
-      PMA_PASSWORD: pass
-      PMA_SSL: 1
+# Adminer URL for app database, password is 'pass'
+# http://localhost:51141/?server=db&username=user&db=broker
 
-  phpmyadmintest:
-    image: phpmyadmin:5
+# Adminer URL for test database, password is 'appfortests'
+# http://localhost:51141/?server=testdb&username=appfortests&db=appfortests
+
+  adminer:
+    image: adminer
     ports:
-      - "51142:80"
-    depends_on:
-      - testdb
-    env_file:
-      - path: ./local.env
-        required: false
+      - "51141:8080"
     environment:
-      PMA_HOST: testdb
-      PMA_USER: appfortests
-      PMA_PASSWORD: appfortests
-      PMA_SSL: 1
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_PLUGINS: "backward-keys before-unload edit-foreign enum-option highlight-monaco"
+      ADMINER_SSL_CONFIG: '{"verify": true}'
 
 networks:
   default:
