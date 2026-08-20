@@ -203,7 +203,7 @@ services:
 # http://localhost:51141/?server=testdb&username=appfortests&db=appfortests
 
   adminer:
-    image: adminer
+    image: ghcr.io/sil-org/terraform-aws-adminer:4.1
     ports:
       - "51141:8080"
     environment:
