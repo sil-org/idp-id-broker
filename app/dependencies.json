@@ -73,7 +73,7 @@
   },
   {
     "name": "guzzlehttp/guzzle",
-    "version": "7.15.1"
+    "version": "7.15.2"
   },
   {
     "name": "guzzlehttp/promises",
@@ -97,7 +97,7 @@
   },
   {
     "name": "mtdowling/jmespath.php",
-    "version": "2.8.0"
+    "version": "2.9.2"
   },
   {
     "name": "paragonie/constant_time_encoding",
@@ -241,7 +241,7 @@
   },
   {
     "name": "symfony/polyfill-mbstring",
-    "version": "v1.38.1"
+    "version": "v1.38.2"
   },
   {
     "name": "symfony/polyfill-php80",
