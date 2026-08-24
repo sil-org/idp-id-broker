@@ -54,8 +54,9 @@ class MfaApiClient
         $this->headers = [
             'X-MFA-APIKey' => $apiKey,
             'X-MFA-APISecret' => $apiSecret,
+            'Accept' => 'application/json',
             'Content-type' => 'application/json',
-            'User-Agent' => 'idp-id-broker',
+            'User-Agent' => \Yii::$app->params['userAgent'],
         ];
 
         $this->client = new GuzzleClient([
@@ -228,6 +229,5 @@ class MfaApiClient
             throw $e;
         }
     }
-
 
 }

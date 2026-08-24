@@ -179,6 +179,7 @@ class FeatureContext extends YiiContext
             'x-mfa-RPOrigin' => $webConfig['rpId'],
             'x-mfa-UserUUID' => $externalId,
             'Content-type' => 'application/json',
+            'Accept' => 'application/json',
         ]);
 
         $client = $this->buildU2fClient();
