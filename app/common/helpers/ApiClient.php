@@ -28,6 +28,7 @@ class ApiClient
                 'Accept' => 'application/json',
                 'Accept-Encoding' => 'gzip',
                 'Authorization' => 'Bearer ' . $this->apiKey,
+                'User-Agent' => \Yii::$app->params['userAgent'],
             ],
             'http_errors' => false,
         ];
