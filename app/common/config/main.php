@@ -16,7 +16,7 @@ use Sil\Sentry\SentryTarget;
 use yii\db\Connection;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
-use yii\swiftmailer\Mailer as SwiftMailer;
+use yii\symfonymailer\Mailer as SymfonyMailer;
 
 $idpName        = Env::requireEnv('IDP_NAME');
 $idpDisplayName = Env::get('IDP_DISPLAY_NAME', $idpName);
@@ -50,16 +50,15 @@ $mailerConfig = [
     'htmlLayout' => '@common/mail/layouts/html',
     'textLayout' => '@common/mail/layouts/text',
 ];
-$mailerHost = Env::get('MAILER_HOST');
+$mailerHost = Env::get('MAILER_HOST', '');
 if (!empty($mailerHost) || $mailerConfig['useFileTransport'] === true) {
-    $mailerConfig['class'] = SwiftMailer::class;
+    $mailerConfig['class'] = SymfonyMailer::class;
     $mailerConfig['transport'] = [
-        'class' => 'Swift_SmtpTransport',
+        'scheme' => 'smtps',
         'host' => $mailerHost,
         'username' => Env::get('MAILER_USERNAME'),
         'password' => Env::get('MAILER_PASSWORD'),
-        'port' => '465',
-        'encryption' => 'ssl',
+        'port' => 465,
     ];
 } else {
     $mailerConfig['class'] = SesMailer::class;

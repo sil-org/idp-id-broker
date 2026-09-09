@@ -25,7 +25,7 @@
     "webmozart/assert": "^1.2",
     "yiisoft/yii2": "^2.0.11",
     "yiisoft/yii2-gii": "*",
-    "yiisoft/yii2-swiftmailer": "^2.0"
+    "yiisoft/yii2-symfonymailer": "^4.0"
   },
   "require-dev": {
     "behat/behat": "^3.3",
