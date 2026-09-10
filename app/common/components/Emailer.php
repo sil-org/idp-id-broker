@@ -352,6 +352,47 @@ class Emailer extends Component
     }
 
     /**
+     * Send the specified type of message to the given User's primary address and to each of their
+     * verified password-recovery addresses.
+     *
+     * @param string $messageType The message type. Must be one of the
+     *     EmailLog::MESSAGE_TYPE_* values.
+     * @param User $user The intended recipient.
+     * @param string[] $data Data fields for email template.
+     */
+    public function sendMessageToUserAndRecoveryMethods(
+        string $messageType,
+        User $user,
+        array $data = []
+    ) {
+        $this->sendMessageTo($messageType, $user, $data);
+
+        // sendMessageTo() only skips inactive users when it is given a User; the sends below pass null.
+        if ($user->active === 'no') {
+            return;
+        }
+
+        $primaryAddress = $user->getEmailAddress();
+
+        // sendMessageTo() only pulls these in when it is given a User, so pass them along explicitly.
+        $dataForEmail = ArrayHelper::merge($user->getAttributesForEmail(), $data);
+
+        foreach ($user->getVerifiedMethodOptions() as $method) {
+            // A user with no work email is reached at their personal email, which is also a verified method.
+            if ($method->value === $primaryAddress) {
+                continue;
+            }
+
+            $this->sendMessageTo(
+                $messageType,
+                // Don't log this as a user email because the Emailer won't log the email address in that case.
+                null,
+                ArrayHelper::merge($dataForEmail, ['toAddress' => $method->value])
+            );
+        }
+    }
+
+    /**
      * Iterates over all users and sends get-backup-code and/or lost-security-key emails as is appropriate
      */
     public function sendDelayedMfaRelatedEmails()

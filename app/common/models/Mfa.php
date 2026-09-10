@@ -622,23 +622,23 @@ class Mfa extends MfaBase
         $user->refresh();
 
         if ($emailer->shouldSendMfaOptionAddedMessageTo($user, $eventType)) {
-            $emailer->sendMessageTo(
+            $emailer->sendMessageToUserAndRecoveryMethods(
                 EmailLog::MESSAGE_TYPE_MFA_OPTION_ADDED,
                 $user
             );
         } elseif ($emailer->shouldSendMfaEnabledMessageTo($user, $eventType)) {
-            $emailer->sendMessageTo(
+            $emailer->sendMessageToUserAndRecoveryMethods(
                 EmailLog::MESSAGE_TYPE_MFA_ENABLED,
                 $user
             );
         } elseif ($emailer->shouldSendMfaOptionRemovedMessageTo($user, $eventType, $mfa)) {
             $emailer->otherDataForEmails['mfaTypeDisabled'] = $mfa->getReadableType();
-            $emailer->sendMessageTo(
+            $emailer->sendMessageToUserAndRecoveryMethods(
                 EmailLog::MESSAGE_TYPE_MFA_OPTION_REMOVED,
                 $user
             );
         } elseif ($emailer->shouldSendMfaDisabledMessageTo($user, $eventType, $mfa)) {
-            $emailer->sendMessageTo(
+            $emailer->sendMessageToUserAndRecoveryMethods(
                 EmailLog::MESSAGE_TYPE_MFA_DISABLED,
                 $user
             );

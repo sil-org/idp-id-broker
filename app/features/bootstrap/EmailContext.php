@@ -70,6 +70,7 @@ class EmailContext extends YiiContext
     public const MANAGER_EMAIL = 'manager@example.com';
     public const RECOVERY_EMAIL = 'recovery@example.com';
     public const NO_MAIL_ADMINS_EMAIL = 'no_mail_admins@example.com';
+    public const PERSONAL_ONLY_EMAIL = 'personal_only@example.org';
 
 
     #[Then('a(n) :messageType email should have been sent to them')]
@@ -1259,5 +1260,97 @@ class EmailContext extends YiiContext
     {
         $this->assertEmailSent(EmailLog::MESSAGE_TYPE_INVITE, $this->tempUser->email);
         $this->assertEmailHasNoCc();
+    }
+
+    #[Given('that user has a verified recovery email :address')]
+    public function thatUserHasAVerifiedRecoveryEmail($address): void
+    {
+        Method::findOrCreate($this->tempUser->id, $address, true);
+        $this->tempUser->refresh();
+    }
+
+
+    #[Given('that user has an unverified recovery email :address')]
+    public function thatUserHasAnUnverifiedRecoveryEmail($address): void
+    {
+        Method::findOrCreate($this->tempUser->id, $address);
+        $this->tempUser->refresh();
+    }
+
+
+    #[Given('a specific user already exists with only a personal email address')]
+    public function aSpecificUserAlreadyExistsWithOnlyAPersonalEmailAddress(): void
+    {
+        $employeeId = uniqid();
+        $user = new User([
+            'employee_id' => strval($employeeId),
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'username' => 'test_user_' . $employeeId,
+            'personal_email' => self::PERSONAL_ONLY_EMAIL,
+            'manager_email' => self::MANAGER_EMAIL,
+        ]);
+        $user->scenario = User::SCENARIO_NEW_USER;
+        Assert::true($user->save(), \json_encode($user->getFirstErrors(), JSON_PRETTY_PRINT));
+
+        $user->refresh();
+        $this->tempUser = $user;
+    }
+
+    #[Then('exactly :count :messageType email should have been sent to :address')]
+    public function exactlyEmailShouldHaveBeenSentTo($messageType, $address, $count): void
+    {
+        $matchingFakeEmails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser(
+            $messageType,
+            $address,
+            $this->tempUser
+        );
+
+        Assert::count($matchingFakeEmails, intval($count), sprintf(
+            'Expected %s %s email(s) to have been sent to %s, but instead found %s of them.',
+            $count,
+            $messageType,
+            $address,
+            count($matchingFakeEmails)
+        ));
+    }
+
+    #[When('that user is deleted')]
+    public function thatUserIsDeleted(): void
+    {
+        Assert::true((bool) $this->tempUser->delete(), 'Could not delete the test user.');
+    }
+
+    #[When('that user\'s backup code mfa option is deleted')]
+    public function thatUsersBackupCodeMfaOptionIsDeleted(): void
+    {
+        $mfa = $this->getMfa(Mfa::TYPE_BACKUPCODE);
+        Assert::notNull($mfa, 'The test user has no backup code mfa option to delete.');
+
+        // delete() returns the number of rows deleted, or false on failure.
+        Assert::true((bool) $mfa->delete(), 'Could not delete the backup code mfa option for the test user.');
+    }
+
+    #[Then('a :messageType email should have been sent to recovery address :address')]
+    public function aEmailShouldHaveBeenSentToRecoveryAddress($messageType, $address): void
+    {
+        $this->assertEmailSent($messageType, $address);
+    }
+
+    #[Then('a :messageType email should NOT have been sent to recovery address :address')]
+    public function aEmailShouldNotHaveBeenSentToRecoveryAddress($messageType, $address): void
+    {
+        $matchingFakeEmails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser(
+            $messageType,
+            $address,
+            $this->tempUser
+        );
+
+        Assert::isEmpty($matchingFakeEmails, sprintf(
+            'Expected no %s emails to have been sent to %s, but instead found %s of them.',
+            $messageType,
+            $address,
+            count($matchingFakeEmails)
+        ));
     }
 }
