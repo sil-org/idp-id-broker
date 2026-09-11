@@ -1262,21 +1262,6 @@ class EmailContext extends YiiContext
         $this->assertEmailHasNoCc();
     }
 
-    #[Given('that user has a verified recovery email :address')]
-    public function thatUserHasAVerifiedRecoveryEmail($address): void
-    {
-        Method::findOrCreate($this->tempUser->id, $address, true);
-        $this->tempUser->refresh();
-    }
-
-
-    #[Given('that user has an unverified recovery email :address')]
-    public function thatUserHasAnUnverifiedRecoveryEmail($address): void
-    {
-        Method::findOrCreate($this->tempUser->id, $address);
-        $this->tempUser->refresh();
-    }
-
 
     #[Given('a specific user already exists with only a personal email address')]
     public function aSpecificUserAlreadyExistsWithOnlyAPersonalEmailAddress(): void
@@ -1331,14 +1316,28 @@ class EmailContext extends YiiContext
         Assert::true((bool) $mfa->delete(), 'Could not delete the backup code mfa option for the test user.');
     }
 
-    #[Then('a :messageType email should have been sent to recovery address :address')]
-    public function aEmailShouldHaveBeenSentToRecoveryAddress($messageType, $address): void
+    #[Given('that user has a verified recovery method :address')]
+    public function thatUserHasAVerifiedRecoveryMethod($address): void
+    {
+        Method::findOrCreate($this->tempUser->id, $address, true);
+        $this->tempUser->refresh();
+    }
+
+    #[Given('that user has an unverified recovery method :address')]
+    public function thatUserHasAnUnverifiedRecoveryMethod($address): void
+    {
+        Method::findOrCreate($this->tempUser->id, $address);
+        $this->tempUser->refresh();
+    }
+
+    #[Then('a :messageType email should have been sent to recovery method :address')]
+    public function aEmailShouldHaveBeenSentToRecoveryMethod($messageType, $address): void
     {
         $this->assertEmailSent($messageType, $address);
     }
 
-    #[Then('a :messageType email should NOT have been sent to recovery address :address')]
-    public function aEmailShouldNotHaveBeenSentToRecoveryAddress($messageType, $address): void
+    #[Then('a :messageType email should NOT have been sent to recovery method :address')]
+    public function aEmailShouldNotHaveBeenSentToRecoveryMethod($messageType, $address): void
     {
         $matchingFakeEmails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser(
             $messageType,

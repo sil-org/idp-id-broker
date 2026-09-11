@@ -536,28 +536,28 @@ Feature: Email
     When I try to log an email as sent to neither a User nor a non-user address
     Then an email log validation error should have occurred
 
-  Scenario Outline: Which recovery addresses receive security emails
+  Scenario Outline: Which recovery methods receive security emails
     Given a specific user already exists
       And that user has a password
-      And that user has <verifiedOrNot> recovery email "recovery@example.com"
+      And that user has <verifiedOrNot> recovery method "recovery@example.com"
       And I remove records of any emails that have been sent
     When that user gets a password
     Then a "password-changed" email should have been sent to them
-      And a "password-changed" email <shouldOrNot> have been sent to recovery address "recovery@example.com"
+      And a "password-changed" email <shouldOrNot> have been sent to recovery method "recovery@example.com"
 
     Examples:
       | verifiedOrNot | shouldOrNot |
       | a verified    | should      |
       | an unverified | should NOT  |
 
-  Scenario: 2-Step Verification emails also go to verified recovery addresses
+  Scenario: 2-Step Verification emails also go to verified recovery methods
     Given a specific user already exists
-      And that user has a verified recovery email "recovery@example.com"
+      And that user has a verified recovery method "recovery@example.com"
       And a backup code mfa option does exist
       And I remove records of any emails that have been sent
     When that user's backup code mfa option is deleted
     Then a "mfa-disabled" email should have been sent to them
-      And a "mfa-disabled" email should have been sent to recovery address "recovery@example.com"
+      And a "mfa-disabled" email should have been sent to recovery method "recovery@example.com"
 
   Scenario: A user reached at their personal email is not emailed twice
     Given a specific user already exists with only a personal email address
@@ -566,10 +566,10 @@ Feature: Email
     When that user gets a password
     Then exactly 1 "password-changed" email should have been sent to "personal_only@example.org"
 
-  Scenario: Deleting a user does not notify their recovery addresses
+  Scenario: Deleting a user does not notify their recovery methods
     Given a specific user already exists
-      And that user has a verified recovery email "recovery@example.com"
+      And that user has a verified recovery method "recovery@example.com"
       And a backup code mfa option does exist
       And I remove records of any emails that have been sent
     When that user is deleted
-    Then a "mfa-disabled" email should NOT have been sent to recovery address "recovery@example.com"
+    Then a "mfa-disabled" email should NOT have been sent to recovery method "recovery@example.com"

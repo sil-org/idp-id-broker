@@ -353,7 +353,7 @@ class Emailer extends Component
 
     /**
      * Send the specified type of message to the given User's primary address and to each of their
-     * verified password-recovery addresses.
+     * verified password-recovery methods.
      *
      * @param string $messageType The message type. Must be one of the
      *     EmailLog::MESSAGE_TYPE_* values.
@@ -378,7 +378,7 @@ class Emailer extends Component
         $dataForEmail = ArrayHelper::merge($user->getAttributesForEmail(), $data);
 
         foreach ($user->getVerifiedMethodOptions() as $method) {
-            // A user with no work email is reached at their personal email, which is also a verified method.
+            // A user with no work email is reached at their personal email, which may also be a recovery method.
             if ($method->value === $primaryAddress) {
                 continue;
             }
