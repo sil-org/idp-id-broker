@@ -883,7 +883,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Delete a specific recovery method.'
+      description: >-
+        Delete a specific recovery method. Deleting a verified method notifies
+        the user, their remaining recovery methods, and the removed address.
       operationId: DELETE_method-uid
       requestBody:
         content:
@@ -939,7 +941,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Verify the recovery method by a matching code.'
+      description: >-
+        Verify the recovery method by a matching code. Notifies the user and
+        their verified recovery methods.
       operationId: PUT_method-uid-verify
       requestBody:
         content:
