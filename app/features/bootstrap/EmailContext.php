@@ -1352,4 +1352,25 @@ class EmailContext extends YiiContext
             count($matchingFakeEmails)
         ));
     }
+
+    #[When('that user verifies the recovery method :address')]
+    public function thatUserVerifiesTheRecoveryMethod($address): void
+    {
+        $this->getMethod($address)->setAsVerified();
+    }
+
+    #[When('that user\'s recovery method :address is deleted')]
+    public function thatUsersRecoveryMethodIsDeleted($address): void
+    {
+        // delete() returns the number of rows deleted, or false on failure.
+        Assert::true((bool) $this->getMethod($address)->delete(), 'Could not delete that recovery method.');
+    }
+
+    protected function getMethod($address): Method
+    {
+        $method = Method::findOne(['user_id' => $this->tempUser->id, 'value' => $address]);
+        Assert::notNull($method, 'The test user has no recovery method with a value of ' . $address . '.');
+
+        return $method;
+    }
 }

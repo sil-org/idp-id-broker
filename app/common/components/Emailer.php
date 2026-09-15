@@ -24,9 +24,12 @@ class Emailer extends Component
     public const SUBJ_INVITE = 'Your new {idpDisplayName} Identity account';
     public const SUBJ_LOST_SECURITY_KEY = 'Do you still have the security key you use with your {idpDisplayName}'
         . ' Identity account?';
+    public const SUBJ_METHOD_ADDED = 'A password recovery method was added to a {idpDisplayName} Identity account';
     public const SUBJ_METHOD_PURGED = 'An unverified password recovery method has been removed from your {idpDisplayName}'
         . ' Identity account';
     public const SUBJ_METHOD_REMINDER = 'REMINDER: Please verify your new password recovery method';
+    public const SUBJ_METHOD_REMOVED = 'A password recovery method was removed from a {idpDisplayName}'
+        . ' Identity account';
     public const SUBJ_METHOD_VERIFY = 'Please verify your new password recovery method';
     public const SUBJ_MFA_DISABLED = '2-Step Verification was disabled on your {idpDisplayName} Identity account';
     public const SUBJ_MFA_ENABLED = '2-Step Verification was enabled on your {idpDisplayName} Identity account';
@@ -104,8 +107,10 @@ class Emailer extends Component
     public $subjectForGetBackupCodes;
     public $subjectForInvite;
     public $subjectForLostSecurityKey;
+    public $subjectForMethodAdded;
     public $subjectForMethodPurged;
     public $subjectForMethodReminder;
+    public $subjectForMethodRemoved;
     public $subjectForMethodVerify;
     public $subjectForMfaDisabled;
     public $subjectForMfaEnabled;
@@ -249,8 +254,10 @@ class Emailer extends Component
         $this->subjectForGetBackupCodes ??= self::SUBJ_GET_BACKUP_CODES;
         $this->subjectForInvite ??= self::SUBJ_INVITE;
         $this->subjectForLostSecurityKey ??= self::SUBJ_LOST_SECURITY_KEY;
+        $this->subjectForMethodAdded ??= self::SUBJ_METHOD_ADDED;
         $this->subjectForMethodPurged ??= self::SUBJ_METHOD_PURGED;
         $this->subjectForMethodReminder ??= self::SUBJ_METHOD_REMINDER;
+        $this->subjectForMethodRemoved ??= self::SUBJ_METHOD_REMOVED;
         $this->subjectForMethodVerify ??= self::SUBJ_METHOD_VERIFY;
         $this->subjectForMfaDisabled ??= self::SUBJ_MFA_DISABLED;
         $this->subjectForMfaEnabled ??= self::SUBJ_MFA_ENABLED;
@@ -272,8 +279,10 @@ class Emailer extends Component
             EmailLog::MESSAGE_TYPE_GET_BACKUP_CODES => $this->subjectForGetBackupCodes,
             EmailLog::MESSAGE_TYPE_INVITE => $this->subjectForInvite,
             EmailLog::MESSAGE_TYPE_LOST_SECURITY_KEY => $this->subjectForLostSecurityKey,
+            EmailLog::MESSAGE_TYPE_METHOD_ADDED => $this->subjectForMethodAdded,
             EmailLog::MESSAGE_TYPE_METHOD_PURGED => $this->subjectForMethodPurged,
             EmailLog::MESSAGE_TYPE_METHOD_REMINDER => $this->subjectForMethodReminder,
+            EmailLog::MESSAGE_TYPE_METHOD_REMOVED => $this->subjectForMethodRemoved,
             EmailLog::MESSAGE_TYPE_METHOD_VERIFY => $this->subjectForMethodVerify,
             EmailLog::MESSAGE_TYPE_MFA_DISABLED => $this->subjectForMfaDisabled,
             EmailLog::MESSAGE_TYPE_MFA_ENABLED => $this->subjectForMfaEnabled,

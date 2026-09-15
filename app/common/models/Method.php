@@ -133,6 +133,21 @@ class Method extends MethodBase
             ]);
             throw new \Exception('Unable to set method as verified', 1461442990);
         }
+
+        $this->sendAddedEmail();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function afterDelete()
+    {
+        parent::afterDelete();
+
+        // Cron purges unverified methods with its own message; an inactive user is one being deleted.
+        if ($this->verified === 1 && $this->user !== null && $this->user->active === 'yes') {
+            $this->sendRemovedEmail();
+        }
     }
 
     /**
@@ -325,6 +340,55 @@ class Method extends MethodBase
         }
 
         return $method;
+    }
+
+    /**
+     * Notify the user and their verified recovery methods that this method was added.
+     */
+    public function sendAddedEmail()
+    {
+        /* @var $emailer Emailer */
+        $emailer = \Yii::$app->emailer;
+
+        $this->user->refresh();
+
+        $emailer->sendMessageToUserAndRecoveryMethods(
+            EmailLog::MESSAGE_TYPE_METHOD_ADDED,
+            $this->user,
+            ['alternateAddress' => $this->value]
+        );
+    }
+
+    /**
+     * Notify the user, their remaining verified recovery methods, and the removed address itself
+     * that this method was removed.
+     */
+    public function sendRemovedEmail()
+    {
+        /* @var $emailer Emailer */
+        $emailer = \Yii::$app->emailer;
+
+        $this->user->refresh();
+        $data = ['alternateAddress' => $this->value];
+
+        $emailer->sendMessageToUserAndRecoveryMethods(
+            EmailLog::MESSAGE_TYPE_METHOD_REMOVED,
+            $this->user,
+            $data
+        );
+
+        // This address is no longer one of the user's recovery methods, so it needs its own send.
+        if ($this->value !== $this->user->getEmailAddress()) {
+            $emailer->sendMessageTo(
+                EmailLog::MESSAGE_TYPE_METHOD_REMOVED,
+                null,
+                ArrayHelper::merge(
+                    $this->user->getAttributesForEmail(),
+                    $data,
+                    ['toAddress' => $this->value]
+                )
+            );
+        }
     }
 
     /**
