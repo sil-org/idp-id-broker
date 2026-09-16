@@ -145,7 +145,7 @@ class Method extends MethodBase
         parent::afterDelete();
 
         // Cron purges unverified methods with its own message; an inactive user is one being deleted.
-        if ($this->verified === 1 && $this->user !== null && $this->user->active === 'yes') {
+        if ($this->verified === 1 && $this->user?->active === 'yes') {
             $this->sendRemovedEmail();
         }
     }
@@ -350,8 +350,6 @@ class Method extends MethodBase
         /* @var $emailer Emailer */
         $emailer = \Yii::$app->emailer;
 
-        $this->user->refresh();
-
         $emailer->sendMessageToUserAndRecoveryMethods(
             EmailLog::MESSAGE_TYPE_METHOD_ADDED,
             $this->user,
@@ -368,7 +366,6 @@ class Method extends MethodBase
         /* @var $emailer Emailer */
         $emailer = \Yii::$app->emailer;
 
-        $this->user->refresh();
         $data = ['alternateAddress' => $this->value];
 
         $emailer->sendMessageToUserAndRecoveryMethods(
