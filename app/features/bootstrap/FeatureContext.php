@@ -854,6 +854,15 @@ class FeatureContext extends YiiContext
         Assert::true($reset->save());
     }
 
+    #[Given('the user is inactive')]
+    public function theUserIsInactive(): void
+    {
+        $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
+        $user->active = 'no';
+        $user->scenario = User::SCENARIO_UPDATE_USER;
+        Assert::true($user->save());
+    }
+
     #[When('I send a reset verification request using the correct uuid')]
     public function iSendAResetVerificationRequestUsingTheCorrectUuid(): void
     {
