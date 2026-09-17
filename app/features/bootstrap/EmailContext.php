@@ -59,6 +59,9 @@ class EmailContext extends YiiContext
     /** @var Method */
     protected $testMethod;
 
+    /** @var ?Method A method whose `user` relation was deliberately cached before the action. */
+    protected $preloadedMethod;
+
     /** @var array<array> */
     protected $matchingFakeEmails;
 
@@ -1368,9 +1371,24 @@ class EmailContext extends YiiContext
 
     protected function getMethod($address): Method
     {
+        // Reuse the preloaded instance so its cached relation survives into the action being tested.
+        if ($this->preloadedMethod !== null && $this->preloadedMethod->value === $address) {
+            return $this->preloadedMethod;
+        }
+
         $method = Method::findOne(['user_id' => $this->tempUser->id, 'value' => $address]);
         Assert::notNull($method, 'The test user has no recovery method with a value of ' . $address . '.');
 
         return $method;
+    }
+
+    #[Given('the recovery method :address has its user relation preloaded')]
+    public function theRecoveryMethodHasItsUserRelationPreloaded($address): void
+    {
+        $method = Method::findOne(['user_id' => $this->tempUser->id, 'value' => $address]);
+        Assert::notNull($method, 'The test user has no recovery method with a value of ' . $address . '.');
+
+        $method->user->getVerifiedMethodOptions();
+        $this->preloadedMethod = $method;
     }
 }

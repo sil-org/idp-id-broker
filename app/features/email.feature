@@ -614,3 +614,21 @@ Feature: Email
       And I remove records of any emails that have been sent
     When that user is created with a personal email address
     Then a "method-added" email should NOT have been sent to them
+
+  Scenario: A cached methods list does not hide a newly verified recovery method
+    Given a specific user already exists
+      And that user has a verified recovery method "existing@example.com"
+      And that user has an unverified recovery method "new@example.com"
+      And the recovery method "new@example.com" has its user relation preloaded
+      And I remove records of any emails that have been sent
+    When that user verifies the recovery method "new@example.com"
+    Then a "method-added" email should have been sent to recovery method "new@example.com"
+
+  Scenario: A cached methods list does not double-send when a recovery method is removed
+    Given a specific user already exists
+      And that user has a verified recovery method "removed@example.com"
+      And that user has a verified recovery method "kept@example.com"
+      And the recovery method "removed@example.com" has its user relation preloaded
+      And I remove records of any emails that have been sent
+    When that user's recovery method "removed@example.com" is deleted
+    Then exactly 1 "method-removed" email should have been sent to "removed@example.com"

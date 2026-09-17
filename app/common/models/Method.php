@@ -350,6 +350,9 @@ class Method extends MethodBase
         /* @var $emailer Emailer */
         $emailer = \Yii::$app->emailer;
 
+        // Drop any `methods` relation cached before this one was verified, or it is left out.
+        $this->user->refresh();
+
         $emailer->sendMessageToUserAndRecoveryMethods(
             EmailLog::MESSAGE_TYPE_METHOD_ADDED,
             $this->user,
@@ -365,6 +368,9 @@ class Method extends MethodBase
     {
         /* @var $emailer Emailer */
         $emailer = \Yii::$app->emailer;
+
+        // Drop any `methods` relation cached before this one was deleted, or it is mailed twice.
+        $this->user->refresh();
 
         $data = ['alternateAddress' => $this->value];
 
