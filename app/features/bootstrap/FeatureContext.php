@@ -6,6 +6,7 @@ use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
 use Behat\Transformation\Transform;
+use common\components\Emailer;
 use common\helpers\MySqlDateTime;
 use common\models\EmailLog;
 use common\models\Invite;
@@ -861,6 +862,22 @@ class FeatureContext extends YiiContext
         $user->active = 'no';
         $user->scenario = User::SCENARIO_UPDATE_USER;
         Assert::true($user->save());
+    }
+
+    #[Given('no reset emails were sent')]
+    public function noResetEmailsWereSent(): void
+    {
+        $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
+
+        $emails = array_map(function(Method $method): string {
+            return $method->value;
+        }, $user->methods);
+        $emails[] = $user->email;
+
+        foreach ($emails as $email) {
+            $sent = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser(EmailLog::MESSAGE_TYPE_RESET_SELF, $email, $user);
+            Assert::isEmpty($sent);
+        }
     }
 
     #[When('I send a reset verification request using the correct uuid')]

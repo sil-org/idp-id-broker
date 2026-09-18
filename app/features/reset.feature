@@ -43,6 +43,7 @@ Feature: Password Reset API
     And the user is inactive
     When I request "/reset" be created
     Then the response status code should be 204
+    And no reset emails were sent
 
   Scenario: Correctly verifying a reset
     Given a user that has an existing reset record
