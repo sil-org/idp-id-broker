@@ -184,6 +184,17 @@ class Reset extends ResetBase
      */
     protected function sendMethods(array $methods): void
     {
+        // Need to check if user is active as passing null to sendMessageTo bypasses the user status check
+        if ($this->user && $this->user->active === 'no') {
+            \Yii::warning([
+                'action' => 'send message',
+                'status' => 'canceled',
+                'messageType' => EmailLog::MESSAGE_TYPE_RESET_SELF,
+                'username' => $this->user->username,
+            ]);
+            return;
+        }
+
         foreach ($methods as $method) {
             Yii::info("sending reset to employee '{$this->user->employee_id}' password reset email $method->value");
 
