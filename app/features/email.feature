@@ -573,3 +573,62 @@ Feature: Email
       And I remove records of any emails that have been sent
     When that user is deleted
     Then a "mfa-disabled" email should NOT have been sent to recovery method "recovery@example.com"
+
+  Scenario: Verifying a recovery method notifies the account's addresses
+    Given a specific user already exists
+      And that user has a verified recovery method "existing@example.com"
+      And that user has an unverified recovery method "new@example.com"
+      And I remove records of any emails that have been sent
+    When that user verifies the recovery method "new@example.com"
+    Then a "method-added" email should have been sent to them
+      And a "method-added" email should have been sent to recovery method "existing@example.com"
+      And a "method-added" email should have been sent to recovery method "new@example.com"
+
+  Scenario: Removing a recovery method notifies the account's addresses and the removed one
+    Given a specific user already exists
+      And that user has a verified recovery method "removed@example.com"
+      And that user has a verified recovery method "kept@example.com"
+      And I remove records of any emails that have been sent
+    When that user's recovery method "removed@example.com" is deleted
+    Then a "method-removed" email should have been sent to them
+      And a "method-removed" email should have been sent to recovery method "kept@example.com"
+      And a "method-removed" email should have been sent to recovery method "removed@example.com"
+
+  Scenario: Removing an unverified recovery method notifies no one
+    Given a specific user already exists
+      And that user has an unverified recovery method "unverified@example.com"
+      And I remove records of any emails that have been sent
+    When that user's recovery method "unverified@example.com" is deleted
+    Then a "method-removed" email should NOT have been sent to them
+      And a "method-removed" email should NOT have been sent to recovery method "unverified@example.com"
+
+  Scenario: Deleting a user does not notify about their recovery methods
+    Given a specific user already exists
+      And that user has a verified recovery method "recovery@example.com"
+      And I remove records of any emails that have been sent
+    When that user is deleted
+    Then a "method-removed" email should NOT have been sent to recovery method "recovery@example.com"
+
+  Scenario: The personal email added at account creation does not notify
+    Given a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user is created with a personal email address
+    Then a "method-added" email should NOT have been sent to them
+
+  Scenario: A cached methods list does not hide a newly verified recovery method
+    Given a specific user already exists
+      And that user has a verified recovery method "existing@example.com"
+      And that user has an unverified recovery method "new@example.com"
+      And the recovery method "new@example.com" has its user relation preloaded
+      And I remove records of any emails that have been sent
+    When that user verifies the recovery method "new@example.com"
+    Then a "method-added" email should have been sent to recovery method "new@example.com"
+
+  Scenario: A cached methods list does not double-send when a recovery method is removed
+    Given a specific user already exists
+      And that user has a verified recovery method "removed@example.com"
+      And that user has a verified recovery method "kept@example.com"
+      And the recovery method "removed@example.com" has its user relation preloaded
+      And I remove records of any emails that have been sent
+    When that user's recovery method "removed@example.com" is deleted
+    Then exactly 1 "method-removed" email should have been sent to "removed@example.com"
