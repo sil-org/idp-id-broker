@@ -67,6 +67,7 @@ if (!empty($mailerHost) || $mailerConfig['useFileTransport'] === true) {
 
 $fromEmail           = Env::get('FROM_EMAIL', '');
 $fromName            = Env::get('FROM_NAME', '');
+$replyToEmail        = Env::get('REPLY_TO_EMAIL', '');
 $emailQueueBatchSize = Env::get('EMAIL_QUEUE_BATCH_SIZE', 10);
 
 $version = Env::get('GITHUB_REF_NAME', 'unknown');
@@ -291,6 +292,7 @@ return [
         'externalGroupsSyncSets'        => Env::getArrayFromPrefix('EXTERNAL_GROUPS_SYNC_'),
         'fromEmail'                     => $fromEmail,
         'fromName'                      => $fromName,
+        'replyToEmail'                  => $replyToEmail,
         'google' => ArrayHelper::merge(
             [
                 'enableSheetsExport'  => false,
