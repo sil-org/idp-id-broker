@@ -65,6 +65,16 @@ Feature: Email
     Then an "invite" email should have been sent to them
       And the invite email should have no one CCed
 
+  Scenario: Add the reply-to address to the email when it is set
+    Given the reply-to email address is configured as "reply_to@example.com"
+    When an email message is built
+    Then the email message should have a reply-to address of "reply_to@example.com"
+
+  Scenario: Do not add a reply-to address to the email when it is not set
+    Given the reply-to email address is NOT configured
+    When an email message is built
+    Then the email message should have no reply-to address
+
   Scenario Outline: When to send password-changed emails
     Given we are configured <sendPwChgEml> password-changed emails
       And a specific user <userExistsOrNot>
