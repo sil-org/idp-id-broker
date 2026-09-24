@@ -207,7 +207,9 @@ class Email extends EmailBase
         } else {
             $mailer->setFrom([$from => $name]);
         }
-        $mailer->setReplyTo($replyTo);
+        if (!empty($replyTo)) {
+            $mailer->setReplyTo($replyTo);
+        }
         $mailer->setTo($this->to_address);
         $mailer->setSubject($this->subject);
 
