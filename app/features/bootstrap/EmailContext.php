@@ -4,6 +4,7 @@ namespace Sil\SilIdBroker\Behat\Context;
 
 use common\components\Emailer;
 use common\helpers\MySqlDateTime;
+use common\models\Email;
 use common\models\EmailLog;
 use common\models\Invite;
 use common\models\Method;
@@ -68,6 +69,8 @@ class EmailContext extends YiiContext
     private string $dummyExtGroupsAppPrefix = 'ext-dummy';
 
     private ?EmailLog $tempEmailLog;
+
+    private ?\yii\mail\MessageInterface $builtMessage = null;
 
     public const METHOD_EMAIL_ADDRESS = 'method@example.com';
     public const MANAGER_EMAIL = 'manager@example.com';
@@ -1055,6 +1058,49 @@ class EmailContext extends YiiContext
     public function theParamEmailAddressIsOnTheBccLine(string $param)
     {
         $this->assertEmailBcc(\Yii::$app->params[$param]);
+    }
+
+    #[Given('the reply-to email address is configured as :address')]
+    public function theReplyToEmailAddressIsConfiguredAs(string $address)
+    {
+        \Yii::$app->params['replyToEmail'] = $address;
+    }
+
+    #[Given('the reply-to email address is NOT configured')]
+    public function theReplyToEmailAddressIsNotConfigured()
+    {
+        \Yii::$app->params['replyToEmail'] = '';
+    }
+
+    #[When('an email message is built')]
+    public function anEmailMessageIsBuilt()
+    {
+        $email = new Email([
+            'to_address' => 'recipient@example.com',
+            'subject' => 'Test subject',
+            'text_body' => 'Test body',
+        ]);
+        $this->builtMessage = $email->getMessage();
+    }
+
+    #[Then('the email message should have a reply-to address of :address')]
+    public function theEmailMessageShouldHaveAReplyToAddressOf(string $address)
+    {
+        Assert::notNull($this->builtMessage, 'No email message was built.');
+        $replyTo = (array) $this->builtMessage->getReplyTo();
+        Assert::keyExists($replyTo, $address, sprintf(
+            'Expected reply-to to contain %s, but found: %s',
+            $address,
+            var_export($replyTo, true)
+        ));
+    }
+
+    #[Then('the email message should have no reply-to address')]
+    public function theEmailMessageShouldHaveNoReplyToAddress()
+    {
+        Assert::notNull($this->builtMessage, 'No email message was built.');
+        $replyTo = $this->builtMessage->getReplyTo();
+        Assert::isEmpty($replyTo, 'Expected no reply-to, but found: ' . var_export($replyTo, true));
     }
 
     #[Given('/^hr notification email (is|is NOT) set$/')]

@@ -201,10 +201,14 @@ class Email extends EmailBase
         );
         $from = \Yii::$app->params['fromEmail'];
         $name = \Yii::$app->params['fromName'];
+        $replyTo = \Yii::$app->params['replyToEmail'];
         if (empty($name)) {
             $mailer->setFrom($from);
         } else {
             $mailer->setFrom([$from => $name]);
+        }
+        if (!empty($replyTo)) {
+            $mailer->setReplyTo($replyTo);
         }
         $mailer->setTo($this->to_address);
         $mailer->setSubject($this->subject);
