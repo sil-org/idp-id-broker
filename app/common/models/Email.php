@@ -22,6 +22,7 @@ class Email extends EmailBase
         return [
             self::SCENARIO_DEFAULT => [
                 'to_address',
+                'to_name',
                 'cc_address',
                 'bcc_address',
                 'subject',
@@ -210,7 +211,11 @@ class Email extends EmailBase
         if (!empty($replyTo)) {
             $mailer->setReplyTo($replyTo);
         }
-        $mailer->setTo($this->to_address);
+        if (empty($this->to_name)) {
+            $mailer->setTo($this->to_address);
+        } else {
+            $mailer->setTo([$this->to_address => $this->to_name]);
+        }
         $mailer->setSubject($this->subject);
 
         /*
@@ -308,6 +313,7 @@ class Email extends EmailBase
         return [
             'id',
             'to_address',
+            'to_name',
             'cc_address',
             'bcc_address',
             'subject',

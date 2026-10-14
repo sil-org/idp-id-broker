@@ -388,7 +388,7 @@ class Method extends MethodBase
                 ArrayHelper::merge(
                     $this->user->getAttributesForEmail(),
                     $data,
-                    ['toAddress' => $this->value]
+                    ['toAddress' => $this->value, 'toName' => $this->user->getDisplayName()]
                 )
             );
         }

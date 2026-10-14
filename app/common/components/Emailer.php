@@ -49,6 +49,7 @@ class Emailer extends Component
 
     public const PROP_SUBJECT = 'subject';
     public const PROP_TO_ADDRESS = 'to_address';
+    public const PROP_TO_NAME = 'to_name';
     public const PROP_CC_ADDRESS = 'cc_address';
     public const PROP_BCC_ADDRESS = 'bcc_address';
     public const PROP_HTML_BODY = 'html_body';
@@ -171,6 +172,7 @@ class Emailer extends Component
      * @param string $ccAddress Optional. Email address to include as 'cc'.
      * @param string $bccAddress Optional. Email address to include as 'bcc'.
      * @param int $delaySeconds Number of seconds to delay sending the email. Default = no delay.
+     * @param string $toName Optional. The recipient's name.
      */
     protected function email(
         string $toAddress,
@@ -179,7 +181,8 @@ class Emailer extends Component
         string $textBody,
         string $ccAddress = '',
         string $bccAddress = '',
-        int $delaySeconds = 0
+        int $delaySeconds = 0,
+        string $toName = ''
     ) {
         $properties = [
             self::PROP_TO_ADDRESS => $toAddress,
@@ -188,6 +191,10 @@ class Emailer extends Component
             self::PROP_TEXT_BODY => $textBody,
             self::PROP_DELAY_SECONDS => $delaySeconds,
         ];
+
+        if ($toName) {
+            $properties[self::PROP_TO_NAME] = $toName;
+        }
 
         if ($ccAddress) {
             $properties[self::PROP_CC_ADDRESS] = $ccAddress;
@@ -347,11 +354,22 @@ class Emailer extends Component
         $htmlBody = \Yii::$app->view->render($htmlView, $dataForEmail);
 
         $toAddress = $data['toAddress'] ?? $user->getEmailAddress();
+        // Only name the user's own address: some messages pass the User but go to their manager or recovery contact.
+        $toName = $data['toName'] ?? ($toAddress === $user?->getEmailAddress() ? $user->getDisplayName() : '');
         $ccAddress = $data['ccAddress'] ?? '';
         $bccAddress = $data['bccAddress'] ?? '';
         $subject = $this->getSubjectForMessage($messageType, $dataForEmail);
 
-        $this->email($toAddress, $subject, $htmlBody, strip_tags($htmlBody), $ccAddress, $bccAddress, $delaySeconds);
+        $this->email(
+            $toAddress,
+            $subject,
+            $htmlBody,
+            strip_tags($htmlBody),
+            $ccAddress,
+            $bccAddress,
+            $delaySeconds,
+            $toName
+        );
 
         if ($user !== null) {
             EmailLog::logMessageToUser($messageType, $user->id);
@@ -396,7 +414,7 @@ class Emailer extends Component
                 $messageType,
                 // Don't log this as a user email because the Emailer won't log the email address in that case.
                 null,
-                ArrayHelper::merge($dataForEmail, ['toAddress' => $method->value])
+                ArrayHelper::merge($dataForEmail, ['toAddress' => $method->value, 'toName' => $user->getDisplayName()])
             );
         }
     }

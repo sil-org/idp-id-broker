@@ -205,7 +205,7 @@ class Reset extends ResetBase
                 // Don't log this as a user email because the Emailer won't log the email address in that case.
                 // If non_user_address validation is changed to allow this, this should be changed to `$this->user`.
                 null,
-                $this->dataForEmail($method->value),
+                ArrayHelper::merge($this->dataForEmail($method->value), ['toName' => $this->user->getDisplayName()]),
             );
         }
     }
