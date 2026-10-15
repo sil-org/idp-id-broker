@@ -869,7 +869,7 @@ class FeatureContext extends YiiContext
     {
         $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
 
-        $emails = array_map(function(Method $method): string {
+        $emails = array_map(function (Method $method): string {
             return $method->value;
         }, $user->methods);
         $emails[] = $user->email;
