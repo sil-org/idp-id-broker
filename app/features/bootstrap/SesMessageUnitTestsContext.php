@@ -236,4 +236,12 @@ class SesMessageUnitTestsContext extends YiiContext
     {
         Assert::isInstanceOf($this->exceptionThrown, NotSupportedException::class);
     }
+
+    #[Then('the to address should not contain line breaks')]
+    public function theToAddressShouldNotContainLineBreaks(): void
+    {
+        foreach ($this->message->getTo() as $address) {
+            Assert::notRegex($address, '/[\r\n]/');
+        }
+    }
 }

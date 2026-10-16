@@ -370,4 +370,22 @@ class EmailClientContext extends YiiContext
         }
     }
 
+    #[When('we get a message for a queued email with a to name')]
+    public function testGetMessageKeepsToNameAfterQueueing(): void
+    {
+        $email = new Email();
+
+        $email->attributes = [
+            'to_address' => $this->stubToAddress,
+            'to_name' => 'Test Name',
+            'subject' => $this->stubSubject,
+            'text_body' => $this->stubTextBody,
+            'html_body' => $this->stubHtmlBody,
+        ];
+
+        Assert::true($email->save(), current($email->getFirstErrors()));
+
+        $queuedEmail = Email::findOne($email->id);
+        Assert::eq($queuedEmail->getMessage()->getTo(), [$this->stubToAddress => 'Test Name'], 'to_name was not kept');
+    }
 }

@@ -1697,6 +1697,9 @@ components:
       properties:
         to_address:
           type: string
+        to_name:
+          description: 'recipient name to show with to_address'
+          type: string
         cc_address:
           type: string
         bcc_address:
@@ -1724,6 +1727,8 @@ components:
         id:
           type: integer
         to_address:
+          type: string
+        to_name:
           type: string
         cc_address:
           type: string

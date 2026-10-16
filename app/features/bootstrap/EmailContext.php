@@ -1437,4 +1437,20 @@ class EmailContext extends YiiContext
         $method->user->getVerifiedMethodOptions();
         $this->preloadedMethod = $method;
     }
+
+    #[Then('that email should have been addressed to their name')]
+    public function thatEmailShouldHaveBeenAddressedToTheirName(): void
+    {
+        Assert::greaterThan(count($this->matchingFakeEmails), 0);
+        $toName = current($this->matchingFakeEmails)[Emailer::PROP_TO_NAME] ?? null;
+        Assert::eq($toName, $this->tempUser->getDisplayName(), 'user name not on to line');
+    }
+
+    #[Then('that email should NOT have been addressed to their name')]
+    public function thatEmailShouldNotHaveBeenAddressedToTheirName(): void
+    {
+        Assert::greaterThan(count($this->matchingFakeEmails), 0);
+        $toName = current($this->matchingFakeEmails)[Emailer::PROP_TO_NAME] ?? null;
+        Assert::notEq($toName, $this->tempUser->getDisplayName(), 'user name on to line');
+    }
 }

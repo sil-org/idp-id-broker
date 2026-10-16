@@ -75,6 +75,37 @@ Feature: Email
     When an email message is built
     Then the email message should have no reply-to address
 
+  Scenario: Add the user's name to the to address when the email is sent to them
+    Given a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user is created
+    Then an "invite" email should have been sent to them
+      And that email should have been addressed to their name
+
+  Scenario: Do not add the user's name to the to address when the email is sent to their manager
+    Given a user already exists
+      And no mfas exist
+    When I request a new manager mfa
+    Then a Manager Rescue email is sent to the manager
+      And that email should NOT have been addressed to their name
+
+  Scenario: Add the user's name to the to address when the email is sent to their recovery method
+    Given a specific user already exists
+      And that user has a password
+      And that user has a verified recovery method "recovery@example.com"
+      And I remove records of any emails that have been sent
+    When that user gets a password
+    Then a "password-changed" email should have been sent to recovery method "recovery@example.com"
+      And that email should have been addressed to their name
+
+  Scenario: Add the user's name to the to address when the email is sent to their removed recovery method
+    Given a specific user already exists
+      And that user has a verified recovery method "removed@example.com"
+      And I remove records of any emails that have been sent
+    When that user's recovery method "removed@example.com" is deleted
+    Then a "method-removed" email should have been sent to recovery method "removed@example.com"
+      And that email should have been addressed to their name
+
   Scenario Outline: When to send password-changed emails
     Given we are configured <sendPwChgEml> password-changed emails
       And a specific user <userExistsOrNot>

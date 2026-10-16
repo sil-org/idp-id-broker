@@ -23,6 +23,7 @@ Feature: Email API
     When we queue an email with all fields
     Then the response status code should be 200
     And the response body should contain "'to_address' => 'test@example.org'"
+    And the response body should contain "'to_name' => 'Test Name'"
     And the response body should contain "'cc_address' => 'testcc@example.org'"
     And the response body should contain "'bcc_address' => 'testbcc@example.org'"
     And the response body should contain "'subject' => 'subject all fields'"

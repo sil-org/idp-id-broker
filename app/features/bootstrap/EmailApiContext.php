@@ -15,6 +15,7 @@ class EmailApiContext extends FeatureContext
     public const TEXT_BODY_TEXT = 'text body';
     public const SUBJECT_TEXT = 'subject text';
     public const TO_ADDRESS = 'to_address';
+    public const TO_NAME = 'to_name';
     public const CC_ADDRESS = 'cc_address';
     public const BCC_ADDRESS = 'bcc_address';
     public const SUBJECT = 'subject';
@@ -74,6 +75,7 @@ class EmailApiContext extends FeatureContext
     public function testQueue_AllFields()
     {
         $this->setRequestBody(self::TO_ADDRESS, self::TEST_EXAMPLE_ORG);
+        $this->setRequestBody(self::TO_NAME, 'Test Name');
         $this->setRequestBody(self::CC_ADDRESS, self::TESTCC_EXAMPLE_ORG);
         $this->setRequestBody(self::BCC_ADDRESS, self::TESTBCC_EXAMPLE_ORG);
         $this->setRequestBody(self::SUBJECT, 'subject all fields');
