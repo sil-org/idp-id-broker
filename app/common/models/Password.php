@@ -31,6 +31,13 @@ class Password extends PasswordBase
 
     public $password;
 
+    /**
+     * If true, the password expires (with no grace period) at the end of the next day.
+     * Only applies when the password is first saved.
+     * @var bool
+     */
+    public $temporary = false;
+
     public function rules(): array
     {
         return ArrayHelper::merge([
@@ -105,7 +112,6 @@ class Password extends PasswordBase
                 'class' => AttributeBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'expires_on',
-                    ActiveRecord::EVENT_BEFORE_UPDATE => 'expires_on',
                 ],
                 'value' => $this->expires(),
             ],
@@ -113,7 +119,6 @@ class Password extends PasswordBase
                 'class' => AttributeBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'grace_period_ends_on',
-                    ActiveRecord::EVENT_BEFORE_UPDATE => 'grace_period_ends_on',
                 ],
                 'value' => $this->gracePeriodEnds(),
             ],
@@ -123,12 +128,13 @@ class Password extends PasswordBase
     private function expires(): Closure
     {
         return function () {
-            $oldHIPB = $this->getOldAttribute('hibp_is_pwned');
-            if ($this->hibp_is_pwned === 'yes' && $oldHIPB !== 'yes') {
-                // Password is already marked as pwned, don't adjust time
+            if ($this->hibp_is_pwned === 'yes') {
+                // expiration was set when the password was marked as pwned
                 return $this->expires_on;
-            } elseif ($this->hibp_is_pwned === 'yes') {
-                return MySqlDateTime::relativeTime('+5 minutes');
+            }
+
+            if ($this->temporary) {
+                return MySqlDateTime::relative('+1 day');
             }
 
             $lifespan = Yii::$app->params['passwordLifespan'];
@@ -146,7 +152,12 @@ class Password extends PasswordBase
     {
         return function () {
             if ($this->hibp_is_pwned === 'yes') {
-                return MySqlDateTime::relativeTime(\Yii::$app->params['hibpGracePeriod']);
+                // grace period was set when the password was marked as pwned
+                return $this->grace_period_ends_on;
+            }
+
+            if ($this->temporary) {
+                return $this->expires_on;
             }
 
             $gracePeriod = Yii::$app->params['passwordExpirationGracePeriod'];

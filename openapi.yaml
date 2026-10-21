@@ -360,6 +360,12 @@ paths:
               properties:
                 password:
                   type: string
+                temporary:
+                  description: >-
+                    If true, the password expires at the end of the
+                    next day (UTC), with no grace period.
+                  type: boolean
+                  default: false
               required:
               - password
               type: object

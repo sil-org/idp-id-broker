@@ -1030,7 +1030,7 @@ class EmailContext extends YiiContext
         $currentPassword->created_utc = MySqlDateTime::formatDate($createdOn);
 
         Assert::true(
-            $currentPassword->save(),
+            $currentPassword->updateExpiry(),
             'Failed to save updated password expiration date. '
                 . join(', ', $currentPassword->getFirstErrors())
         );

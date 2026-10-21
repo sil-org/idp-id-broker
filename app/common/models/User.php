@@ -31,6 +31,9 @@ class User extends UserBase
     /** @var string */
     public $password;
 
+    /** @var bool */
+    public $temporary = false;
+
     /** @var array */
     public array $mfa = [];
 
@@ -206,7 +209,7 @@ class User extends UserBase
             'token_type',
         ];
 
-        $scenarios[self::SCENARIO_UPDATE_PASSWORD] = ['password'];
+        $scenarios[self::SCENARIO_UPDATE_PASSWORD] = ['password', 'temporary'];
 
         $scenarios[self::SCENARIO_AUTHENTICATE] = ['username', 'password', '!active', '!locked'];
 
@@ -260,6 +263,10 @@ class User extends UserBase
             ],
             [
                 'password', 'string',
+            ],
+            [
+                'temporary', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true,
+                'on' => self::SCENARIO_UPDATE_PASSWORD,
             ],
             [
                 // special note:  As a best practice against timing attacks this rule should be run
@@ -867,6 +874,7 @@ class User extends UserBase
 
         $password->user_id = $this->id;
         $password->password = $this->password;
+        $password->temporary = $this->temporary;
 
         if (!$password->save()) {
             $this->addErrors($password->errors);
