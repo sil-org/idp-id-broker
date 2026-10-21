@@ -43,6 +43,23 @@ Feature: Password
     When the user tries to change their password to that same password
     Then the password change should succeed
 
+  Scenario: A new password expires after the normal lifespan
+    Given there is a user in the database
+    When the user submits a new password
+    Then the password should expire after the normal lifespan
+
+  Scenario: Provide a new temporary password for an existing user
+    Given there is a user in the database
+    When the user submits a new temporary password
+    Then a new password hash should be stored
+      And the password should expire tomorrow with no grace period
+
+  Scenario: Updating unrelated password data does not change the expiration dates
+    Given there is a user in the database
+      And the user submits a new temporary password
+    When the user's password HIBP check date is extended
+    Then the password expiration dates should not change
+
 #  Scenario: Attempt to update a password for a nonexistent user
 #  Scenario: Attempt to update a password for an existing user without providing a password
 #  Scenario: Attempt to update a password for an existing user without providing a valid password
