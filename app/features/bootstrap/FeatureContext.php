@@ -816,6 +816,12 @@ class FeatureContext extends YiiContext
         Assert::lessThanEq(strtotime($user->currentPassword->expires_on), time());
     }
 
+    #[Then('the password expiration in the response should be end of day UTC')]
+    public function thePasswordExpirationInTheResponseShouldBeEndOfDayUtc()
+    {
+        Assert::regex($this->resBody['password']['expires_on'], '/^\d{4}-\d{2}-\d{2}T23:59:59Z$/');
+    }
+
     #[Given('I prepare a request with the user\'s username')]
     public function iPrepareARequestWithTheUsersUsername(): void
     {
