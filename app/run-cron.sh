@@ -3,6 +3,8 @@
 # exit if any line in the script fails
 set -e
 
+echo "email-cron starting idp-id-broker version $GITHUB_REF_NAME"
+
 if [[ $PARAMETER_STORE_PATH ]]; then
   config="config-shim -v --path $PARAMETER_STORE_PATH"
 elif [[ $APP_ID ]]; then
