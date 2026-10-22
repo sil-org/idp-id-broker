@@ -9,6 +9,7 @@ use common\components\MfaBackendTotp;
 use common\components\MfaBackendWebAuthn;
 use common\components\Monitor;
 use common\components\SesMailer;
+use common\helpers\SentryHelper;
 use Sentry\Event;
 use Sil\JsonLog\target\JsonStreamTarget;
 use Sil\PhpEnv\Env;
@@ -249,6 +250,7 @@ return [
                         'max_request_body_size' => 'never', // never send request bodies
                         'before_send' => function (Event $event) use ($idpName): ?Event {
                             $event->setExtra(['idp' => $idpName]);
+                            SentryHelper::groupDbConnectionErrors($event);
                             return $event;
                         },
                     ],
