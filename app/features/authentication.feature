@@ -293,6 +293,7 @@ Feature: Authentication
     Then the response status code should be 200
     And The user's current password should be marked as pwned
     And The user's password is expired
+    And the password expiration in the response should be end of day UTC
 
   Scenario Outline: Successfully authenticating even if the WebAuthn MFA API is unusable
     Given "shep_clark" has a valid WebAuthn MFA method
