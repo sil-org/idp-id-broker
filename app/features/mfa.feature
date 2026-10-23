@@ -128,6 +128,12 @@ Feature: MFA
     And the response body should contain "'type' => 'webauthn'"
     And the response body should contain "'label' => 'Yubikey'"
 
+  Scenario: Verify a webauthn MFA with an invalid value
+    Given the user has a mfaWebauthn with a key_handle_hash of "KHH"
+    When I request to verify the webauthn MFA with an invalid value
+    Then the response status code should be 400
+    And 1 failed attempt should be stored
+
   Scenario: Create new MFA record of type totp
     When I have requested a new TOTP MFA with label "My TOTP"
     Then the response status code should be 200
