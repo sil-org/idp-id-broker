@@ -6,6 +6,7 @@ use common\models\Mfa;
 use common\models\MfaWebauthn;
 use common\models\User;
 use Google\Service\PeopleService\ExternalId;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use yii\base\Component;
 use yii\helpers\Json;
@@ -160,7 +161,15 @@ class MfaBackendWebAuthn extends Component implements MfaBackendInterface
                 throw new NotFoundHttpException("No MfaWebauthn records found for Mfa ID: " . $mfa->id, 1659637860);
             }
 
-            $response = $this->client->webauthnValidateAuthentication($headers, $value);
+            try {
+                $response = $this->client->webauthnValidateAuthentication($headers, $value);
+            } catch (ClientException $e) {
+                if ($e->getCode() === 400) {
+                    // 400 = MFA API rejected the security key's response
+                    return false;
+                }
+                throw $e;
+            }
             $khh = $response['key_handle_hash'];
 
             $mfaWebauthn = MfaWebauthn::findOne(['key_handle_hash' => $khh, 'mfa_id' => $mfaId]);
