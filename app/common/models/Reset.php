@@ -196,6 +196,11 @@ class Reset extends ResetBase
         }
 
         foreach ($methods as $method) {
+            // A user with no work email is reached at their personal email, which may also be a recovery method.
+            if ($this->user->isPrimaryAddress($method->value)) {
+                continue;
+            }
+
             Yii::info("sending reset to employee '{$this->user->employee_id}' password reset email $method->value");
 
             /* @var $emailer Emailer */
