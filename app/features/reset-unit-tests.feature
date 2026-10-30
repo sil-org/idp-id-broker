@@ -35,6 +35,24 @@ Feature: Password Reset
     And a "reset-self" email should be sent to "recovery@example.com"
     And no other emails should be sent
 
+  Scenario Outline: Create a password reset for a user with only a personal email
+    Given there is a user in the database with only a personal email "<personalEmail>"
+    When the user requests a password reset
+    Then a "reset-self" email should be sent to "<personalEmail>"
+    And no other emails should be sent
+
+    Examples:
+      | personalEmail             |
+      | personal_only@example.org |
+      | Personal_Only@Example.org |
+
+  Scenario: Create a password reset for a user whose primary email is also a password recovery email
+    Given there is a user in the database
+    And the user's primary email is also a password recovery email
+    When the user requests a password reset
+    Then a "reset-self" email should be sent to their primary email
+    And no other emails should be sent
+
   Scenario: Add the user's name to the to address of a password reset sent to their password recovery email
     Given there is a user in the database
     And the user has a password recovery email "recovery@example.com"

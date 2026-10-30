@@ -399,14 +399,12 @@ class Emailer extends Component
             return;
         }
 
-        $primaryAddress = $user->getEmailAddress();
-
         // sendMessageTo() only pulls these in when it is given a User, so pass them along explicitly.
         $dataForEmail = ArrayHelper::merge($user->getAttributesForEmail(), $data);
 
         foreach ($user->getVerifiedMethodOptions() as $method) {
             // A user with no work email is reached at their personal email, which may also be a recovery method.
-            if ($method->value === $primaryAddress) {
+            if ($user->isPrimaryAddress($method->value)) {
                 continue;
             }
 

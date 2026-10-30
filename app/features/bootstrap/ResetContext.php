@@ -167,4 +167,16 @@ class ResetContext extends UnitTestsContext
         $toName = current($emails)[Emailer::PROP_TO_NAME] ?? null;
         Assert::notEq($toName, $this->tempUser->getDisplayName(), 'user name on to line');
     }
+
+    #[Given('there is a user in the database with only a personal email :email')]
+    public function thereIsAUserInTheDatabaseWithOnlyAPersonalEmail($email): void
+    {
+        $this->tempUser = $this->createNewUserInDatabase('unit_test', ['email' => null, 'personal_email' => $email]);
+    }
+
+    #[Given('the user\'s primary email is also a password recovery email')]
+    public function theUsersPrimaryEmailIsAlsoAPasswordRecoveryEmail(): void
+    {
+        $this->createMethod($this->tempUser->email, 1, $this->tempUser);
+    }
 }

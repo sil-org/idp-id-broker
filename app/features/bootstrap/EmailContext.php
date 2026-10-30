@@ -1315,13 +1315,19 @@ class EmailContext extends YiiContext
     #[Given('a specific user already exists with only a personal email address')]
     public function aSpecificUserAlreadyExistsWithOnlyAPersonalEmailAddress(): void
     {
+        $this->aSpecificUserAlreadyExistsWithOnlyThePersonalEmailAddress(self::PERSONAL_ONLY_EMAIL);
+    }
+
+    #[Given('a specific user already exists with only the personal email address :address')]
+    public function aSpecificUserAlreadyExistsWithOnlyThePersonalEmailAddress($address): void
+    {
         $employeeId = uniqid();
         $user = new User([
             'employee_id' => strval($employeeId),
             'first_name' => 'Test',
             'last_name' => 'User',
             'username' => 'test_user_' . $employeeId,
-            'personal_email' => self::PERSONAL_ONLY_EMAIL,
+            'personal_email' => $address,
             'manager_email' => self::MANAGER_EMAIL,
         ]);
         $user->scenario = User::SCENARIO_NEW_USER;
