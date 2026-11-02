@@ -1213,6 +1213,14 @@ class User extends UserBase
     }
 
     /**
+     * Ignores case, because Method::create() lowercases recovery addresses but the primary address keeps its case.
+     */
+    public function isPrimaryAddress(string $address): bool
+    {
+        return mb_strtolower($address) === mb_strtolower($this->getEmailAddress());
+    }
+
+    /**
      * @inheritDoc
      */
     public function afterFind()

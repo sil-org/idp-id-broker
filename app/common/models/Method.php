@@ -381,7 +381,7 @@ class Method extends MethodBase
         );
 
         // This address is no longer one of the user's recovery methods, so it needs its own send.
-        if ($this->value !== $this->user->getEmailAddress()) {
+        if (!$this->user->isPrimaryAddress($this->value)) {
             $emailer->sendMessageTo(
                 EmailLog::MESSAGE_TYPE_METHOD_REMOVED,
                 null,
