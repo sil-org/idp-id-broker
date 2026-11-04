@@ -48,4 +48,5 @@ $config "$APP_HOME"/yii migrate --interactive=0
 
 make-ssl-cert generate-default-snakeoil
 
-$config apache2ctl -k start -D FOREGROUND
+# exec so Apache replaces this shell as PID 1 and receives the container's stop signal
+exec $config apache2-foreground
