@@ -184,8 +184,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-        '204':
+        '404':
           description: 'No user record was found with that `employee_id`.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
       description: 'Get information about a specific user.'
       operationId: GET_user-employee_id
     put:
@@ -198,8 +202,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-        '204':
+        '404':
           description: 'No user record was found with that `employee_id`.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '422':
           description: 'The given user data does not satisfy some validation rule.'
           content:
@@ -323,8 +331,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-        '204':
+        '404':
           description: 'No user record was found with that `employee_id`.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '409':
           description: 'A recently-used password was given.'
           content:
