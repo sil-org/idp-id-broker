@@ -82,14 +82,15 @@ class MethodController extends BaseRestController
     }
 
     /**
-     * Create new password recovery method, normally un-verified, and send a
-     * verification message to the user. If 'created' parameter is specified,
-     * then the record is created pre-verified and no message is sent to the
-     * user.
+     * Create a new, unverified password recovery method and send a verification
+     * message to the user. If the user already has an unverified method with that
+     * value, restart its verification (a new code is sent) and return it. If the
+     * user already has a verified method with that value, respond with 409.
      *
      * @return Method
      * @throws BadRequestHttpException
      * @throws ConflictHttpException
+     * @throws NotFoundHttpException
      * @throws \Exception
      */
     public function actionCreate()
@@ -115,6 +116,14 @@ class MethodController extends BaseRestController
             throw new NotFoundHttpException(
                 'employee_id not found',
                 1540990165
+            );
+        }
+
+        $existing = Method::findOne(['user_id' => $userId, 'value' => mb_strtolower($value)]);
+        if ($existing !== null && $existing->isVerified()) {
+            throw new ConflictHttpException(
+                'a verified method with that value already exists',
+                1794134175
             );
         }
 

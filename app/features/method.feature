@@ -54,6 +54,34 @@ Feature: Recovery Method API
 #    And verification_expires should be stored as ? UTC
 #    And created should be stored as now UTC
 
+  Scenario: Try to create a Method that matches a verified Method
+    Given user with employee id 123 has a verified Method "verified@example.org"
+      And I provide the following valid data:
+        | property     | value                 |
+        | employee_id  | 123                   |
+        | value        | Verified@Example.org  |
+    When I request "/method/create" be created
+    Then the response status code should be 409
+      And a method record exists with a value of "verified@example.org"
+      And the following method data should be stored:
+        | property              | value                 |
+        | verified              | 1                     |
+
+  Scenario: Create a Method that matches an unverified Method
+    Given user with employee id 123 has an unverified Method "unverified@example.org"
+      And I provide the following valid data:
+        | property     | value                   |
+        | employee_id  | 123                     |
+        | value        | unverified@example.org  |
+    When I request "/method/create" be created
+    Then the response status code should be 200
+      And the following data is returned:
+        | property      | value                   |
+        | value         | unverified@example.org  |
+      And a method record exists with a value of "unverified@example.org"
+      And the method should remain unverified
+      And the verification code should have changed
+
 ### TODO: Try to create a method using the primary (or manager) address
 
   Scenario: Resend a method verification
