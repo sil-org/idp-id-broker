@@ -25,13 +25,13 @@ class MethodController extends BaseRestController
      * Get list of Recovery Methods for given user
      * @param string $employeeId
      * @return Method[]
-     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
      */
     public function actionList(string $employeeId): array
     {
         $user = User::findOne(['employee_id' => $employeeId]);
         if ($user === null) {
-            throw new BadRequestHttpException(
+            throw new NotFoundHttpException(
                 'User not found for employeeId ' . var_export($employeeId, true),
                 1540491109
             );

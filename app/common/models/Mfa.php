@@ -9,6 +9,7 @@ use yii\helpers\ArrayHelper;
 use yii\validators\EmailValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\ConflictHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\ServerErrorHttpException;
 use yii\web\TooManyRequestsHttpException;
 
@@ -326,6 +327,7 @@ class Mfa extends MfaBase
      * @param string|null $recoveryEmail
      * @return array
      * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
      * @throws ServerErrorHttpException
      * @throws ConflictHttpException
      */
@@ -343,7 +345,7 @@ class Mfa extends MfaBase
          */
         $user = User::findOne(['id' => $userId]);
         if ($user == null) {
-            throw new BadRequestHttpException("User not found");
+            throw new NotFoundHttpException('User not found');
         }
 
         if ($type == self::TYPE_MANAGER && empty($user->manager_email)) {

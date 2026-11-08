@@ -13,6 +13,11 @@ Feature: Recovery Method API
     Then the response status code should be 200
       And I should receive 0 records
 
+  Scenario: Retrieve Method records for a User that does not exist
+    When I request "/user/999/method" be retrieved
+    Then the response status code should be 404
+      And the response body should contain "User not found"
+
   Scenario: Retrieve Method records for a User with 1 Method record
     Given user with employee id 123 has a verified Method "email@example.com"
     When I request "/user/123/method" be retrieved
