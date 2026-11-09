@@ -17,6 +17,7 @@ use Webmozart\Assert\Assert;
 use Behat\Step\Then;
 use Behat\Step\When;
 use Behat\Step\Given;
+use yii\log\Logger;
 
 class EmailContext extends YiiContext
 {
@@ -1296,6 +1297,30 @@ class EmailContext extends YiiContext
     {
         $this->assertEmailSent(EmailLog::MESSAGE_TYPE_INVITE, $this->tempUser->email);
         $this->assertEmailNotCc($address);
+    }
+
+    #[Then('that user should exist')]
+    public function thatUserShouldExist(): void
+    {
+        Assert::notNull(
+            User::findOne(['employee_id' => $this->tempUser->employee_id]),
+            'The user should have been saved.'
+        );
+    }
+
+    #[Then('a failure to send the :messageType email should have been logged')]
+    public function aFailureToSendTheEmailShouldHaveBeenLogged($messageType): void
+    {
+        // Inspect the logger's buffer directly: flushing would dispatch to the
+        // real log targets, whose prefix needs a web request that tests lack.
+        $expectedAction = 'send ' . $messageType . ' message';
+        $matches = array_filter(
+            \Yii::getLogger()->messages,
+            fn($message) => $message[1] === Logger::LEVEL_ERROR
+                && is_array($message[0])
+                && ($message[0]['action'] ?? null) === $expectedAction
+        );
+        Assert::notEmpty($matches, 'Expected an error log entry for: ' . $expectedAction);
     }
 
     #[Then('the invite email should also CC the personal email')]

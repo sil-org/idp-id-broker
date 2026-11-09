@@ -789,26 +789,53 @@ class User extends UserBase
         $emailer = \Yii::$app->emailer;
 
         if ($emailer->shouldSendInviteMessageTo($this, $isNewUser)) {
-            $invite = Invite::findOrCreate($this->id);
-            $data = ['inviteCode' => $invite->getCode()];
-            $ccAddress = $this->getInviteCcAddress();
-            if ($ccAddress !== '') {
-                $data['ccAddress'] = $ccAddress;
-            }
-            $emailer->sendMessageTo(
-                EmailLog::MESSAGE_TYPE_INVITE,
-                $this,
-                $data,
-                \Yii::$app->params['inviteEmailDelaySeconds']
-            );
+            $this->sendMessageSafely(EmailLog::MESSAGE_TYPE_INVITE, function () use ($emailer) {
+                $invite = Invite::findOrCreate($this->id);
+                $data = ['inviteCode' => $invite->getCode()];
+                $ccAddress = $this->getInviteCcAddress();
+                if ($ccAddress !== '') {
+                    $data['ccAddress'] = $ccAddress;
+                }
+                $emailer->sendMessageTo(
+                    EmailLog::MESSAGE_TYPE_INVITE,
+                    $this,
+                    $data,
+                    \Yii::$app->params['inviteEmailDelaySeconds']
+                );
+            });
         }
 
         if ($emailer->shouldSendPasswordChangedMessageTo($this, $changedAttributes)) {
-            $emailer->sendMessageToUserAndRecoveryMethods(EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED, $this);
+            $this->sendMessageSafely(EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED, function () use ($emailer) {
+                $emailer->sendMessageToUserAndRecoveryMethods(EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED, $this);
+            });
         }
 
         if ($emailer->shouldSendWelcomeMessageTo($this, $changedAttributes)) {
-            $emailer->sendMessageTo(EmailLog::MESSAGE_TYPE_WELCOME, $this);
+            $this->sendMessageSafely(EmailLog::MESSAGE_TYPE_WELCOME, function () use ($emailer) {
+                $emailer->sendMessageTo(EmailLog::MESSAGE_TYPE_WELCOME, $this);
+            });
+        }
+    }
+
+    /**
+     * Run a message-sending callback from `afterSave()` without letting a failure
+     * escape. By then the user record is already saved, so an exception would
+     * only turn a successful request into a misleading 500. The failure is logged
+     * at error level (and so reported to Sentry) instead.
+     */
+    private function sendMessageSafely(string $messageType, callable $send): void
+    {
+        try {
+            $send();
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'action' => 'send ' . $messageType . ' message',
+                'status' => 'error',
+                'employee_id' => $this->employee_id,
+                'error' => $e->getMessage(),
+                'exception' => $e,
+            ]);
         }
     }
 

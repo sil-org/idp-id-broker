@@ -65,6 +65,17 @@ Feature: Email
     Then an "invite" email should have been sent to them
       And the invite email should have no one CCed
 
+  Scenario: Still create the user when the invite email cannot be queued
+    Given we are configured to send invite emails
+      And we are configured to CC mail admins on invite emails
+      And we are configured to CC "not-an-email-address" as the mail admin fallback
+      And a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user whose account has no mail admins is created
+    Then that user should exist
+      And an "invite" email should NOT have been sent to them
+      And a failure to send the "invite" email should have been logged
+
   Scenario: Add the reply-to address to the email when it is set
     Given the reply-to email address is configured as "reply_to@example.com"
     When an email message is built
