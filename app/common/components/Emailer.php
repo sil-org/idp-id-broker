@@ -379,6 +379,60 @@ class Emailer extends Component
     }
 
     /**
+     * Like `sendMessageTo()`, but log a failure at error level (with the
+     * exception, so it reaches Sentry) instead of throwing it. Use this for
+     * notifications sent after the triggering change is already saved, where an
+     * exception would only turn a successful request into a misleading 500.
+     *
+     * @return bool Whether the message was sent (or queued) without error.
+     */
+    public function trySendMessageTo(
+        string $messageType,
+        ?User $user = null,
+        array $data = [],
+        int $delaySeconds = 0
+    ): bool {
+        try {
+            $this->sendMessageTo($messageType, $user, $data, $delaySeconds);
+            return true;
+        } catch (\Throwable $e) {
+            $this->logSendFailure($messageType, $user, $e);
+            return false;
+        }
+    }
+
+    /**
+     * Like `sendMessageToUserAndRecoveryMethods()`, but log a failure instead of
+     * throwing it. See `trySendMessageTo()`.
+     *
+     * @return bool Whether all of the messages were sent (or queued) without error.
+     */
+    public function trySendMessageToUserAndRecoveryMethods(
+        string $messageType,
+        User $user,
+        array $data = []
+    ): bool {
+        try {
+            $this->sendMessageToUserAndRecoveryMethods($messageType, $user, $data);
+            return true;
+        } catch (\Throwable $e) {
+            $this->logSendFailure($messageType, $user, $e);
+            return false;
+        }
+    }
+
+    private function logSendFailure(string $messageType, ?User $user, \Throwable $e): void
+    {
+        \Yii::error([
+            'action' => 'send ' . $messageType . ' message',
+            'status' => 'error',
+            'employee_id' => $user?->employee_id,
+            'error' => $e->getMessage(),
+            'exception' => $e,
+        ]);
+    }
+
+    /**
      * Send the specified type of message to the given User's primary address and to each of their
      * verified password-recovery methods.
      *
