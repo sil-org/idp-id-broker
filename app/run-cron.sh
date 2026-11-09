@@ -34,6 +34,8 @@ term_handler() {
     # `|| true` because `set -e` would otherwise exit here on an already-gone child
     kill -TERM "$child" 2>/dev/null || true
     wait "$child" 2>/dev/null || true
+    # Let a send in progress finish; the container's stop timeout still caps this
+    while pgrep -f 'yii send/send-queued-email' >/dev/null; do sleep 1; done
     exit 0
 }
 trap term_handler TERM
