@@ -9,6 +9,7 @@ use Yii;
  *
  * @property int $id
  * @property string $to_address
+ * @property string|null $to_name
  * @property string|null $cc_address
  * @property string|null $bcc_address
  * @property string $subject
@@ -38,7 +39,7 @@ class EmailBase extends \yii\db\ActiveRecord
             [['to_address', 'subject', 'created_at'], 'required'],
             [['text_body', 'html_body'], 'string'],
             [['attempts_count', 'updated_at', 'created_at', 'send_after'], 'integer'],
-            [['to_address', 'cc_address', 'bcc_address', 'subject'], 'string', 'max' => 255],
+            [['to_address', 'to_name', 'cc_address', 'bcc_address', 'subject'], 'string', 'max' => 255],
         ];
     }
 
@@ -50,6 +51,7 @@ class EmailBase extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'to_address' => Yii::t('app', 'To Address'),
+            'to_name' => Yii::t('app', 'To Name'),
             'cc_address' => Yii::t('app', 'Cc Address'),
             'bcc_address' => Yii::t('app', 'Bcc Address'),
             'subject' => Yii::t('app', 'Subject'),

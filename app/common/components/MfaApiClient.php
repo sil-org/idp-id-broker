@@ -54,8 +54,9 @@ class MfaApiClient
         $this->headers = [
             'X-MFA-APIKey' => $apiKey,
             'X-MFA-APISecret' => $apiSecret,
+            'Accept' => 'application/json',
             'Content-type' => 'application/json',
-            'User-Agent' => 'idp-id-broker',
+            'User-Agent' => \Yii::$app->params['userAgent'],
         ];
 
         $this->client = new GuzzleClient([
@@ -67,15 +68,15 @@ class MfaApiClient
 
     /**
      * Create a new TOTP configuration
-     * @param string $username
+     * @param string $email
      * @return array
      * @throws GuzzleException
      */
-    public function createTotp(string $username, string $issuer): array
+    public function createTotp(string $email, string $issuer): array
     {
         $response = $this->callApi('totp', 'POST', [
             'issuer' => $issuer,
-            'label' => $username,
+            'label' => $email,
         ]);
 
         return Json::decode($response->getBody()->getContents());
@@ -228,6 +229,5 @@ class MfaApiClient
             throw $e;
         }
     }
-
 
 }

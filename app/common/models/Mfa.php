@@ -96,12 +96,7 @@ class Mfa extends MfaBase
         } elseif ($this->type === self::TYPE_WEBAUTHN) {
             $webauthns = $this->mfaWebauthns;
             foreach ($webauthns as $webauthn) {
-                $this->data[] = [
-                    'id' => $webauthn->id,
-                    'label' => $webauthn->label,
-                    'last_used_utc' => $webauthn->last_used_utc,
-                    'created_utc' => $webauthn->created_utc,
-                ];
+                $this->data[] = $webauthn->toArray(['id', 'label', 'last_used_utc', 'created_utc']);
             }
         }
     }
@@ -622,23 +617,23 @@ class Mfa extends MfaBase
         $user->refresh();
 
         if ($emailer->shouldSendMfaOptionAddedMessageTo($user, $eventType)) {
-            $emailer->sendMessageTo(
+            $emailer->sendMessageToUserAndRecoveryMethods(
                 EmailLog::MESSAGE_TYPE_MFA_OPTION_ADDED,
                 $user
             );
         } elseif ($emailer->shouldSendMfaEnabledMessageTo($user, $eventType)) {
-            $emailer->sendMessageTo(
+            $emailer->sendMessageToUserAndRecoveryMethods(
                 EmailLog::MESSAGE_TYPE_MFA_ENABLED,
                 $user
             );
         } elseif ($emailer->shouldSendMfaOptionRemovedMessageTo($user, $eventType, $mfa)) {
             $emailer->otherDataForEmails['mfaTypeDisabled'] = $mfa->getReadableType();
-            $emailer->sendMessageTo(
+            $emailer->sendMessageToUserAndRecoveryMethods(
                 EmailLog::MESSAGE_TYPE_MFA_OPTION_REMOVED,
                 $user
             );
         } elseif ($emailer->shouldSendMfaDisabledMessageTo($user, $eventType, $mfa)) {
-            $emailer->sendMessageTo(
+            $emailer->sendMessageToUserAndRecoveryMethods(
                 EmailLog::MESSAGE_TYPE_MFA_DISABLED,
                 $user
             );

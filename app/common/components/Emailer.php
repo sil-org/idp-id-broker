@@ -24,9 +24,12 @@ class Emailer extends Component
     public const SUBJ_INVITE = 'Your new {idpDisplayName} Identity account';
     public const SUBJ_LOST_SECURITY_KEY = 'Do you still have the security key you use with your {idpDisplayName}'
         . ' Identity account?';
+    public const SUBJ_METHOD_ADDED = 'A password recovery method was added to a {idpDisplayName} Identity account';
     public const SUBJ_METHOD_PURGED = 'An unverified password recovery method has been removed from your {idpDisplayName}'
         . ' Identity account';
     public const SUBJ_METHOD_REMINDER = 'REMINDER: Please verify your new password recovery method';
+    public const SUBJ_METHOD_REMOVED = 'A password recovery method was removed from a {idpDisplayName}'
+        . ' Identity account';
     public const SUBJ_METHOD_VERIFY = 'Please verify your new password recovery method';
     public const SUBJ_MFA_DISABLED = '2-Step Verification was disabled on your {idpDisplayName} Identity account';
     public const SUBJ_MFA_ENABLED = '2-Step Verification was enabled on your {idpDisplayName} Identity account';
@@ -46,6 +49,7 @@ class Emailer extends Component
 
     public const PROP_SUBJECT = 'subject';
     public const PROP_TO_ADDRESS = 'to_address';
+    public const PROP_TO_NAME = 'to_name';
     public const PROP_CC_ADDRESS = 'cc_address';
     public const PROP_BCC_ADDRESS = 'bcc_address';
     public const PROP_HTML_BODY = 'html_body';
@@ -104,8 +108,10 @@ class Emailer extends Component
     public $subjectForGetBackupCodes;
     public $subjectForInvite;
     public $subjectForLostSecurityKey;
+    public $subjectForMethodAdded;
     public $subjectForMethodPurged;
     public $subjectForMethodReminder;
+    public $subjectForMethodRemoved;
     public $subjectForMethodVerify;
     public $subjectForMfaDisabled;
     public $subjectForMfaEnabled;
@@ -166,6 +172,7 @@ class Emailer extends Component
      * @param string $ccAddress Optional. Email address to include as 'cc'.
      * @param string $bccAddress Optional. Email address to include as 'bcc'.
      * @param int $delaySeconds Number of seconds to delay sending the email. Default = no delay.
+     * @param string $toName Optional. The recipient's name.
      */
     protected function email(
         string $toAddress,
@@ -174,7 +181,8 @@ class Emailer extends Component
         string $textBody,
         string $ccAddress = '',
         string $bccAddress = '',
-        int $delaySeconds = 0
+        int $delaySeconds = 0,
+        string $toName = ''
     ) {
         $properties = [
             self::PROP_TO_ADDRESS => $toAddress,
@@ -183,6 +191,10 @@ class Emailer extends Component
             self::PROP_TEXT_BODY => $textBody,
             self::PROP_DELAY_SECONDS => $delaySeconds,
         ];
+
+        if ($toName) {
+            $properties[self::PROP_TO_NAME] = $toName;
+        }
 
         if ($ccAddress) {
             $properties[self::PROP_CC_ADDRESS] = $ccAddress;
@@ -249,8 +261,10 @@ class Emailer extends Component
         $this->subjectForGetBackupCodes ??= self::SUBJ_GET_BACKUP_CODES;
         $this->subjectForInvite ??= self::SUBJ_INVITE;
         $this->subjectForLostSecurityKey ??= self::SUBJ_LOST_SECURITY_KEY;
+        $this->subjectForMethodAdded ??= self::SUBJ_METHOD_ADDED;
         $this->subjectForMethodPurged ??= self::SUBJ_METHOD_PURGED;
         $this->subjectForMethodReminder ??= self::SUBJ_METHOD_REMINDER;
+        $this->subjectForMethodRemoved ??= self::SUBJ_METHOD_REMOVED;
         $this->subjectForMethodVerify ??= self::SUBJ_METHOD_VERIFY;
         $this->subjectForMfaDisabled ??= self::SUBJ_MFA_DISABLED;
         $this->subjectForMfaEnabled ??= self::SUBJ_MFA_ENABLED;
@@ -272,8 +286,10 @@ class Emailer extends Component
             EmailLog::MESSAGE_TYPE_GET_BACKUP_CODES => $this->subjectForGetBackupCodes,
             EmailLog::MESSAGE_TYPE_INVITE => $this->subjectForInvite,
             EmailLog::MESSAGE_TYPE_LOST_SECURITY_KEY => $this->subjectForLostSecurityKey,
+            EmailLog::MESSAGE_TYPE_METHOD_ADDED => $this->subjectForMethodAdded,
             EmailLog::MESSAGE_TYPE_METHOD_PURGED => $this->subjectForMethodPurged,
             EmailLog::MESSAGE_TYPE_METHOD_REMINDER => $this->subjectForMethodReminder,
+            EmailLog::MESSAGE_TYPE_METHOD_REMOVED => $this->subjectForMethodRemoved,
             EmailLog::MESSAGE_TYPE_METHOD_VERIFY => $this->subjectForMethodVerify,
             EmailLog::MESSAGE_TYPE_MFA_DISABLED => $this->subjectForMfaDisabled,
             EmailLog::MESSAGE_TYPE_MFA_ENABLED => $this->subjectForMfaEnabled,
@@ -338,16 +354,66 @@ class Emailer extends Component
         $htmlBody = \Yii::$app->view->render($htmlView, $dataForEmail);
 
         $toAddress = $data['toAddress'] ?? $user->getEmailAddress();
+        // Only name the user's own address: some messages pass the User but go to their manager or recovery contact.
+        $toName = $data['toName'] ?? ($toAddress === $user?->getEmailAddress() ? $user->getDisplayName() : '');
         $ccAddress = $data['ccAddress'] ?? '';
         $bccAddress = $data['bccAddress'] ?? '';
         $subject = $this->getSubjectForMessage($messageType, $dataForEmail);
 
-        $this->email($toAddress, $subject, $htmlBody, strip_tags($htmlBody), $ccAddress, $bccAddress, $delaySeconds);
+        $this->email(
+            $toAddress,
+            $subject,
+            $htmlBody,
+            strip_tags($htmlBody),
+            $ccAddress,
+            $bccAddress,
+            $delaySeconds,
+            $toName
+        );
 
         if ($user !== null) {
             EmailLog::logMessageToUser($messageType, $user->id);
         } else {
             EmailLog::logMessageToNonUser($messageType, $toAddress);
+        }
+    }
+
+    /**
+     * Send the specified type of message to the given User's primary address and to each of their
+     * verified password-recovery methods.
+     *
+     * @param string $messageType The message type. Must be one of the
+     *     EmailLog::MESSAGE_TYPE_* values.
+     * @param User $user The intended recipient.
+     * @param string[] $data Data fields for email template.
+     */
+    public function sendMessageToUserAndRecoveryMethods(
+        string $messageType,
+        User $user,
+        array $data = []
+    ) {
+        $this->sendMessageTo($messageType, $user, $data);
+
+        // sendMessageTo() only skips inactive users when it is given a User; the sends below pass null.
+        if ($user->active === 'no') {
+            return;
+        }
+
+        // sendMessageTo() only pulls these in when it is given a User, so pass them along explicitly.
+        $dataForEmail = ArrayHelper::merge($user->getAttributesForEmail(), $data);
+
+        foreach ($user->getVerifiedMethodOptions() as $method) {
+            // A user with no work email is reached at their personal email, which may also be a recovery method.
+            if ($user->isPrimaryAddress($method->value)) {
+                continue;
+            }
+
+            $this->sendMessageTo(
+                $messageType,
+                // Don't log this as a user email because the Emailer won't log the email address in that case.
+                null,
+                ArrayHelper::merge($dataForEmail, ['toAddress' => $method->value, 'toName' => $user->getDisplayName()])
+            );
         }
     }
 

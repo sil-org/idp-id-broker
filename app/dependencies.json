@@ -73,7 +73,7 @@
   },
   {
     "name": "guzzlehttp/guzzle",
-    "version": "7.15.1"
+    "version": "7.15.2"
   },
   {
     "name": "guzzlehttp/promises",
@@ -97,7 +97,7 @@
   },
   {
     "name": "mtdowling/jmespath.php",
-    "version": "2.8.0"
+    "version": "2.9.2"
   },
   {
     "name": "paragonie/constant_time_encoding",
@@ -133,7 +133,7 @@
   },
   {
     "name": "phpseclib/phpseclib",
-    "version": "3.0.55"
+    "version": "3.0.57"
   },
   {
     "name": "phpspec/php-diff",
@@ -146,6 +146,10 @@
   {
     "name": "psr/container",
     "version": "2.0.2"
+  },
+  {
+    "name": "psr/event-dispatcher",
+    "version": "1.0.0"
   },
   {
     "name": "psr/http-client",
@@ -200,11 +204,15 @@
     "version": "2.1.2"
   },
   {
-    "name": "swiftmailer/swiftmailer",
-    "version": "v6.3.0"
+    "name": "symfony/deprecation-contracts",
+    "version": "v3.7.1"
   },
   {
-    "name": "symfony/deprecation-contracts",
+    "name": "symfony/event-dispatcher",
+    "version": "v7.4.17"
+  },
+  {
+    "name": "symfony/event-dispatcher-contracts",
     "version": "v3.7.1"
   },
   {
@@ -220,6 +228,14 @@
     "version": "v3.6.0"
   },
   {
+    "name": "symfony/mailer",
+    "version": "v7.4.17"
+  },
+  {
+    "name": "symfony/mime",
+    "version": "v7.4.18"
+  },
+  {
     "name": "symfony/options-resolver",
     "version": "v7.4.0"
   },
@@ -228,20 +244,16 @@
     "version": "v1.37.0"
   },
   {
-    "name": "symfony/polyfill-iconv",
-    "version": "v1.33.0"
-  },
-  {
     "name": "symfony/polyfill-intl-idn",
-    "version": "v1.38.1"
+    "version": "v1.42.0"
   },
   {
     "name": "symfony/polyfill-intl-normalizer",
-    "version": "v1.38.0"
+    "version": "v1.42.0"
   },
   {
     "name": "symfony/polyfill-mbstring",
-    "version": "v1.38.1"
+    "version": "v1.38.2"
   },
   {
     "name": "symfony/polyfill-php80",
@@ -253,7 +265,7 @@
   },
   {
     "name": "symfony/service-contracts",
-    "version": "v3.6.1"
+    "version": "v3.7.3"
   },
   {
     "name": "webmozart/assert",
@@ -272,7 +284,7 @@
     "version": "2.2.7"
   },
   {
-    "name": "yiisoft/yii2-swiftmailer",
-    "version": "2.1.3"
+    "name": "yiisoft/yii2-symfonymailer",
+    "version": "4.0.0"
   }
 ]

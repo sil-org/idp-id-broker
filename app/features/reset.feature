@@ -38,6 +38,13 @@ Feature: Password Reset API
     When I request "/reset" be created
     Then the response status code should be 204
 
+  Scenario: Attempt to create a reset for an inactive user
+    Given I prepare a request with the user's username
+    And the user is inactive
+    When I request "/reset" be created
+    Then the response status code should be 204
+    And no reset emails were sent
+
   Scenario: Correctly verifying a reset
     Given a user that has an existing reset record
     When I send a reset verification request using the correct uuid

@@ -28,6 +28,11 @@ return [
             'parsers' => [
                 'application/json' => JsonParser::class,
             ],
+            // Headers used by getUserIP() to find the client IP, in order of preference
+            'ipHeaders' => [
+                'CF-Connecting-IP',
+                'X-Forwarded-For',
+            ],
         ],
         // http://www.yiiframework.com/doc-2.0/guide-runtime-responses.html
         'response' => [

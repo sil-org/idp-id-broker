@@ -26,7 +26,7 @@ Feature: MFA
       | label         | Security Key-1 |
       | id            | *              |
       | last_used_utc | null           |
-      | created_utc   | *              |
+      | created_utc   | ISO 8601       |
 
   Scenario: Create new MFA record of type backupcode
     Given I provide the following valid data:
@@ -128,6 +128,12 @@ Feature: MFA
     And the response body should contain "'type' => 'webauthn'"
     And the response body should contain "'label' => 'Yubikey'"
 
+  Scenario: Verify a webauthn MFA with an invalid value
+    Given the user has a mfaWebauthn with a key_handle_hash of "KHH"
+    When I request to verify the webauthn MFA with an invalid value
+    Then the response status code should be 400
+    And 1 failed attempt should be stored
+
   Scenario: Create new MFA record of type totp
     When I have requested a new TOTP MFA with label "My TOTP"
     Then the response status code should be 200
@@ -186,6 +192,7 @@ Feature: MFA
     When I update the mfaWebauthn
     Then the response status code should be 200
       And the property label should contain "A New Label"
+      And the property created_utc should be an ISO 8601 timestamp
       And the following mfaWebauthn data should be stored:
         | property            | value           |
         | label               | A New Label     |

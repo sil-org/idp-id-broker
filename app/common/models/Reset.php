@@ -184,7 +184,23 @@ class Reset extends ResetBase
      */
     protected function sendMethods(array $methods): void
     {
+        // Need to check if user is active as passing null to sendMessageTo bypasses the user status check
+        if ($this->user && $this->user->active === 'no') {
+            \Yii::warning([
+                'action' => 'send message',
+                'status' => 'canceled',
+                'messageType' => EmailLog::MESSAGE_TYPE_RESET_SELF,
+                'username' => $this->user->username,
+            ]);
+            return;
+        }
+
         foreach ($methods as $method) {
+            // A user with no work email is reached at their personal email, which may also be a recovery method.
+            if ($this->user->isPrimaryAddress($method->value)) {
+                continue;
+            }
+
             Yii::info("sending reset to employee '{$this->user->employee_id}' password reset email $method->value");
 
             /* @var $emailer Emailer */
@@ -194,7 +210,7 @@ class Reset extends ResetBase
                 // Don't log this as a user email because the Emailer won't log the email address in that case.
                 // If non_user_address validation is changed to allow this, this should be changed to `$this->user`.
                 null,
-                $this->dataForEmail($method->value),
+                ArrayHelper::merge($this->dataForEmail($method->value), ['toName' => $this->user->getDisplayName()]),
             );
         }
     }

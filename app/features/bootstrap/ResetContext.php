@@ -5,6 +5,7 @@ namespace Sil\SilIdBroker\Behat\Context;
 use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
+use common\components\Emailer;
 use common\helpers\MySqlDateTime;
 use common\models\Reset;
 use Webmozart\Assert\Assert;
@@ -145,5 +146,37 @@ class ResetContext extends UnitTestsContext
     public function theResetWillBecomeExpired(): void
     {
         Assert::true($this->reset->isExpired());
+    }
+
+    #[Then('the :template email sent to :email should be addressed to their name')]
+    public function theEmailSentToShouldBeAddressedToTheirName($template, $email): void
+    {
+        $emails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser($template, $email, $this->tempUser);
+
+        Assert::greaterThan(count($emails), 0, sprintf('Did not find any %s emails sent to %s.', $template, $email));
+        $toName = current($emails)[Emailer::PROP_TO_NAME] ?? null;
+        Assert::eq($toName, $this->tempUser->getDisplayName(), 'user name not on to line');
+    }
+
+    #[Then('the :template email sent to :email should NOT be addressed to their name')]
+    public function theEmailSentToShouldNotBeAddressedToTheirName($template, $email): void
+    {
+        $emails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser($template, $email, $this->tempUser);
+
+        Assert::greaterThan(count($emails), 0, sprintf('Did not find any %s emails sent to %s.', $template, $email));
+        $toName = current($emails)[Emailer::PROP_TO_NAME] ?? null;
+        Assert::notEq($toName, $this->tempUser->getDisplayName(), 'user name on to line');
+    }
+
+    #[Given('there is a user in the database with only a personal email :email')]
+    public function thereIsAUserInTheDatabaseWithOnlyAPersonalEmail($email): void
+    {
+        $this->tempUser = $this->createNewUserInDatabase('unit_test', ['email' => null, 'personal_email' => $email]);
+    }
+
+    #[Given('the user\'s primary email is also a password recovery email')]
+    public function theUsersPrimaryEmailIsAlsoAPasswordRecoveryEmail(): void
+    {
+        $this->createMethod($this->tempUser->email, 1, $this->tempUser);
     }
 }

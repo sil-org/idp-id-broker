@@ -4,6 +4,7 @@ namespace Sil\SilIdBroker\Behat\Context;
 
 use common\components\Emailer;
 use common\helpers\MySqlDateTime;
+use common\models\Email;
 use common\models\EmailLog;
 use common\models\Invite;
 use common\models\Method;
@@ -59,6 +60,9 @@ class EmailContext extends YiiContext
     /** @var Method */
     protected $testMethod;
 
+    /** @var ?Method A method whose `user` relation was deliberately cached before the action. */
+    protected $preloadedMethod;
+
     /** @var array<array> */
     protected $matchingFakeEmails;
 
@@ -66,10 +70,13 @@ class EmailContext extends YiiContext
 
     private ?EmailLog $tempEmailLog;
 
+    private ?\yii\mail\MessageInterface $builtMessage = null;
+
     public const METHOD_EMAIL_ADDRESS = 'method@example.com';
     public const MANAGER_EMAIL = 'manager@example.com';
     public const RECOVERY_EMAIL = 'recovery@example.com';
     public const NO_MAIL_ADMINS_EMAIL = 'no_mail_admins@example.com';
+    public const PERSONAL_ONLY_EMAIL = 'personal_only@example.org';
 
 
     #[Then('a(n) :messageType email should have been sent to them')]
@@ -1023,7 +1030,7 @@ class EmailContext extends YiiContext
         $currentPassword->created_utc = MySqlDateTime::formatDate($createdOn);
 
         Assert::true(
-            $currentPassword->save(),
+            $currentPassword->updateExpiry(),
             'Failed to save updated password expiration date. '
                 . join(', ', $currentPassword->getFirstErrors())
         );
@@ -1051,6 +1058,49 @@ class EmailContext extends YiiContext
     public function theParamEmailAddressIsOnTheBccLine(string $param)
     {
         $this->assertEmailBcc(\Yii::$app->params[$param]);
+    }
+
+    #[Given('the reply-to email address is configured as :address')]
+    public function theReplyToEmailAddressIsConfiguredAs(string $address)
+    {
+        \Yii::$app->params['replyToEmail'] = $address;
+    }
+
+    #[Given('the reply-to email address is NOT configured')]
+    public function theReplyToEmailAddressIsNotConfigured()
+    {
+        \Yii::$app->params['replyToEmail'] = '';
+    }
+
+    #[When('an email message is built')]
+    public function anEmailMessageIsBuilt()
+    {
+        $email = new Email([
+            'to_address' => 'recipient@example.com',
+            'subject' => 'Test subject',
+            'text_body' => 'Test body',
+        ]);
+        $this->builtMessage = $email->getMessage();
+    }
+
+    #[Then('the email message should have a reply-to address of :address')]
+    public function theEmailMessageShouldHaveAReplyToAddressOf(string $address)
+    {
+        Assert::notNull($this->builtMessage, 'No email message was built.');
+        $replyTo = (array) $this->builtMessage->getReplyTo();
+        Assert::keyExists($replyTo, $address, sprintf(
+            'Expected reply-to to contain %s, but found: %s',
+            $address,
+            var_export($replyTo, true)
+        ));
+    }
+
+    #[Then('the email message should have no reply-to address')]
+    public function theEmailMessageShouldHaveNoReplyToAddress()
+    {
+        Assert::notNull($this->builtMessage, 'No email message was built.');
+        $replyTo = $this->builtMessage->getReplyTo();
+        Assert::isEmpty($replyTo, 'Expected no reply-to, but found: ' . var_export($replyTo, true));
     }
 
     #[Given('/^hr notification email (is|is NOT) set$/')]
@@ -1259,5 +1309,154 @@ class EmailContext extends YiiContext
     {
         $this->assertEmailSent(EmailLog::MESSAGE_TYPE_INVITE, $this->tempUser->email);
         $this->assertEmailHasNoCc();
+    }
+
+
+    #[Given('a specific user already exists with only a personal email address')]
+    public function aSpecificUserAlreadyExistsWithOnlyAPersonalEmailAddress(): void
+    {
+        $this->aSpecificUserAlreadyExistsWithOnlyThePersonalEmailAddress(self::PERSONAL_ONLY_EMAIL);
+    }
+
+    #[Given('a specific user already exists with only the personal email address :address')]
+    public function aSpecificUserAlreadyExistsWithOnlyThePersonalEmailAddress($address): void
+    {
+        $employeeId = uniqid();
+        $user = new User([
+            'employee_id' => strval($employeeId),
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'username' => 'test_user_' . $employeeId,
+            'personal_email' => $address,
+            'manager_email' => self::MANAGER_EMAIL,
+        ]);
+        $user->scenario = User::SCENARIO_NEW_USER;
+        Assert::true($user->save(), \json_encode($user->getFirstErrors(), JSON_PRETTY_PRINT));
+
+        $user->refresh();
+        $this->tempUser = $user;
+    }
+
+    #[Then('exactly :count :messageType email should have been sent to :address')]
+    public function exactlyEmailShouldHaveBeenSentTo($messageType, $address, $count): void
+    {
+        $matchingFakeEmails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser(
+            $messageType,
+            $address,
+            $this->tempUser
+        );
+
+        Assert::count($matchingFakeEmails, intval($count), sprintf(
+            'Expected %s %s email(s) to have been sent to %s, but instead found %s of them.',
+            $count,
+            $messageType,
+            $address,
+            count($matchingFakeEmails)
+        ));
+    }
+
+    #[When('that user is deleted')]
+    public function thatUserIsDeleted(): void
+    {
+        Assert::true((bool) $this->tempUser->delete(), 'Could not delete the test user.');
+    }
+
+    #[When('that user\'s backup code mfa option is deleted')]
+    public function thatUsersBackupCodeMfaOptionIsDeleted(): void
+    {
+        $mfa = $this->getMfa(Mfa::TYPE_BACKUPCODE);
+        Assert::notNull($mfa, 'The test user has no backup code mfa option to delete.');
+
+        // delete() returns the number of rows deleted, or false on failure.
+        Assert::true((bool) $mfa->delete(), 'Could not delete the backup code mfa option for the test user.');
+    }
+
+    #[Given('that user has a verified recovery method :address')]
+    public function thatUserHasAVerifiedRecoveryMethod($address): void
+    {
+        Method::findOrCreate($this->tempUser->id, $address, true);
+        $this->tempUser->refresh();
+    }
+
+    #[Given('that user has an unverified recovery method :address')]
+    public function thatUserHasAnUnverifiedRecoveryMethod($address): void
+    {
+        Method::findOrCreate($this->tempUser->id, $address);
+        $this->tempUser->refresh();
+    }
+
+    #[Then('a :messageType email should have been sent to recovery method :address')]
+    public function aEmailShouldHaveBeenSentToRecoveryMethod($messageType, $address): void
+    {
+        $this->assertEmailSent($messageType, $address);
+    }
+
+    #[Then('a :messageType email should NOT have been sent to recovery method :address')]
+    public function aEmailShouldNotHaveBeenSentToRecoveryMethod($messageType, $address): void
+    {
+        $matchingFakeEmails = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser(
+            $messageType,
+            $address,
+            $this->tempUser
+        );
+
+        Assert::isEmpty($matchingFakeEmails, sprintf(
+            'Expected no %s emails to have been sent to %s, but instead found %s of them.',
+            $messageType,
+            $address,
+            count($matchingFakeEmails)
+        ));
+    }
+
+    #[When('that user verifies the recovery method :address')]
+    public function thatUserVerifiesTheRecoveryMethod($address): void
+    {
+        $this->getMethod($address)->setAsVerified();
+    }
+
+    #[When('that user\'s recovery method :address is deleted')]
+    public function thatUsersRecoveryMethodIsDeleted($address): void
+    {
+        // delete() returns the number of rows deleted, or false on failure.
+        Assert::true((bool) $this->getMethod($address)->delete(), 'Could not delete that recovery method.');
+    }
+
+    protected function getMethod($address): Method
+    {
+        // Reuse the preloaded instance so its cached relation survives into the action being tested.
+        if ($this->preloadedMethod !== null && $this->preloadedMethod->value === $address) {
+            return $this->preloadedMethod;
+        }
+
+        $method = Method::findOne(['user_id' => $this->tempUser->id, 'value' => $address]);
+        Assert::notNull($method, 'The test user has no recovery method with a value of ' . $address . '.');
+
+        return $method;
+    }
+
+    #[Given('the recovery method :address has its user relation preloaded')]
+    public function theRecoveryMethodHasItsUserRelationPreloaded($address): void
+    {
+        $method = Method::findOne(['user_id' => $this->tempUser->id, 'value' => $address]);
+        Assert::notNull($method, 'The test user has no recovery method with a value of ' . $address . '.');
+
+        $method->user->getVerifiedMethodOptions();
+        $this->preloadedMethod = $method;
+    }
+
+    #[Then('that email should have been addressed to their name')]
+    public function thatEmailShouldHaveBeenAddressedToTheirName(): void
+    {
+        Assert::greaterThan(count($this->matchingFakeEmails), 0);
+        $toName = current($this->matchingFakeEmails)[Emailer::PROP_TO_NAME] ?? null;
+        Assert::eq($toName, $this->tempUser->getDisplayName(), 'user name not on to line');
+    }
+
+    #[Then('that email should NOT have been addressed to their name')]
+    public function thatEmailShouldNotHaveBeenAddressedToTheirName(): void
+    {
+        Assert::greaterThan(count($this->matchingFakeEmails), 0);
+        $toName = current($this->matchingFakeEmails)[Emailer::PROP_TO_NAME] ?? null;
+        Assert::notEq($toName, $this->tempUser->getDisplayName(), 'user name on to line');
     }
 }

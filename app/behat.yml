@@ -59,6 +59,10 @@ default:
       paths:
         - "features/mysql-date-time.feature"
       contexts: [Sil\SilIdBroker\Behat\Context\MySqlDateTimeContext]
+    sentry_helper_unit_tests_features:
+      paths:
+        - "features/sentry-helper-unit-tests.feature"
+      contexts: [Sil\SilIdBroker\Behat\Context\SentryHelperUnitTestsContext]
     sheets_unit_tests_features:
       paths:
         - "features/sheets-unit-tests.feature"

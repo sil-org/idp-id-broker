@@ -31,6 +31,9 @@ class User extends UserBase
     /** @var string */
     public $password;
 
+    /** @var bool */
+    public $temporary = false;
+
     /** @var array */
     public array $mfa = [];
 
@@ -206,7 +209,7 @@ class User extends UserBase
             'token_type',
         ];
 
-        $scenarios[self::SCENARIO_UPDATE_PASSWORD] = ['password'];
+        $scenarios[self::SCENARIO_UPDATE_PASSWORD] = ['password', 'temporary'];
 
         $scenarios[self::SCENARIO_AUTHENTICATE] = ['username', 'password', '!active', '!locked'];
 
@@ -262,6 +265,10 @@ class User extends UserBase
                 'password', 'string',
             ],
             [
+                'temporary', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true,
+                'on' => self::SCENARIO_UPDATE_PASSWORD,
+            ],
+            [
                 // special note:  As a best practice against timing attacks this rule should be run
                 // before most other rules.  https://en.wikipedia.org/wiki/Timing_attack
                 'password',
@@ -288,6 +295,9 @@ class User extends UserBase
                 ['last_synced_utc', 'last_changed_utc', 'created_utc'],
                 'default', 'value' => MySqlDateTime::now(),
             ],
+            // DEPRECATED: contingent users (no primary email, expiring) will be
+            // removed in the next major version, along with the `expires_on`
+            // default and the conditional `email` requirement below.
             [
                 'expires_on',
                 'default',
@@ -794,7 +804,7 @@ class User extends UserBase
         }
 
         if ($emailer->shouldSendPasswordChangedMessageTo($this, $changedAttributes)) {
-            $emailer->sendMessageTo(EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED, $this);
+            $emailer->sendMessageToUserAndRecoveryMethods(EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED, $this);
         }
 
         if ($emailer->shouldSendWelcomeMessageTo($this, $changedAttributes)) {
@@ -867,6 +877,7 @@ class User extends UserBase
 
         $password->user_id = $this->id;
         $password->password = $this->password;
+        $password->temporary = $this->temporary;
 
         if (!$password->save()) {
             $this->addErrors($password->errors);
@@ -1190,6 +1201,7 @@ class User extends UserBase
 
     /**
      * @return string:null
+     * @deprecated contingent users will be removed in the next major version
      */
     public function getExpiresOnInitialValue()
     {
@@ -1202,6 +1214,14 @@ class User extends UserBase
     public function getEmailAddress(): string
     {
         return $this->email ?? $this->personal_email ?? '';
+    }
+
+    /**
+     * Ignores case, because Method::create() lowercases recovery addresses but the primary address keeps its case.
+     */
+    public function isPrimaryAddress(string $address): bool
+    {
+        return mb_strtolower($address) === mb_strtolower($this->getEmailAddress());
     }
 
     /**
@@ -1391,6 +1411,9 @@ class User extends UserBase
         return MySqlDateTime::formatDateForHumans($pw->created_utc);
     }
 
+    /**
+     * @deprecated contingent users will be removed in the next major version
+     */
     protected function isExpired(): bool
     {
         return $this->expires_on !== null && MySqlDateTime::isBefore($this->expires_on, time());
@@ -1398,6 +1421,8 @@ class User extends UserBase
 
     /**
      * Attempts to deactivate an expired user. If not successful, an error is logged.
+     *
+     * @deprecated contingent users will be removed in the next major version
      */
     protected function deactivateExpiredUser(): void
     {

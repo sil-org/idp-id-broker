@@ -45,6 +45,27 @@ Feature: SesMessage Unit Tests
     Then the to address should contain "Recipient One <r1@example.com>"
     And the to address should contain "Recipient Two <r2@example.com>"
 
+  Scenario: Testing To address with a name containing a comma
+    Given I have a new SesMessage
+    When I set the to address to the following:
+      | email | name |
+      | r1@example.com | Doe, John |
+    Then the to address should contain '"Doe, John" <r1@example.com>'
+
+  Scenario: Testing To address with a non-ASCII name
+    Given I have a new SesMessage
+    When I set the to address to the following:
+      | email | name |
+      | r1@example.com | José Müller |
+    Then the to address should contain "=?utf-8?Q?Jos=C3=A9_M=C3=BCller?= <r1@example.com>"
+
+  Scenario: Testing To address with a long non-ASCII name
+    Given I have a new SesMessage
+    When I set the to address to the following:
+      | email | name |
+      | r1@example.com | สมชายใจดีมีสุขเสมอตลอดไป |
+    Then the to address should not contain line breaks
+
   Scenario: Testing Reply-To address
     Given I have a new SesMessage
     When I set the reply-to address to "reply@example.com"

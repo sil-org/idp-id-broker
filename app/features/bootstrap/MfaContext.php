@@ -350,4 +350,29 @@ class MfaContext extends \FeatureContext
 
         $this->mfa = Mfa::findOne(['id' => $this->getResponseBody()['id']]);
     }
+
+    #[When('I request to verify the webauthn MFA with an invalid value')]
+    public function iRequestToVerifyTheWebauthnMfaWithAnInvalidValue(): void
+    {
+        $rpId = getenv('MFA_WEBAUTHN_rpId');
+        $this->iProvideAFieldQueryPropertyOfValue('rpOrigin', $rpId);
+        $this->setRequestBody('employee_id', $this->tempEmployeeId);
+        $this->setRequestBody('value', [
+            'id' => 'invalid',
+            'rawId' => 'invalid',
+            'type' => 'public-key',
+            'response' => [
+                'authenticatorData' => 'invalid',
+                'clientDataJSON' => 'invalid',
+                'signature' => 'invalid',
+            ],
+        ]);
+        $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify', self::CREATED);
+    }
+
+    #[Then(':num failed attempt(s) should be stored')]
+    public function failedAttemptsShouldBeStored($num): void
+    {
+        Assert::eq($this->mfa->countRecentFailures(), $num);
+    }
 }

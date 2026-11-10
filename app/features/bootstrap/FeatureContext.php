@@ -6,6 +6,7 @@ use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
 use Behat\Transformation\Transform;
+use common\components\Emailer;
 use common\helpers\MySqlDateTime;
 use common\models\EmailLog;
 use common\models\Invite;
@@ -47,6 +48,7 @@ class FeatureContext extends YiiContext
 
     private $now;
     public const ACCEPTABLE_DELTA_IN_SECONDS = 3;
+    public const ISO8601_REGEX = '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/';
 
     protected $tempEmployeeId = null;
 
@@ -108,6 +110,8 @@ class FeatureContext extends YiiContext
 
             if ($expectedValue == '*') {
                 Assert::minLength($data[$property], 1);
+            } elseif ($expectedValue == 'ISO 8601') {
+                Assert::regex($data[$property], self::ISO8601_REGEX);
             } else {
                 Assert::eq($data[$property], $this->transformNULLs($expectedValue));
             }
@@ -179,6 +183,7 @@ class FeatureContext extends YiiContext
             'x-mfa-RPOrigin' => $webConfig['rpId'],
             'x-mfa-UserUUID' => $externalId,
             'Content-type' => 'application/json',
+            'Accept' => 'application/json',
         ]);
 
         $client = $this->buildU2fClient();
@@ -288,6 +293,12 @@ class FeatureContext extends YiiContext
     {
         empty($contents) ? Assert::eq($this->resBody[$property], "")
                          : Assert::contains($this->resBody[$property], $contents);
+    }
+
+    #[Then('/^the property (\w+) should be an ISO 8601 timestamp$/')]
+    public function thePropertyShouldBeAnIso8601Timestamp($property)
+    {
+        Assert::regex($this->resBody[$property], self::ISO8601_REGEX);
     }
 
     #[Then('there is no response body')]
@@ -827,6 +838,12 @@ class FeatureContext extends YiiContext
         Assert::lessThanEq(strtotime($user->currentPassword->expires_on), time());
     }
 
+    #[Then('the password expiration in the response should be end of day UTC')]
+    public function thePasswordExpirationInTheResponseShouldBeEndOfDayUtc()
+    {
+        Assert::regex($this->resBody['password']['expires_on'], '/^\d{4}-\d{2}-\d{2}T23:59:59Z$/');
+    }
+
     #[Given('I prepare a request with the user\'s username')]
     public function iPrepareARequestWithTheUsersUsername(): void
     {
@@ -864,6 +881,31 @@ class FeatureContext extends YiiContext
         $reset = $user->reset;
         $reset->expires = MySqlDateTime::now();
         Assert::true($reset->save());
+    }
+
+    #[Given('the user is inactive')]
+    public function theUserIsInactive(): void
+    {
+        $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
+        $user->active = 'no';
+        $user->scenario = User::SCENARIO_UPDATE_USER;
+        Assert::true($user->save());
+    }
+
+    #[Given('no reset emails were sent')]
+    public function noResetEmailsWereSent(): void
+    {
+        $user = User::findOne(['employee_id' => $this->tempEmployeeId]);
+
+        $emails = array_map(function (Method $method): string {
+            return $method->value;
+        }, $user->methods);
+        $emails[] = $user->email;
+
+        foreach ($emails as $email) {
+            $sent = $this->fakeEmailer->getFakeEmailsOfTypeSentToUser(EmailLog::MESSAGE_TYPE_RESET_SELF, $email, $user);
+            Assert::isEmpty($sent);
+        }
     }
 
     #[When('I send a reset verification request using the correct uuid')]

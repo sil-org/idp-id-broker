@@ -65,6 +65,47 @@ Feature: Email
     Then an "invite" email should have been sent to them
       And the invite email should have no one CCed
 
+  Scenario: Add the reply-to address to the email when it is set
+    Given the reply-to email address is configured as "reply_to@example.com"
+    When an email message is built
+    Then the email message should have a reply-to address of "reply_to@example.com"
+
+  Scenario: Do not add a reply-to address to the email when it is not set
+    Given the reply-to email address is NOT configured
+    When an email message is built
+    Then the email message should have no reply-to address
+
+  Scenario: Add the user's name to the to address when the email is sent to them
+    Given a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user is created
+    Then an "invite" email should have been sent to them
+      And that email should have been addressed to their name
+
+  Scenario: Do not add the user's name to the to address when the email is sent to their manager
+    Given a user already exists
+      And no mfas exist
+    When I request a new manager mfa
+    Then a Manager Rescue email is sent to the manager
+      And that email should NOT have been addressed to their name
+
+  Scenario: Add the user's name to the to address when the email is sent to their recovery method
+    Given a specific user already exists
+      And that user has a password
+      And that user has a verified recovery method "recovery@example.com"
+      And I remove records of any emails that have been sent
+    When that user gets a password
+    Then a "password-changed" email should have been sent to recovery method "recovery@example.com"
+      And that email should have been addressed to their name
+
+  Scenario: Add the user's name to the to address when the email is sent to their removed recovery method
+    Given a specific user already exists
+      And that user has a verified recovery method "removed@example.com"
+      And I remove records of any emails that have been sent
+    When that user's recovery method "removed@example.com" is deleted
+    Then a "method-removed" email should have been sent to recovery method "removed@example.com"
+      And that email should have been addressed to their name
+
   Scenario Outline: When to send password-changed emails
     Given we are configured <sendPwChgEml> password-changed emails
       And a specific user <userExistsOrNot>
@@ -535,3 +576,115 @@ Feature: Email
   Scenario: Ensure each EmailLog is to either a User or a non-user address
     When I try to log an email as sent to neither a User nor a non-user address
     Then an email log validation error should have occurred
+
+  Scenario Outline: Which recovery methods receive security emails
+    Given a specific user already exists
+      And that user has a password
+      And that user has <verifiedOrNot> recovery method "recovery@example.com"
+      And I remove records of any emails that have been sent
+    When that user gets a password
+    Then a "password-changed" email should have been sent to them
+      And a "password-changed" email <shouldOrNot> have been sent to recovery method "recovery@example.com"
+
+    Examples:
+      | verifiedOrNot | shouldOrNot |
+      | a verified    | should      |
+      | an unverified | should NOT  |
+
+  Scenario: 2-Step Verification emails also go to verified recovery methods
+    Given a specific user already exists
+      And that user has a verified recovery method "recovery@example.com"
+      And a backup code mfa option does exist
+      And I remove records of any emails that have been sent
+    When that user's backup code mfa option is deleted
+    Then a "mfa-disabled" email should have been sent to them
+      And a "mfa-disabled" email should have been sent to recovery method "recovery@example.com"
+
+  Scenario: A user reached at their personal email is not emailed twice
+    Given a specific user already exists with only a personal email address
+      And that user has a password
+      And I remove records of any emails that have been sent
+    When that user gets a password
+    Then exactly 1 "password-changed" email should have been sent to "personal_only@example.org"
+
+  Scenario: A user reached at a capitalized personal email is not emailed twice
+    Given a specific user already exists with only the personal email address "Personal_Only@Example.org"
+      And that user has a password
+      And I remove records of any emails that have been sent
+    When that user gets a password
+    Then exactly 1 "password-changed" email should have been sent to "Personal_Only@Example.org"
+      And a "password-changed" email should NOT have been sent to recovery method "personal_only@example.org"
+
+  Scenario: Removing the recovery method for a capitalized personal email does not double-send
+    Given a specific user already exists with only the personal email address "Personal_Only@Example.org"
+      And I remove records of any emails that have been sent
+    When that user's recovery method "personal_only@example.org" is deleted
+    Then exactly 1 "method-removed" email should have been sent to "Personal_Only@Example.org"
+      And a "method-removed" email should NOT have been sent to recovery method "personal_only@example.org"
+
+  Scenario: Deleting a user does not notify their recovery methods
+    Given a specific user already exists
+      And that user has a verified recovery method "recovery@example.com"
+      And a backup code mfa option does exist
+      And I remove records of any emails that have been sent
+    When that user is deleted
+    Then a "mfa-disabled" email should NOT have been sent to recovery method "recovery@example.com"
+
+  Scenario: Verifying a recovery method notifies the account's addresses
+    Given a specific user already exists
+      And that user has a verified recovery method "existing@example.com"
+      And that user has an unverified recovery method "new@example.com"
+      And I remove records of any emails that have been sent
+    When that user verifies the recovery method "new@example.com"
+    Then a "method-added" email should have been sent to them
+      And a "method-added" email should have been sent to recovery method "existing@example.com"
+      And a "method-added" email should have been sent to recovery method "new@example.com"
+
+  Scenario: Removing a recovery method notifies the account's addresses and the removed one
+    Given a specific user already exists
+      And that user has a verified recovery method "removed@example.com"
+      And that user has a verified recovery method "kept@example.com"
+      And I remove records of any emails that have been sent
+    When that user's recovery method "removed@example.com" is deleted
+    Then a "method-removed" email should have been sent to them
+      And a "method-removed" email should have been sent to recovery method "kept@example.com"
+      And a "method-removed" email should have been sent to recovery method "removed@example.com"
+
+  Scenario: Removing an unverified recovery method notifies no one
+    Given a specific user already exists
+      And that user has an unverified recovery method "unverified@example.com"
+      And I remove records of any emails that have been sent
+    When that user's recovery method "unverified@example.com" is deleted
+    Then a "method-removed" email should NOT have been sent to them
+      And a "method-removed" email should NOT have been sent to recovery method "unverified@example.com"
+
+  Scenario: Deleting a user does not notify about their recovery methods
+    Given a specific user already exists
+      And that user has a verified recovery method "recovery@example.com"
+      And I remove records of any emails that have been sent
+    When that user is deleted
+    Then a "method-removed" email should NOT have been sent to recovery method "recovery@example.com"
+
+  Scenario: The personal email added at account creation does not notify
+    Given a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user is created with a personal email address
+    Then a "method-added" email should NOT have been sent to them
+
+  Scenario: A cached methods list does not hide a newly verified recovery method
+    Given a specific user already exists
+      And that user has a verified recovery method "existing@example.com"
+      And that user has an unverified recovery method "new@example.com"
+      And the recovery method "new@example.com" has its user relation preloaded
+      And I remove records of any emails that have been sent
+    When that user verifies the recovery method "new@example.com"
+    Then a "method-added" email should have been sent to recovery method "new@example.com"
+
+  Scenario: A cached methods list does not double-send when a recovery method is removed
+    Given a specific user already exists
+      And that user has a verified recovery method "removed@example.com"
+      And that user has a verified recovery method "kept@example.com"
+      And the recovery method "removed@example.com" has its user relation preloaded
+      And I remove records of any emails that have been sent
+    When that user's recovery method "removed@example.com" is deleted
+    Then exactly 1 "method-removed" email should have been sent to "removed@example.com"

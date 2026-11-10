@@ -1,7 +1,7 @@
 start: app
 
 app: db composer
-	docker compose up -d app phpmyadmin
+	docker compose up -d app adminer
 
 appfortests: testdb composerfortests
 	docker compose up -d appfortests

@@ -41,6 +41,12 @@ class UnitTestsContext extends YiiContext
     /** @var ConflictHttpException|null */
     protected $reuseException;
 
+    /** @var string */
+    protected $originalExpiresOn;
+
+    /** @var string */
+    protected $originalGracePeriodEndsOn;
+
     /** @var bool whether the Mfa option is considered newly verified */
     protected $mfaIsNewlyVerified;
 
@@ -440,6 +446,49 @@ class UnitTestsContext extends YiiContext
         $this->tempUser->password = 'k23@U$%235u25@I2$o';
         $this->tempUser->setScenario(User::SCENARIO_UPDATE_PASSWORD);
         $this->tempUser->save();
+    }
+
+    #[When('the user submits a new temporary password')]
+    public function theUserSubmitsANewTemporaryPassword()
+    {
+        $this->tempUser->password = 'k23@U$%235u25@I2$o';
+        $this->tempUser->temporary = true;
+        $this->tempUser->setScenario(User::SCENARIO_UPDATE_PASSWORD);
+        Assert::true($this->tempUser->save(), var_export($this->tempUser->errors, true));
+    }
+
+    #[Then('the password should expire tomorrow with no grace period')]
+    public function thePasswordShouldExpireTomorrowWithNoGracePeriod()
+    {
+        $password = Password::findOne($this->tempUser->current_password_id);
+        $tomorrow = MySqlDateTime::relative('+1 day');
+        Assert::eq($password->expires_on, $tomorrow);
+        Assert::eq($password->grace_period_ends_on, $tomorrow);
+    }
+
+    #[Then('the password should expire after the normal lifespan')]
+    public function thePasswordShouldExpireAfterTheNormalLifespan()
+    {
+        $password = Password::findOne($this->tempUser->current_password_id);
+        $expected = MySqlDateTime::relative(\Yii::$app->params['passwordLifespan']);
+        Assert::eq($password->expires_on, $expected);
+    }
+
+    #[When("the user's password HIBP check date is extended")]
+    public function theUsersPasswordHibpCheckDateIsExtended()
+    {
+        $password = Password::findOne($this->tempUser->current_password_id);
+        $this->originalExpiresOn = $password->expires_on;
+        $this->originalGracePeriodEndsOn = $password->grace_period_ends_on;
+        $password->extendHibpCheckAfter();
+    }
+
+    #[Then('the password expiration dates should not change')]
+    public function thePasswordExpirationDatesShouldNotChange()
+    {
+        $password = Password::findOne($this->tempUser->current_password_id);
+        Assert::eq($password->expires_on, $this->originalExpiresOn);
+        Assert::eq($password->grace_period_ends_on, $this->originalGracePeriodEndsOn);
     }
 
     #[Then('a new password hash should be stored')]

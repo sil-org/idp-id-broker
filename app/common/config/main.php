@@ -9,6 +9,7 @@ use common\components\MfaBackendTotp;
 use common\components\MfaBackendWebAuthn;
 use common\components\Monitor;
 use common\components\SesMailer;
+use common\helpers\SentryHelper;
 use Sentry\Event;
 use Sil\JsonLog\target\JsonStreamTarget;
 use Sil\PhpEnv\Env;
@@ -16,7 +17,7 @@ use Sil\Sentry\SentryTarget;
 use yii\db\Connection;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
-use yii\swiftmailer\Mailer as SwiftMailer;
+use yii\symfonymailer\Mailer as SymfonyMailer;
 
 $idpName        = Env::requireEnv('IDP_NAME');
 $idpDisplayName = Env::get('IDP_DISPLAY_NAME', $idpName);
@@ -50,16 +51,15 @@ $mailerConfig = [
     'htmlLayout' => '@common/mail/layouts/html',
     'textLayout' => '@common/mail/layouts/text',
 ];
-$mailerHost = Env::get('MAILER_HOST');
+$mailerHost = Env::get('MAILER_HOST', '');
 if (!empty($mailerHost) || $mailerConfig['useFileTransport'] === true) {
-    $mailerConfig['class'] = SwiftMailer::class;
+    $mailerConfig['class'] = SymfonyMailer::class;
     $mailerConfig['transport'] = [
-        'class' => 'Swift_SmtpTransport',
+        'scheme' => 'smtps',
         'host' => $mailerHost,
         'username' => Env::get('MAILER_USERNAME'),
         'password' => Env::get('MAILER_PASSWORD'),
-        'port' => '465',
-        'encryption' => 'ssl',
+        'port' => 465,
     ];
 } else {
     $mailerConfig['class'] = SesMailer::class;
@@ -68,6 +68,7 @@ if (!empty($mailerHost) || $mailerConfig['useFileTransport'] === true) {
 
 $fromEmail           = Env::get('FROM_EMAIL', '');
 $fromName            = Env::get('FROM_NAME', '');
+$replyToEmail        = Env::get('REPLY_TO_EMAIL', '');
 $emailQueueBatchSize = Env::get('EMAIL_QUEUE_BATCH_SIZE', 10);
 
 $version = Env::get('GITHUB_REF_NAME', 'unknown');
@@ -249,6 +250,7 @@ return [
                         'max_request_body_size' => 'never', // never send request bodies
                         'before_send' => function (Event $event) use ($idpName): ?Event {
                             $event->setExtra(['idp' => $idpName]);
+                            SentryHelper::groupDbConnectionErrors($event);
                             return $event;
                         },
                     ],
@@ -292,6 +294,7 @@ return [
         'externalGroupsSyncSets'        => Env::getArrayFromPrefix('EXTERNAL_GROUPS_SYNC_'),
         'fromEmail'                     => $fromEmail,
         'fromName'                      => $fromName,
+        'replyToEmail'                  => $replyToEmail,
         'google' => ArrayHelper::merge(
             [
                 'enableSheetsExport'  => false,
@@ -338,5 +341,6 @@ return [
         'passwordProfileUrl'            => $passwordProfileUrl . "/#",
         'passwordReuseLimit'            => Env::get('PASSWORD_REUSE_LIMIT', 10),
         'profileReviewInterval'         => Env::get('PROFILE_REVIEW_INTERVAL', '+6 months'),
+        'userAgent'                     => "idp-id-broker/" . $version,
     ],
 ];

@@ -2,6 +2,8 @@
 
 namespace common\components;
 
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Header\MailboxHeader;
 use yii\base\NotSupportedException;
 use yii\mail\BaseMessage;
 use yii\mail\MessageInterface;
@@ -276,7 +278,9 @@ class SesMessage extends BaseMessage
 
         $out = [];
         foreach ($email as $addr => $name) {
-            $out[] = sprintf('%s <%s>', $name, $addr);
+            // SES requires 7-bit ASCII, so let Symfony quote/encode the name, then undo its line folding
+            $mailbox = new MailboxHeader('To', new Address($addr, $name));
+            $out[] = str_replace("\r\n ", ' ', $mailbox->getBodyAsString());
         }
         return $out;
     }

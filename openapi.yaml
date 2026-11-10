@@ -360,6 +360,12 @@ paths:
               properties:
                 password:
                   type: string
+                temporary:
+                  description: >-
+                    If true, the password expires at the end of the
+                    next day (UTC), with no grace period.
+                  type: boolean
+                  default: false
               required:
               - password
               type: object
@@ -883,7 +889,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Delete a specific recovery method.'
+      description: >-
+        Delete a specific recovery method. Deleting a verified method notifies
+        the user, their remaining recovery methods, and the removed address.
       operationId: DELETE_method-uid
       requestBody:
         content:
@@ -939,7 +947,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Verify the recovery method by a matching code.'
+      description: >-
+        Verify the recovery method by a matching code. Notifies the user and
+        their verified recovery methods.
       operationId: PUT_method-uid-verify
       requestBody:
         content:
@@ -1611,13 +1621,15 @@ components:
           description: The user-defined label for this MFA key
           type: string
         last_used_utc:
-          description: The last time this MFA key was used, in MySQL date-time format, UTC
-          example: '2026-05-22 12:49:30'
+          description: The last time this MFA key was used, in ISO-8601 format
+          example: '2026-05-22T12:49:30Z'
+          format: date-time
           type: string
           nullable: true
         created_utc:
-          description: The time this MFA key was created, in MySQL date-time format, UTC
-          example: '2026-05-22 12:49:30'
+          description: The time this MFA key was created, in ISO-8601 format
+          example: '2026-05-22T12:49:30Z'
+          format: date-time
           type: string
     MfaDataWebAuthnList:
       description: The data for WebAuthn authentication and a list of all a user's WebAuthn keys
@@ -1646,9 +1658,14 @@ components:
         label:
           type: string
         created_utc:
+          description: The time this MFA key was created, in ISO-8601 format
+          format: date-time
           type: string
         last_used_utc:
-          type: object
+          description: The last time this MFA key was used, in ISO-8601 format
+          format: date-time
+          type: string
+          nullable: true
       required:
       - id
       - mfa_id
@@ -1695,6 +1712,9 @@ components:
       properties:
         to_address:
           type: string
+        to_name:
+          description: 'recipient name to show with to_address'
+          type: string
         cc_address:
           type: string
         bcc_address:
@@ -1722,6 +1742,8 @@ components:
         id:
           type: integer
         to_address:
+          type: string
+        to_name:
           type: string
         cc_address:
           type: string
