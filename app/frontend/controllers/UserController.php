@@ -24,9 +24,7 @@ class UserController extends BaseRestController
             return $user;
         }
 
-        Yii::$app->response->statusCode = 204;
-
-        return null;
+        throw new NotFoundHttpException('User not found');
     }
 
     public function actionCreate(): User
@@ -61,9 +59,7 @@ class UserController extends BaseRestController
         $user = User::findOne(['employee_id' => $employeeId]);
 
         if ($user === null) {
-            Yii::$app->response->statusCode = 204;
-
-            return null;
+            throw new NotFoundHttpException('User not found');
         }
 
         $user->scenario = User::SCENARIO_UPDATE_USER;
@@ -98,9 +94,7 @@ class UserController extends BaseRestController
         $user = User::findOne(['employee_id' => $employeeId]);
 
         if ($user === null) {
-            Yii::$app->response->statusCode = 204;
-
-            return null;
+            throw new NotFoundHttpException('User not found');
         }
 
         $user->scenario = User::SCENARIO_UPDATE_PASSWORD;
