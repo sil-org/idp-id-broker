@@ -337,7 +337,20 @@ class FeatureContext extends YiiContext
     #[Given('/^I provide (?:a|an) (.*) that is too long$/')]
     public function iProvideAPropertyThatIsTooLong($property)
     {
-        $this->reqBody[$property] = str_repeat("z", 256);
+        $maxLength = ($property === 'groups') ? 1024 : 255;
+        $this->reqBody[$property] = str_repeat("z", $maxLength + 1);
+    }
+
+    #[Given('I provide a :property of length :length')]
+    public function iProvideAPropertyOfLength($property, int $length)
+    {
+        $this->reqBody[$property] = str_repeat("z", $length);
+    }
+
+    #[Then('the stored :property should have length :length')]
+    public function theStoredPropertyShouldHaveLength($property, int $length)
+    {
+        Assert::same(strlen((string) $this->userFromDb->$property), $length);
     }
 
     #[Given('/^a record does not exist with (?:a|an) (.*) of "?([^"]*)"?$/')]

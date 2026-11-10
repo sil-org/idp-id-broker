@@ -825,3 +825,20 @@ Feature: User
     When I request "/user/123" be updated
     Then the response status code should be 422
       And the property message should contain "Token Type"
+
+  Scenario: Create a new user with a groups property of maximum length (1024 characters)
+    Given the requester is authorized
+      And the user store is empty
+      And I provide the following valid data:
+        | property     | value                  |
+        | employee_id  | 123                    |
+        | first_name   | Shep                   |
+        | last_name    | Clark                  |
+        | display_name | Shep Clark             |
+        | username     | shep_clark             |
+        | email        | shep_clark@example.org |
+      And I provide a groups of length 1024
+    When I request "/user" be created
+    Then the response status code should be 200
+      And a record exists with an employee_id of "123"
+      And the stored groups should have length 1024
