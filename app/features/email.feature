@@ -602,6 +602,17 @@ Feature: Email
       | a verified    | should      |
       | an unverified | should NOT  |
 
+  Scenario: Still send the password-changed email to other recovery methods when one cannot be sent to
+    Given a specific user already exists
+      And that user has a password
+      And that user has a verified recovery method "not-an-email-address" that cannot be sent to
+      And that user has a verified recovery method "recovery@example.com"
+      And I remove records of any emails that have been sent
+    When that user gets a password
+    Then a "password-changed" email should have been sent to them
+      And a "password-changed" email should have been sent to recovery method "recovery@example.com"
+      And a failure to send the "password-changed" email to "not-an-email-address" should have been logged
+
   Scenario: 2-Step Verification emails also go to verified recovery methods
     Given a specific user already exists
       And that user has a verified recovery method "recovery@example.com"
