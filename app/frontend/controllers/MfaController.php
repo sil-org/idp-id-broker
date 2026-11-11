@@ -24,6 +24,7 @@ class MfaController extends BaseRestController
      * @throws ConflictHttpException
      * @throws ServerErrorHttpException
      * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
      */
     public function actionCreate()
     {
@@ -40,7 +41,7 @@ class MfaController extends BaseRestController
 
         $user = User::findOne(['employee_id' => $employeeId]);
         if ($user === null) {
-            throw new BadRequestHttpException('User not found', 1506695733);
+            throw new NotFoundHttpException('User not found', 1506695733);
         }
 
         $label = $req->getBodyParam('label');
@@ -78,12 +79,12 @@ class MfaController extends BaseRestController
 
         $employeeId = $req->getBodyParam('employee_id');
         if ($employeeId == null) {
-            throw new BadRequestHttpException("employee_id is required");
+            throw new BadRequestHttpException("employee_id is required", 1794377755);
         }
 
         $user = User::findOne(['employee_id' => $employeeId]);
         if ($user == null) {
-            throw new BadRequestHttpException("Invalid employee_id");
+            throw new NotFoundHttpException('User not found', 1794129303);
         }
 
         $mfa = Mfa::findOne(['id' => $id, 'user_id' => $user->id]);
@@ -124,14 +125,14 @@ class MfaController extends BaseRestController
      * Get list of MFA backends for given user
      * @param string $employeeId
      * @return Mfa[]
-     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
      * @throws ForbiddenHttpException
      */
     public function actionList(string $employeeId): array
     {
         $user = User::findOne(['employee_id' => $employeeId]);
         if ($user === null) {
-            throw new BadRequestHttpException(
+            throw new NotFoundHttpException(
                 sprintf('User not found for employeeId %s', $employeeId),
                 1506697453
             );
@@ -168,7 +169,7 @@ class MfaController extends BaseRestController
     {
         $employeeId = \Yii::$app->request->getBodyParam('employee_id');
         if ($employeeId == null) {
-            throw new BadRequestHttpException("employee_id is required");
+            throw new BadRequestHttpException("employee_id is required", 1794377756);
         }
 
         $user = User::findOne(['employee_id' => $employeeId]);
@@ -181,7 +182,7 @@ class MfaController extends BaseRestController
                 'request' => \Yii::$app->request->url,
                 'error' => 'invalid employee_id for requested MFA',
             ]);
-            throw new BadRequestHttpException("Invalid employee_id", 1543934333);
+            throw new NotFoundHttpException('User not found', 1543934333);
         }
 
         $mfa = Mfa::findOne(['id' => $id, 'user_id' => $user->id]);

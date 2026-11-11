@@ -267,3 +267,49 @@ Feature: MFA
     When I request to delete the webauthn entry of the MFA with a webauthn_id of 999
     Then the response status code should be 403
       And 10 codes should be stored
+
+  Scenario: Retrieve MFA records for a User that does not exist
+    When I request "/user/999/mfa" be retrieved
+    Then the response status code should be 404
+      And the response body should contain "User not found"
+
+  Scenario Outline: Attempt to act upon an MFA for a User that does not exist
+    Given I provide the following valid data:
+      | property    | value      |
+      | employee_id | 999        |
+      | type        | backupcode |
+      | label       | My label   |
+      | value       | 123456     |
+    When I request "<resource>" be <action>
+    Then the response status code should be 404
+      And the response body should contain "User not found"
+
+    Examples:
+      | resource                   | action  |
+      | /mfa                       | created |
+      | /mfa/1                     | updated |
+      | /mfa/1                     | deleted |
+      | /mfa/1/verify              | created |
+      | /mfa/1/verify/registration | created |
+      | /mfa/1/webauthn/1          | updated |
+      | /mfa/1/webauthn/1          | deleted |
+
+  Scenario Outline: Attempt to act upon an MFA without providing an employee_id
+    Given I provide the following valid data:
+      | property    | value      |
+      | type        | backupcode |
+      | label       | My label   |
+      | value       | 123456     |
+    When I request "<resource>" be <action>
+    Then the response status code should be 400
+      And the response body should contain "employee_id is required"
+
+    Examples:
+      | resource                   | action  |
+      | /mfa                       | created |
+      | /mfa/1                     | updated |
+      | /mfa/1                     | deleted |
+      | /mfa/1/verify              | created |
+      | /mfa/1/verify/registration | created |
+      | /mfa/1/webauthn/1          | updated |
+      | /mfa/1/webauthn/1          | deleted |

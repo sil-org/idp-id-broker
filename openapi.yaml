@@ -268,7 +268,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserMfaResponse'
-        '400':
+        '403':
+          description: 'The rpOrigin does not match any of the configured values.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
           description: 'User not found for given `employee_id`'
           content:
             application/json:
@@ -300,7 +306,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/MethodResponse'
-        '400':
+        '404':
           description: 'User not found for given `employee_id`'
           content:
             application/json:
@@ -448,6 +454,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '404':
+          description: 'User not found for given `employee_id`'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '409':
           description: >-
             An MFA of the requested type already exists. Note that this
@@ -488,13 +500,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/MfaResponse'
         '400':
-          description: 'Missing or invalid employee_id'
+          description: 'Missing employee_id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: 'MFA record not found or mismatched employee_id'
+          description: 'User not found for given `employee_id`, or MFA record not found for that user'
           content:
             application/json:
               schema:
@@ -529,14 +541,13 @@ paths:
         '204':
           description: 'Successful deletion of record'
         '400':
-          description: '`employee_id` was not provided or it did not match an employee
-            record'
+          description: '`employee_id` was not provided'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: 'The MFA record was not found'
+          description: 'User not found for given `employee_id`, or MFA record not found for that user'
           content:
             application/json:
               schema:
@@ -580,13 +591,13 @@ paths:
         '400':
           description: >-
             Value provided failed verification or was unacceptable for
-            some other reason (such as an invalid `employee_id`).
+            some other reason (such as a missing `employee_id`).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: 'No MFA record found with that `id` and `employee_id`.'
+          description: 'No user found with that `employee_id`, or no MFA record found with that `id` and `employee_id`.'
           content:
             application/json:
               schema:
@@ -641,13 +652,13 @@ paths:
         '400':
           description: >-
             Value provided failed verification or was unacceptable for
-            some other reason (such as an invalid `employee_id`).
+            some other reason (such as a missing `employee_id`).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: 'No MFA record found with that `id` and `employee_id`.'
+          description: 'No user found with that `employee_id`, or no MFA record found with that `id` and `employee_id`.'
           content:
             application/json:
               schema:
@@ -705,14 +716,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/WebauthnResponse'
         '400':
-          description: 'Missing or blank label value or invalid employee_id'
+          description: 'Missing or blank label value or missing employee_id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: 'No MFA record found with that `mfa_id` or no webauthn record
-            found with that `id` and that `mfa_id`.'
+          description: 'No user found with that `employee_id`, no MFA record found with that `mfa_id`
+            for that user, or no webauthn record found with that `id` and that `mfa_id`.'
           content:
             application/json:
               schema:
@@ -747,7 +758,7 @@ paths:
         '204':
           description: 'Successful deletion of record'
         '400':
-          description: 'invalid employee_id'
+          description: 'Missing employee_id'
           content:
             application/json:
               schema:
@@ -760,8 +771,9 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: >-
-            No MFA record found with that `mfa_id` or no webauthn record
-            found with that `id` and that `mfa_id`.
+            No user found with that `employee_id`, no MFA record found with
+            that `mfa_id` for that user, or no webauthn record found with that
+            `id` and that `mfa_id`.
           content:
             application/json:
               schema:
