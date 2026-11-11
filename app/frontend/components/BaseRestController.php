@@ -13,6 +13,11 @@ class BaseRestController extends Controller
     {
         $behaviors = parent::behaviors();
 
+        // Always respond in JSON (set in the 'response' component config) instead of negotiating on the Accept
+        // header. Negotiation runs before routing and authentication, so it would answer clients that don't
+        // accept JSON (e.g. crawlers) with 406 Not Acceptable for every URL, rather than 404 or 401.
+        unset($behaviors['contentNegotiator']);
+
         // Use request header-> 'Authorization: Bearer <token>'
         $behaviors['authenticator']['class'] = HttpBearerAuth::class;
 
