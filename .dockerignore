@@ -1,0 +1,30 @@
+# Whitelist: ignore everything, then include only what the Dockerfile needs.
+*
+!app/
+!dockerbuild/vhost.conf
+
+# Installed by `composer install` in the Dockerfile; a host copy would
+# overwrite it (and may include dev dependencies)
+app/vendor/
+
+# Secrets and generated runtime files
+app/auth.json
+app/**/*.env
+app/console/runtime/*
+!app/console/runtime/.gitignore
+app/frontend/runtime/
+
+# Development and test tooling (tests run with ./app mounted as a volume)
+app/features/
+app/behat.yml
+app/run-tests.sh
+app/check-psr12.sh
+app/rebuildbasemodels.sh
+app/.php-cs-fixer.cache
+app/.php-cs-fixer.dist.php
+app/init
+app/init.bat
+app/yii.bat
+app/requirements.php
+app/**/.gitignore
+!app/console/runtime/.gitignore
