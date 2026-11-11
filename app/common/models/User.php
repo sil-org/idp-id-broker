@@ -795,7 +795,7 @@ class User extends UserBase
             if ($ccAddress !== '') {
                 $data['ccAddress'] = $ccAddress;
             }
-            $emailer->sendMessageTo(
+            $emailer->trySendMessageTo(
                 EmailLog::MESSAGE_TYPE_INVITE,
                 $this,
                 $data,
@@ -804,11 +804,11 @@ class User extends UserBase
         }
 
         if ($emailer->shouldSendPasswordChangedMessageTo($this, $changedAttributes)) {
-            $emailer->sendMessageToUserAndRecoveryMethods(EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED, $this);
+            $emailer->trySendMessageToUserAndRecoveryMethods(EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED, $this);
         }
 
         if ($emailer->shouldSendWelcomeMessageTo($this, $changedAttributes)) {
-            $emailer->sendMessageTo(EmailLog::MESSAGE_TYPE_WELCOME, $this);
+            $emailer->trySendMessageTo(EmailLog::MESSAGE_TYPE_WELCOME, $this);
         }
     }
 

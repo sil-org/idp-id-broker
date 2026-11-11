@@ -379,6 +379,74 @@ class Emailer extends Component
     }
 
     /**
+     * Like `sendMessageTo()`, but log a failure at error level (with the
+     * exception, so it reaches Sentry) instead of throwing it. Use this for
+     * notifications sent after the triggering change is already saved, where an
+     * exception would only turn a successful request into a misleading 500.
+     *
+     * @return bool Whether the message was sent (or queued) without error.
+     */
+    public function trySendMessageTo(
+        string $messageType,
+        ?User $user = null,
+        array $data = [],
+        int $delaySeconds = 0
+    ): bool {
+        try {
+            $this->sendMessageTo($messageType, $user, $data, $delaySeconds);
+            return true;
+        } catch (\Throwable $e) {
+            $this->logSendFailure($messageType, $user, $data['toAddress'] ?? $user?->getEmailAddress(), $e);
+            return false;
+        }
+    }
+
+    /**
+     * Like `sendMessageToUserAndRecoveryMethods()`, but log a failure instead of
+     * throwing it. See `trySendMessageTo()`. Each recipient is tried separately,
+     * so one failed send doesn't keep the message from the others.
+     *
+     * @return bool Whether all of the messages were sent (or queued) without error.
+     */
+    public function trySendMessageToUserAndRecoveryMethods(
+        string $messageType,
+        User $user,
+        array $data = []
+    ): bool {
+        $allSent = $this->trySendMessageTo($messageType, $user, $data);
+
+        try {
+            $recoveryMethodsData = $this->getDataForRecoveryMethodMessages($user, $data);
+        } catch (\Throwable $e) {
+            $this->logSendFailure($messageType, $user, null, $e);
+            return false;
+        }
+
+        foreach ($recoveryMethodsData as $methodData) {
+            try {
+                $this->sendMessageTo($messageType, null, $methodData);
+            } catch (\Throwable $e) {
+                $this->logSendFailure($messageType, $user, $methodData['toAddress'], $e);
+                $allSent = false;
+            }
+        }
+
+        return $allSent;
+    }
+
+    private function logSendFailure(string $messageType, ?User $user, ?string $toAddress, \Throwable $e): void
+    {
+        \Yii::error([
+            'action' => 'send ' . $messageType . ' message',
+            'status' => 'error',
+            'employee_id' => $user?->employee_id,
+            'to_address' => $toAddress,
+            'error' => $e->getMessage(),
+            'exception' => $e,
+        ]);
+    }
+
+    /**
      * Send the specified type of message to the given User's primary address and to each of their
      * verified password-recovery methods.
      *
@@ -394,27 +462,44 @@ class Emailer extends Component
     ) {
         $this->sendMessageTo($messageType, $user, $data);
 
-        // sendMessageTo() only skips inactive users when it is given a User; the sends below pass null.
+        foreach ($this->getDataForRecoveryMethodMessages($user, $data) as $methodData) {
+            $this->sendMessageTo($messageType, null, $methodData);
+        }
+    }
+
+    /**
+     * Build the email data for sending a message to each of the given User's verified
+     * password-recovery methods (other than their primary address).
+     *
+     * @param User $user The intended recipient.
+     * @param string[] $data Data fields for email template.
+     * @return array[] One set of email data per recovery method, each with a 'toAddress'.
+     */
+    private function getDataForRecoveryMethodMessages(User $user, array $data): array
+    {
+        // sendMessageTo() only skips inactive users when it is given a User; the recovery-method sends pass null.
         if ($user->active === 'no') {
-            return;
+            return [];
         }
 
         // sendMessageTo() only pulls these in when it is given a User, so pass them along explicitly.
         $dataForEmail = ArrayHelper::merge($user->getAttributesForEmail(), $data);
 
+        $methodsData = [];
         foreach ($user->getVerifiedMethodOptions() as $method) {
             // A user with no work email is reached at their personal email, which may also be a recovery method.
             if ($user->isPrimaryAddress($method->value)) {
                 continue;
             }
 
-            $this->sendMessageTo(
-                $messageType,
-                // Don't log this as a user email because the Emailer won't log the email address in that case.
-                null,
-                ArrayHelper::merge($dataForEmail, ['toAddress' => $method->value, 'toName' => $user->getDisplayName()])
+            // These are sent with a null User (not logged as a user email) because the Emailer won't
+            // log the email address in that case.
+            $methodsData[] = ArrayHelper::merge(
+                $dataForEmail,
+                ['toAddress' => $method->value, 'toName' => $user->getDisplayName()]
             );
         }
+        return $methodsData;
     }
 
     /**

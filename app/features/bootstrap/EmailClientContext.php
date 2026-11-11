@@ -269,6 +269,33 @@ class EmailClientContext extends YiiContext
         Assert::count($email->getMessage()->getCc(), 2, 'cc_address should split into two recipients');
     }
 
+    #[When('we save an email with a cc list longer than 255 characters')]
+    public function testSaveEmailWithLongCcList()
+    {
+        $ccAddresses = [];
+        for ($i = 1; $i <= 15; $i++) {
+            $ccAddresses[] = sprintf('mail-admin-%02d@subdomain.example.org', $i);
+        }
+        $ccAddress = implode(',', $ccAddresses);
+        Assert::greaterThan(strlen($ccAddress), 255);
+
+        $email = new Email();
+
+        $email->attributes = [
+            'to_address' => $this->stubToAddress,
+            'cc_address' => $ccAddress,
+            'subject' => $this->stubSubject,
+            'text_body' => $this->stubTextBody,
+            'html_body' => $this->stubHtmlBody,
+        ];
+
+        Assert::true($email->save(), current($email->getFirstErrors()));
+
+        $email->refresh();
+        Assert::eq($ccAddress, $email->cc_address);
+        Assert::count($email->getMessage()->getCc(), count($ccAddresses));
+    }
+
     #[When('we send queued emails')]
     public function testSendQueuedEmails()
     {

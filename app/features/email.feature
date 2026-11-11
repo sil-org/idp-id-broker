@@ -65,6 +65,17 @@ Feature: Email
     Then an "invite" email should have been sent to them
       And the invite email should have no one CCed
 
+  Scenario: Still create the user when the invite email cannot be queued
+    Given we are configured to send invite emails
+      And we are configured to CC mail admins on invite emails
+      And we are configured to CC "not-an-email-address" as the mail admin fallback
+      And a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user whose account has no mail admins is created
+    Then that user should exist
+      And an "invite" email should NOT have been sent to them
+      And a failure to send the "invite" email should have been logged
+
   Scenario: Add the reply-to address to the email when it is set
     Given the reply-to email address is configured as "reply_to@example.com"
     When an email message is built
@@ -590,6 +601,17 @@ Feature: Email
       | verifiedOrNot | shouldOrNot |
       | a verified    | should      |
       | an unverified | should NOT  |
+
+  Scenario: Still send the password-changed email to other recovery methods when one cannot be sent to
+    Given a specific user already exists
+      And that user has a password
+      And that user has a verified recovery method "not-an-email-address" that cannot be sent to
+      And that user has a verified recovery method "recovery@example.com"
+      And I remove records of any emails that have been sent
+    When that user gets a password
+    Then a "password-changed" email should have been sent to them
+      And a "password-changed" email should have been sent to recovery method "recovery@example.com"
+      And a failure to send the "password-changed" email to "not-an-email-address" should have been logged
 
   Scenario: 2-Step Verification emails also go to verified recovery methods
     Given a specific user already exists
