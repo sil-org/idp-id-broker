@@ -79,7 +79,7 @@ class MfaController extends BaseRestController
 
         $employeeId = $req->getBodyParam('employee_id');
         if ($employeeId == null) {
-            throw new BadRequestHttpException("employee_id is required");
+            throw new BadRequestHttpException("employee_id is required", 1794377755);
         }
 
         $user = User::findOne(['employee_id' => $employeeId]);
@@ -169,7 +169,7 @@ class MfaController extends BaseRestController
     {
         $employeeId = \Yii::$app->request->getBodyParam('employee_id');
         if ($employeeId == null) {
-            throw new BadRequestHttpException("employee_id is required");
+            throw new BadRequestHttpException("employee_id is required", 1794377756);
         }
 
         $user = User::findOne(['employee_id' => $employeeId]);

@@ -292,3 +292,23 @@ Feature: MFA
       | /mfa/1/verify/registration | created |
       | /mfa/1/webauthn/1          | updated |
       | /mfa/1/webauthn/1          | deleted |
+
+  Scenario Outline: Attempt to act upon an MFA without providing an employee_id
+    Given I provide the following valid data:
+      | property    | value      |
+      | type        | backupcode |
+      | label       | My label   |
+      | value       | 123456     |
+    When I request "<resource>" be <action>
+    Then the response status code should be 400
+      And the response body should contain "employee_id is required"
+
+    Examples:
+      | resource                   | action  |
+      | /mfa                       | created |
+      | /mfa/1                     | updated |
+      | /mfa/1                     | deleted |
+      | /mfa/1/verify              | created |
+      | /mfa/1/verify/registration | created |
+      | /mfa/1/webauthn/1          | updated |
+      | /mfa/1/webauthn/1          | deleted |

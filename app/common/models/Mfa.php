@@ -345,7 +345,7 @@ class Mfa extends MfaBase
          */
         $user = User::findOne(['id' => $userId]);
         if ($user == null) {
-            throw new NotFoundHttpException('User not found');
+            throw new NotFoundHttpException('User not found', 1794377757);
         }
 
         if ($type == self::TYPE_MANAGER && empty($user->manager_email)) {
