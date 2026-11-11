@@ -348,8 +348,7 @@ class FeatureContext extends YiiContext
     #[Given('/^I provide (?:a|an) (.*) that is too long$/')]
     public function iProvideAPropertyThatIsTooLong($property)
     {
-        $maxLength = ($property === 'groups') ? 1024 : 255;
-        $this->reqBody[$property] = str_repeat("z", $maxLength + 1);
+        $this->reqBody[$property] = str_repeat("z", 256);
     }
 
     #[Given('I provide a :property of length :length')]

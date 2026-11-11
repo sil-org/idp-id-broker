@@ -9,7 +9,7 @@ class m261110_000000_increase_user_groups_length extends Migration
 {
     public function safeUp()
     {
-        $this->alterColumn('{{user}}', '{{groups}}', 'varchar(1024) null');
+        $this->alterColumn('{{user}}', '{{groups}}', 'text null');
     }
 
     public function safeDown()

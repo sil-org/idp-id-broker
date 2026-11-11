@@ -341,7 +341,6 @@ Feature: User
       | display_name | Display Name |
       | username     | Username     |
       | email        | Email        |
-      | groups       | Groups       |
 
   Scenario Outline: Attempt to create a new user while providing an invalid value for an optional property
     Given the requester is authorized
@@ -826,7 +825,7 @@ Feature: User
     Then the response status code should be 422
       And the property message should contain "Token Type"
 
-  Scenario: Create a new user with a groups property of maximum length (1024 characters)
+  Scenario: Create a new user with a large groups property
     Given the requester is authorized
       And the user store is empty
       And I provide the following valid data:
@@ -837,8 +836,8 @@ Feature: User
         | display_name | Shep Clark             |
         | username     | shep_clark             |
         | email        | shep_clark@example.org |
-      And I provide a groups of length 1024
+      And I provide a groups of length 2000
     When I request "/user" be created
     Then the response status code should be 200
       And a record exists with an employee_id of "123"
-      And the stored groups should have length 1024
+      And the stored groups should have length 2000

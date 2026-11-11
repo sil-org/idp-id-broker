@@ -1363,7 +1363,6 @@ components:
           type: string
         groups:
           type: string
-          maxLength: 1024
       required:
       - employee_id
       - first_name
@@ -1407,7 +1406,6 @@ components:
           type: string
         groups:
           type: string
-          maxLength: 1024
         token_hash:
           type: string
           nullable: true
