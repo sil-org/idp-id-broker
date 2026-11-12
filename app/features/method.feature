@@ -72,7 +72,7 @@ Feature: Recovery Method API
       And I provide the following valid data:
         | property     | value                   |
         | employee_id  | 123                     |
-        | value        | unverified@example.org  |
+        | value        | Unverified@Example.org  |
     When I request "/method/create" be created
     Then the response status code should be 200
       And the following data is returned:

@@ -120,7 +120,7 @@ class MethodController extends BaseRestController
         }
 
         $existing = Method::findOne(['user_id' => $userId, 'value' => mb_strtolower($value)]);
-        if ($existing !== null && $existing->isVerified()) {
+        if ($existing?->isVerified()) {
             throw new ConflictHttpException(
                 'a verified method with that value already exists',
                 1794134175

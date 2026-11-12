@@ -217,7 +217,7 @@ class Method extends MethodBase
      */
     public static function findOrCreate($userId, $value, $preVerified = false)
     {
-        $method = Method::findOne(['value' => $value, 'user_id' => $userId]);
+        $method = Method::findOne(['value' => mb_strtolower($value), 'user_id' => $userId]);
 
         if ($method === null) {
             $method = self::create($userId, $value, $preVerified);
