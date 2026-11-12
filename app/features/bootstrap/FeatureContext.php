@@ -351,6 +351,18 @@ class FeatureContext extends YiiContext
         $this->reqBody[$property] = str_repeat("z", 256);
     }
 
+    #[Given('I provide a :property of length :length')]
+    public function iProvideAPropertyOfLength($property, int $length)
+    {
+        $this->reqBody[$property] = str_repeat("z", $length);
+    }
+
+    #[Then('the stored :property should have length :length')]
+    public function theStoredPropertyShouldHaveLength($property, int $length)
+    {
+        Assert::same(strlen((string) $this->userFromDb->$property), $length);
+    }
+
     #[Given('/^a record does not exist with (?:a|an) (.*) of "?([^"]*)"?$/')]
     public function aUserDoesNotExist($property, $value)
     {
