@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\helpers\MySqlDateTime;
+use common\helpers\Utils;
 use common\components\Emailer;
 use yii\base\BaseObject;
 use yii\helpers\ArrayHelper;
@@ -27,6 +28,28 @@ class MfaWebauthn extends MfaWebauthnBase
                 'created_utc', 'default', 'value' => MySqlDateTime::now(),
             ],
         ], parent::rules());
+    }
+
+    /**
+     * The default fields, with timestamps in ISO 8601 format like every other timestamp in the API
+     */
+    public function fields(): array
+    {
+        return [
+            'id',
+            'mfa_id',
+            'key_handle_hash',
+            'label',
+            'created_utc' => function ($model) {
+                return Utils::getIso8601($model->created_utc);
+            },
+            'last_used_utc' => function ($model) {
+                if ($model->last_used_utc !== null) {
+                    return Utils::getIso8601($model->last_used_utc);
+                }
+                return null;
+            },
+        ];
     }
 
     // Adds a new integer on to the end of "Security Key-" while ensuring that a related

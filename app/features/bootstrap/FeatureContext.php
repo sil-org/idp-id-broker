@@ -48,6 +48,7 @@ class FeatureContext extends YiiContext
 
     private $now;
     public const ACCEPTABLE_DELTA_IN_SECONDS = 3;
+    public const ISO8601_REGEX = '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/';
 
     protected $tempEmployeeId = null;
 
@@ -109,6 +110,8 @@ class FeatureContext extends YiiContext
 
             if ($expectedValue == '*') {
                 Assert::minLength($data[$property], 1);
+            } elseif ($expectedValue == 'ISO 8601') {
+                Assert::regex($data[$property], self::ISO8601_REGEX);
             } else {
                 Assert::eq($data[$property], $this->transformNULLs($expectedValue));
             }
@@ -292,6 +295,12 @@ class FeatureContext extends YiiContext
                          : Assert::contains($this->resBody[$property], $contents);
     }
 
+    #[Then('/^the property (\w+) should be an ISO 8601 timestamp$/')]
+    public function thePropertyShouldBeAnIso8601Timestamp($property)
+    {
+        Assert::regex($this->resBody[$property], self::ISO8601_REGEX);
+    }
+
     #[Then('there is no response body')]
     public function thereIsNoResponseBody(): void
     {
@@ -340,6 +349,18 @@ class FeatureContext extends YiiContext
     public function iProvideAPropertyThatIsTooLong($property)
     {
         $this->reqBody[$property] = str_repeat("z", 256);
+    }
+
+    #[Given('I provide a :property of length :length')]
+    public function iProvideAPropertyOfLength($property, int $length)
+    {
+        $this->reqBody[$property] = str_repeat("z", $length);
+    }
+
+    #[Then('the stored :property should have length :length')]
+    public function theStoredPropertyShouldHaveLength($property, int $length)
+    {
+        Assert::same(strlen((string) $this->userFromDb->$property), $length);
     }
 
     #[Given('/^a record does not exist with (?:a|an) (.*) of "?([^"]*)"?$/')]

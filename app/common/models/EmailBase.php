@@ -37,9 +37,9 @@ class EmailBase extends \yii\db\ActiveRecord
     {
         return [
             [['to_address', 'subject', 'created_at'], 'required'],
-            [['text_body', 'html_body'], 'string'],
+            [['cc_address', 'text_body', 'html_body'], 'string'],
             [['attempts_count', 'updated_at', 'created_at', 'send_after'], 'integer'],
-            [['to_address', 'to_name', 'cc_address', 'bcc_address', 'subject'], 'string', 'max' => 255],
+            [['to_address', 'to_name', 'bcc_address', 'subject'], 'string', 'max' => 255],
         ];
     }
 

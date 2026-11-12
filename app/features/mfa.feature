@@ -26,7 +26,7 @@ Feature: MFA
       | label         | Security Key-1 |
       | id            | *              |
       | last_used_utc | null           |
-      | created_utc   | *              |
+      | created_utc   | ISO 8601       |
 
   Scenario: Create new MFA record of type backupcode
     Given I provide the following valid data:
@@ -192,6 +192,7 @@ Feature: MFA
     When I update the mfaWebauthn
     Then the response status code should be 200
       And the property label should contain "A New Label"
+      And the property created_utc should be an ISO 8601 timestamp
       And the following mfaWebauthn data should be stored:
         | property            | value           |
         | label               | A New Label     |

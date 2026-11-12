@@ -17,6 +17,7 @@ use Webmozart\Assert\Assert;
 use Behat\Step\Then;
 use Behat\Step\When;
 use Behat\Step\Given;
+use yii\log\Logger;
 
 class EmailContext extends YiiContext
 {
@@ -1296,6 +1297,54 @@ class EmailContext extends YiiContext
     {
         $this->assertEmailSent(EmailLog::MESSAGE_TYPE_INVITE, $this->tempUser->email);
         $this->assertEmailNotCc($address);
+    }
+
+    #[Then('that user should exist')]
+    public function thatUserShouldExist(): void
+    {
+        Assert::notNull(
+            User::findOne(['employee_id' => $this->tempUser->employee_id]),
+            'The user should have been saved.'
+        );
+    }
+
+    #[Then('a failure to send the :messageType email should have been logged')]
+    public function aFailureToSendTheEmailShouldHaveBeenLogged($messageType): void
+    {
+        $this->assertSendFailureLogged($messageType);
+    }
+
+    #[Then('a failure to send the :messageType email to :address should have been logged')]
+    public function aFailureToSendTheEmailToShouldHaveBeenLogged($messageType, $address): void
+    {
+        $this->assertSendFailureLogged($messageType, $address);
+    }
+
+    private function assertSendFailureLogged(string $messageType, ?string $toAddress = null): void
+    {
+        // The fake log target is added fresh for each scenario, so this only sees this scenario's messages.
+        \Yii::getLogger()->flush();
+        $expectedAction = 'send ' . $messageType . ' message';
+        $matches = array_filter(
+            $this->fakeLogTarget->messages,
+            fn($message) => $message[1] === Logger::LEVEL_ERROR
+                && is_array($message[0])
+                && ($message[0]['action'] ?? null) === $expectedAction
+                && ($toAddress === null || ($message[0]['to_address'] ?? null) === $toAddress)
+        );
+        Assert::notEmpty(
+            $matches,
+            'Expected an error log entry for: ' . $expectedAction . ($toAddress ? ' to ' . $toAddress : '')
+        );
+    }
+
+    #[Given('that user has a verified recovery method :address that cannot be sent to')]
+    public function thatUserHasAVerifiedRecoveryMethodThatCannotBeSentTo($address): void
+    {
+        // Method validates its value, so store a valid address and then overwrite it directly.
+        $method = Method::findOrCreate($this->tempUser->id, 'placeholder-' . uniqid() . '@example.com', true);
+        Method::updateAll(['value' => $address], ['id' => $method->id]);
+        $this->tempUser->refresh();
     }
 
     #[Then('the invite email should also CC the personal email')]

@@ -1631,13 +1631,15 @@ components:
           description: The user-defined label for this MFA key
           type: string
         last_used_utc:
-          description: The last time this MFA key was used, in MySQL date-time format, UTC
-          example: '2026-05-22 12:49:30'
+          description: The last time this MFA key was used, in ISO-8601 format
+          example: '2026-05-22T12:49:30Z'
+          format: date-time
           type: string
           nullable: true
         created_utc:
-          description: The time this MFA key was created, in MySQL date-time format, UTC
-          example: '2026-05-22 12:49:30'
+          description: The time this MFA key was created, in ISO-8601 format
+          example: '2026-05-22T12:49:30Z'
+          format: date-time
           type: string
     MfaDataWebAuthnList:
       description: The data for WebAuthn authentication and a list of all a user's WebAuthn keys
@@ -1666,9 +1668,14 @@ components:
         label:
           type: string
         created_utc:
+          description: The time this MFA key was created, in ISO-8601 format
+          format: date-time
           type: string
         last_used_utc:
-          type: object
+          description: The last time this MFA key was used, in ISO-8601 format
+          format: date-time
+          type: string
+          nullable: true
       required:
       - id
       - mfa_id

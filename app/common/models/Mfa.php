@@ -97,12 +97,7 @@ class Mfa extends MfaBase
         } elseif ($this->type === self::TYPE_WEBAUTHN) {
             $webauthns = $this->mfaWebauthns;
             foreach ($webauthns as $webauthn) {
-                $this->data[] = [
-                    'id' => $webauthn->id,
-                    'label' => $webauthn->label,
-                    'last_used_utc' => $webauthn->last_used_utc,
-                    'created_utc' => $webauthn->created_utc,
-                ];
+                $this->data[] = $webauthn->toArray(['id', 'label', 'last_used_utc', 'created_utc']);
             }
         }
     }
