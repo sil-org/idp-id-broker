@@ -231,6 +231,7 @@ return [
                         'yii\web\HttpException:400', // BadRequest
                         'yii\web\HttpException:401', // Unauthorized
                         'yii\web\HttpException:404', // NotFound
+                        'yii\web\HttpException:406', // NotAcceptable (client's Accept header excludes JSON)
                         'yii\web\HttpException:409', // Conflict
                         'yii\web\HttpException:410', // Gone
                         'yii\web\HttpException:422', // UnprocessableEntityHttpException

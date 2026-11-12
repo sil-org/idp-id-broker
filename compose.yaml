@@ -172,7 +172,7 @@ services:
       start_period: 2s
 
   test:
-    image: ghcr.io/sil-org/php8:8.3
+    build: ./
     platform: linux/amd64
     volumes:
       - ./app:/app
