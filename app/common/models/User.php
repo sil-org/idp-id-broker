@@ -295,6 +295,9 @@ class User extends UserBase
                 ['last_synced_utc', 'last_changed_utc', 'created_utc'],
                 'default', 'value' => MySqlDateTime::now(),
             ],
+            // DEPRECATED: contingent users (no primary email, expiring) will be
+            // removed in the next major version, along with the `expires_on`
+            // default and the conditional `email` requirement below.
             [
                 'expires_on',
                 'default',
@@ -792,7 +795,7 @@ class User extends UserBase
             if ($ccAddress !== '') {
                 $data['ccAddress'] = $ccAddress;
             }
-            $emailer->sendMessageTo(
+            $emailer->trySendMessageTo(
                 EmailLog::MESSAGE_TYPE_INVITE,
                 $this,
                 $data,
@@ -801,11 +804,11 @@ class User extends UserBase
         }
 
         if ($emailer->shouldSendPasswordChangedMessageTo($this, $changedAttributes)) {
-            $emailer->sendMessageToUserAndRecoveryMethods(EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED, $this);
+            $emailer->trySendMessageToUserAndRecoveryMethods(EmailLog::MESSAGE_TYPE_PASSWORD_CHANGED, $this);
         }
 
         if ($emailer->shouldSendWelcomeMessageTo($this, $changedAttributes)) {
-            $emailer->sendMessageTo(EmailLog::MESSAGE_TYPE_WELCOME, $this);
+            $emailer->trySendMessageTo(EmailLog::MESSAGE_TYPE_WELCOME, $this);
         }
     }
 
@@ -1198,6 +1201,7 @@ class User extends UserBase
 
     /**
      * @return string:null
+     * @deprecated contingent users will be removed in the next major version
      */
     public function getExpiresOnInitialValue()
     {
@@ -1407,6 +1411,9 @@ class User extends UserBase
         return MySqlDateTime::formatDateForHumans($pw->created_utc);
     }
 
+    /**
+     * @deprecated contingent users will be removed in the next major version
+     */
     protected function isExpired(): bool
     {
         return $this->expires_on !== null && MySqlDateTime::isBefore($this->expires_on, time());
@@ -1414,6 +1421,8 @@ class User extends UserBase
 
     /**
      * Attempts to deactivate an expired user. If not successful, an error is logged.
+     *
+     * @deprecated contingent users will be removed in the next major version
      */
     protected function deactivateExpiredUser(): void
     {

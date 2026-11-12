@@ -32,6 +32,10 @@ Feature: Email Client
     When we get a message for an email with multiple comma-separated cc addresses
     Then there is no error
 
+  Scenario: testSaveEmailWithLongCcList
+    When we save an email with a cc list longer than 255 characters
+    Then there is no error
+
   Scenario: testGetMessageKeepsToNameAfterQueueing
     When we get a message for a queued email with a to name
     Then there is no error
