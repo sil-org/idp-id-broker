@@ -16,6 +16,9 @@ app/frontend/runtime/
 
 # Development and test tooling (tests run with ./app mounted as a volume)
 app/features/
+# ...except the fakes, which other projects' dev environments select through
+# EMAILER_CLASS without mounting ./app
+!app/features/bootstrap/fakes/
 app/behat.yml
 app/run-tests.sh
 app/check-psr12.sh
