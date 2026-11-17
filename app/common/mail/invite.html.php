@@ -11,6 +11,7 @@ use yii\helpers\Html as yHtml;
  * @var string $helpCenterUrl
  * @var string $idpDisplayName
  * @var string $passwordProfileUrl
+ * @var string $passwordSyncedWith  Optional. Provided by environment variable PASSWORD_SYNCED_WITH.
  * @var string $supportEmail
  * @var string $supportName
  * @var bool   $isMfaEnabled
@@ -41,7 +42,11 @@ $inviteLink = $passwordProfileUrl . '/profile/intro?invite=' . $inviteCode;
 
 <p>
     Please note that this <?= yHtml::encode($idpDisplayName) ?> Identity account (username and password) is
+<?php if (!empty($passwordSyncedWith)) : ?>
+    synchronized with <?= yHtml::encode($passwordSyncedWith) ?>.
+<?php else : ?>
     unique and its password is not synchronized with any other accounts you may have.
+<?php endif ?>
 </p>
 
 <p>Thank you,</p>

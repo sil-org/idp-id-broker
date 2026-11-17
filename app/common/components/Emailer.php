@@ -59,6 +59,13 @@ class Emailer extends Component
     public const PASSWORD_EXPIRED_CUTOFF = '-15 days';
     public const PASSWORD_EXPIRING_CUTOFF = '+15 days';
 
+    /** Keys in $otherDataForEmails that may be empty; the templates handle a missing value. */
+    private const OPTIONAL_DATA_FOR_EMAILS = [
+        'helpCenterUrl',
+        'passwordChangeHelpUrl',
+        'passwordSyncedWith',
+    ];
+
     /** @var EmailClient */
     protected $emailClient = null;
 
@@ -812,10 +819,7 @@ class Emailer extends Component
     {
         foreach ($this->otherDataForEmails as $keyForEmail => $valueForEmail) {
             if (empty($valueForEmail)) {
-                if ($keyForEmail === 'helpCenterUrl') {
-                    /*
-                     * helpCenterUrl is not required
-                     */
+                if (in_array($keyForEmail, self::OPTIONAL_DATA_FOR_EMAILS, true)) {
                     continue;
                 }
 

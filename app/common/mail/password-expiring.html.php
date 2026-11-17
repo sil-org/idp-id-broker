@@ -10,6 +10,7 @@ use yii\helpers\Html as yHtml;
  * @var string $emailSignature
  * @var string $helpCenterUrl
  * @var string $idpDisplayName
+ * @var string $passwordChangeHelpUrl  Optional. Provided by environment variable PASSWORD_CHANGE_HELP_URL.
  * @var string $passwordProfileUrl
  * @var string $supportEmail
  * @var string $supportName
@@ -17,6 +18,8 @@ use yii\helpers\Html as yHtml;
  * @var string $passwordLastChanged
  */
 
+// When MFA cannot be disabled it is effectively required, so don't pitch it as an optional perk.
+$mfaAllowDisable = (bool) \Yii::$app->params['mfaAllowDisable'];
 $pwExtension = ltrim(\Yii::$app->params['passwordMfaLifespanExtension'], '+');
 ?>
 <p>
@@ -28,11 +31,16 @@ $pwExtension = ltrim(\Yii::$app->params['passwordMfaLifespanExtension'], '+');
     <?=yHtml::a(yHtml::encode($passwordProfileUrl), $passwordProfileUrl)?> and login to
     change your password.
 </p>
+<?php if (!empty($passwordChangeHelpUrl)) : ?>
+<p>
+    For detailed instructions, go to <?=yHtml::a(yHtml::encode($passwordChangeHelpUrl), $passwordChangeHelpUrl)?>
+</p>
+<?php endif ?>
 <p>
     Password changed on: <?=yHtml::encode($passwordLastChanged)?><br>
     Password expires on: <?=yHtml::encode($passwordExpiresUtc)?>
 </p>
-<?php if (!$isMfaEnabled) : ?>
+<?php if (!$isMfaEnabled && $mfaAllowDisable) : ?>
 <p>
     If you enable 2-Step Verification, your password expiration will be extended
     by <?= yHtml::encode($pwExtension) ?>. This would take effect immediately, so you would not have to change

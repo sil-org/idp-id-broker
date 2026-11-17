@@ -1501,6 +1501,44 @@ class EmailContext extends YiiContext
         Assert::eq($toName, $this->tempUser->getDisplayName(), 'user name not on to line');
     }
 
+    #[Given('/^the "([^"]+)" email setting is "([^"]*)"$/')]
+    public function theEmailSettingIs(string $key, string $value): void
+    {
+        $this->fakeEmailer->otherDataForEmails[$key] = $value;
+    }
+
+    #[Given('the :key email setting is empty')]
+    public function theEmailSettingIsEmpty(string $key): void
+    {
+        $this->fakeEmailer->otherDataForEmails[$key] = '';
+    }
+
+    #[Given('/^we are configured (NOT to|to) allow MFA to be disabled$/')]
+    public function weAreConfiguredToAllowMfaToBeDisabled(string $allowOrNot): void
+    {
+        \Yii::$app->params['mfaAllowDisable'] = ($allowOrNot === 'to');
+    }
+
+    #[Then('that email should contain :text')]
+    public function thatEmailShouldContain(string $text): void
+    {
+        Assert::contains($this->getMatchingEmailText(), $text);
+    }
+
+    #[Then('that email should NOT contain :text')]
+    public function thatEmailShouldNotContain(string $text): void
+    {
+        Assert::notContains($this->getMatchingEmailText(), $text);
+    }
+
+    /** The plain-text body of the email found by the last "should have been sent" step, with whitespace collapsed. */
+    private function getMatchingEmailText(): string
+    {
+        Assert::greaterThan(count($this->matchingFakeEmails), 0);
+        $textBody = current($this->matchingFakeEmails)[Emailer::PROP_TEXT_BODY] ?? '';
+        return preg_replace('/\s+/', ' ', $textBody);
+    }
+
     #[Then('that email should NOT have been addressed to their name')]
     public function thatEmailShouldNotHaveBeenAddressedToTheirName(): void
     {

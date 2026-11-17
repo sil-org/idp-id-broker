@@ -710,3 +710,82 @@ Feature: Email
       And I remove records of any emails that have been sent
     When that user's recovery method "removed@example.com" is deleted
     Then exactly 1 "method-removed" email should have been sent to "removed@example.com"
+
+  Scenario Outline: Say whether the account is synchronized with another account in the invite email
+    Given we are configured to send invite emails
+      And the "passwordSyncedWith" email setting is <syncedWith>
+      And a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user is created
+    Then an "invite" email should have been sent to them
+      And that email should contain <expectedText>
+
+    Examples:
+      | syncedWith                    | expectedText                                                 |
+      | "your Example Google account" | "is synchronized with your Example Google account."          |
+      | empty                         | "unique and its password is not synchronized with any other" |
+
+  Scenario Outline: Say whether the account is synchronized with another account in the password-changed email
+    Given we are configured to send password-changed emails
+      And the "passwordSyncedWith" email setting is <syncedWith>
+      And a specific user already exists
+      And that user has a password
+      And I remove records of any emails that have been sent
+    When that user gets a password
+    Then a "password-changed" email should have been sent to them
+      And that email should contain <expectedText>
+
+    Examples:
+      | syncedWith                    | expectedText                                            |
+      | "your Example Google account" | "is synchronized with your Example Google account."     |
+      | empty                         | "is unique and will not be kept in sync with any other" |
+
+  Scenario Outline: Link to password-change instructions in the password expiring email
+    Given we are configured to send password expiring emails
+      And the "passwordChangeHelpUrl" email setting is <helpUrl>
+      And I remove records of any emails that have been sent
+      And no mfas exist
+      And a user already exists
+      And that user has a password that expires in 5 days
+    When I send password expiring emails
+    Then a "password-expiring" email should have been sent to them
+      And that email <shouldOrNot> contain "For detailed instructions, go to https://help.example.com/change-password"
+
+    Examples:
+      | helpUrl                                    | shouldOrNot |
+      | "https://help.example.com/change-password" | should      |
+      | empty                                      | should NOT  |
+
+  Scenario Outline: Link to password-change instructions in the password expired email
+    Given we are configured to send password expired emails
+      And the "passwordChangeHelpUrl" email setting is <helpUrl>
+      And I remove records of any emails that have been sent
+      And no mfas exist
+      And a user already exists
+      And that user has a password that expires in -1 days
+    When I send password expired emails
+    Then a "password-expired" email should have been sent to them
+      And that email <shouldOrNot> contain "For detailed instructions, go to https://help.example.com/change-password"
+
+    Examples:
+      | helpUrl                                    | shouldOrNot |
+      | "https://help.example.com/change-password" | should      |
+      | empty                                      | should NOT  |
+
+  Scenario Outline: Only offer the MFA password extension in password expiry emails when MFA is optional
+    Given we are configured to send password <expiringOrExpired> emails
+      And we are configured <allowOrNot> allow MFA to be disabled
+      And I remove records of any emails that have been sent
+      And no mfas exist
+      And a user already exists
+      And that user has a password that expires in <days> days
+    When I send password <expiringOrExpired> emails
+    Then a "password-<expiringOrExpired>" email should have been sent to them
+      And that email <shouldOrNot> contain "If you enable 2-Step Verification, your password expiration will be extended"
+
+    Examples:
+      | expiringOrExpired | allowOrNot | days | shouldOrNot |
+      | expiring          | to         | 5    | should      |
+      | expiring          | NOT to     | 5    | should NOT  |
+      | expired           | to         | -1   | should      |
+      | expired           | NOT to     | -1   | should NOT  |
