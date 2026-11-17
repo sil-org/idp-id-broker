@@ -166,6 +166,24 @@ Feature: User
       And a record exists with a active of no
       And deactivated_utc should be stored as now UTC
 
+  Scenario Outline: Attempt to act upon a user that does not exist
+    Given a record does not exist with an employee_id of "123"
+      And the requester is authorized
+      And I provide the following valid data:
+        | property        | value                 |
+        | first_name      | Shep                  |
+        | password        | Fdh2iPp9a@mxcRmw      |
+    When I request "<resource>" be <action>
+    Then the response status code should be 404
+      And the response body should contain "User not found"
+      And the user store is still empty
+
+    Examples:
+      | resource            | action    |
+      | /user/123           | retrieved |
+      | /user/123           | updated   |
+      | /user/123/password  | updated   |
+
 #TODO: consider creating a new security.feature file for all these security-related tests.
 #TODO: need to think through tests for API_ACCESS_KEYS config, i.e., need tests for ApiConsumer
   Scenario Outline: Attempt to act upon a user as an unauthorized user
