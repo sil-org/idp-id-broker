@@ -1504,19 +1504,27 @@ class EmailContext extends YiiContext
     #[Given('/^the "([^"]+)" email setting is "([^"]*)"$/')]
     public function theEmailSettingIs(string $key, string $value): void
     {
-        $this->fakeEmailer->otherDataForEmails[$key] = $value;
+        $this->fakeEmailer->setOtherDataForEmail($key, $value);
     }
 
     #[Given('the :key email setting is empty')]
     public function theEmailSettingIsEmpty(string $key): void
     {
-        $this->fakeEmailer->otherDataForEmails[$key] = '';
+        $this->fakeEmailer->setOtherDataForEmail($key, '');
     }
 
-    #[Given('/^we are configured (NOT to|to) allow MFA to be disabled$/')]
-    public function weAreConfiguredToAllowMfaToBeDisabled(string $allowOrNot): void
+    #[Given('/^that user (is|is NOT) required to set up MFA$/')]
+    public function thatUserIsRequiredToSetUpMfa(string $isOrNot): void
     {
-        \Yii::$app->params['mfaAllowDisable'] = ($allowOrNot === 'to');
+        $this->tempUser->updateAttributes(['require_mfa' => $isOrNot === 'is' ? 'yes' : 'no']);
+    }
+
+    #[Given('/^that user has (no MFA|an unverified MFA option|a verified MFA option)$/')]
+    public function thatUserHasMfa(string $mfaState): void
+    {
+        if ($mfaState !== 'no MFA') {
+            $this->createMfa(Mfa::TYPE_TOTP, null, null, $mfaState === 'a verified MFA option' ? 1 : 0);
+        }
     }
 
     #[Then('that email should contain :text')]

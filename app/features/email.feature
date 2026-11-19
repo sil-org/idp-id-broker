@@ -740,52 +740,43 @@ Feature: Email
       | "your Example Google account" | "is synchronized with your Example Google account."     |
       | empty                         | "is unique and will not be kept in sync with any other" |
 
-  Scenario Outline: Link to password-change instructions in the password expiring email
-    Given we are configured to send password expiring emails
-      And the "passwordChangeHelpUrl" email setting is <helpUrl>
-      And I remove records of any emails that have been sent
-      And no mfas exist
-      And a user already exists
-      And that user has a password that expires in 5 days
-    When I send password expiring emails
-    Then a "password-expiring" email should have been sent to them
-      And that email <shouldOrNot> contain "For detailed instructions, go to https://help.example.com/change-password"
-
-    Examples:
-      | helpUrl                                    | shouldOrNot |
-      | "https://help.example.com/change-password" | should      |
-      | empty                                      | should NOT  |
-
-  Scenario Outline: Link to password-change instructions in the password expired email
-    Given we are configured to send password expired emails
-      And the "passwordChangeHelpUrl" email setting is <helpUrl>
-      And I remove records of any emails that have been sent
-      And no mfas exist
-      And a user already exists
-      And that user has a password that expires in -1 days
-    When I send password expired emails
-    Then a "password-expired" email should have been sent to them
-      And that email <shouldOrNot> contain "For detailed instructions, go to https://help.example.com/change-password"
-
-    Examples:
-      | helpUrl                                    | shouldOrNot |
-      | "https://help.example.com/change-password" | should      |
-      | empty                                      | should NOT  |
-
-  Scenario Outline: Only offer the MFA password extension in password expiry emails when MFA is optional
+  Scenario Outline: Link to password-change instructions in the password expiry emails
     Given we are configured to send password <expiringOrExpired> emails
-      And we are configured <allowOrNot> allow MFA to be disabled
+      And the "passwordChangeHelpUrl" email setting is <helpUrl>
       And I remove records of any emails that have been sent
       And no mfas exist
       And a user already exists
       And that user has a password that expires in <days> days
     When I send password <expiringOrExpired> emails
     Then a "password-<expiringOrExpired>" email should have been sent to them
+      And that email <shouldOrNot> contain "For detailed instructions, go to https://help.example.com/change-password"
+
+    Examples:
+      | expiringOrExpired | days | helpUrl                                    | shouldOrNot |
+      | expiring          | 5    | "https://help.example.com/change-password" | should      |
+      | expiring          | 5    | empty                                      | should NOT  |
+      | expired           | -1   | "https://help.example.com/change-password" | should      |
+      | expired           | -1   | empty                                      | should NOT  |
+
+  Scenario Outline: Only offer the MFA password extension to users who have no verified MFA and are not required to set it up
+    Given we are configured to send password <expiringOrExpired> emails
+      And I remove records of any emails that have been sent
+      And no mfas exist
+      And a user already exists
+      And that user <isOrNot> required to set up MFA
+      And that user has <mfaState>
+      And that user has a password that expires in <days> days
+    When I send password <expiringOrExpired> emails
+    Then a "password-<expiringOrExpired>" email should have been sent to them
       And that email <shouldOrNot> contain "If you enable 2-Step Verification, your password expiration will be extended"
 
     Examples:
-      | expiringOrExpired | allowOrNot | days | shouldOrNot |
-      | expiring          | to         | 5    | should      |
-      | expiring          | NOT to     | 5    | should NOT  |
-      | expired           | to         | -1   | should      |
-      | expired           | NOT to     | -1   | should NOT  |
+      | expiringOrExpired | days | isOrNot | mfaState                 | shouldOrNot |
+      | expiring          | 5    | is NOT  | no MFA                   | should      |
+      | expiring          | 5    | is NOT  | an unverified MFA option | should      |
+      | expiring          | 5    | is NOT  | a verified MFA option    | should NOT  |
+      | expiring          | 5    | is      | no MFA                   | should NOT  |
+      | expired           | -1   | is NOT  | no MFA                   | should      |
+      | expired           | -1   | is NOT  | an unverified MFA option | should      |
+      | expired           | -1   | is NOT  | a verified MFA option    | should NOT  |
+      | expired           | -1   | is      | no MFA                   | should NOT  |

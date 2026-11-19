@@ -14,13 +14,11 @@ use yii\helpers\Html as yHtml;
  * @var string $passwordProfileUrl
  * @var string $supportEmail
  * @var string $supportName
- * @var bool   $isMfaEnabled
+ * @var bool   $offerMfaExtension  Whether to offer a longer password lifespan for enabling 2-Step Verification
  * @var string $passwordLastChanged
  */
 
 $passwordForgotUrl = $passwordProfileUrl . '/password/forgot';
-// When MFA cannot be disabled it is effectively required, so don't pitch it as an optional perk.
-$mfaAllowDisable = (bool) \Yii::$app->params['mfaAllowDisable'];
 $pwExtension = ltrim(\Yii::$app->params['passwordMfaLifespanExtension'], '+');
 
 ?>
@@ -42,7 +40,7 @@ $pwExtension = ltrim(\Yii::$app->params['passwordMfaLifespanExtension'], '+');
     Password last changed on: <?=yHtml::encode($passwordLastChanged)?><br>
     Password expired on: <?=yHtml::encode($passwordExpiresUtc)?>
 </p>
-<?php if (!$isMfaEnabled && $mfaAllowDisable) { ?>
+<?php if ($offerMfaExtension) { ?>
 <p>
     If you enable 2-Step Verification, your password expiration will be extended
     by <?= yHtml::encode($pwExtension) ?>. This would take effect immediately, so you would not have to change
