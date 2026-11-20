@@ -20,6 +20,16 @@ class FakeEmailer extends Emailer
         return $this->emailClient;
     }
 
+    /**
+     * Set a value for use in emails, then validate it the way init() validates
+     * configured values, so an empty required value becomes '(MISSING)'.
+     */
+    public function setOtherDataForEmail(string $key, mixed $value): void
+    {
+        $this->otherDataForEmails[$key] = $value;
+        $this->verifyOtherDataForEmailIsValid();
+    }
+
     public function forgetFakeEmailsSent()
     {
         return $this->getEmailClient()->emailsSent = [];
