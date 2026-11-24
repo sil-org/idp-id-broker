@@ -19,7 +19,7 @@ Feature: User Unit Tests
     Given the database contains a user
       And that user has a require_mfa property value of no
       And the mfaRequiredForNewUsers config parameter is true
-    When I change the user's hide property to yes
+    When I change the user's first_name property to Jane
     Then I see the user's require_mfa property is no
 
   Scenario: Set require_mfa to 'no' when mfaAllowDisable is true

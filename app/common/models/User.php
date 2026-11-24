@@ -185,7 +185,6 @@ class User extends UserBase
             'nag_for_method_after',
             'review_profile_after',
             'personal_email',
-            'hide',
             'groups',
             'expires_on',
             'created_utc',
@@ -202,7 +201,6 @@ class User extends UserBase
             'manager_email',
             'require_mfa',
             'personal_email',
-            'hide',
             'groups',
             'token_hash',
             'token_expiry_utc',
@@ -249,7 +247,7 @@ class User extends UserBase
                 'value' => MySqlDateTime::relative(\Yii::$app->params['profileReviewInterval']),
             ],
             [
-                ['active', 'locked', 'require_mfa', 'hide'], 'in', 'range' => ['yes', 'no'],
+                ['active', 'locked', 'require_mfa'], 'in', 'range' => ['yes', 'no'],
             ],
             [
                 'token_type', 'in', 'range' => ['login', 'reset'], 'skipOnEmpty' => true,
@@ -551,7 +549,6 @@ class User extends UserBase
             },
             'manager_email',
             'personal_email',
-            'hide',
             'member' => function (self $model) {
                 return $model->getMemberList();
             },
