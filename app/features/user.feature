@@ -615,7 +615,7 @@ Feature: User
     Then the response status code should be 200
       And the profile review date should be past
 
-  Scenario: Add a user with personal email address and no primary email address
+  Scenario: Attempt to add a user with personal email address and no primary email address
     Given a record does not exist with an employee_id of "123"
       And the requester is authorized
       And I provide the following valid data:
@@ -626,15 +626,9 @@ Feature: User
         | username        | new_guy               |
         | personal_email  | personal@example.com  |
     When I request "/user" be created
-    Then the response status code should be 200
-      And a record exists with an employee_id of "123"
-      And the following data is returned:
-        | property        | value                 |
-        | employee_id     | 123                   |
-        | email           | personal@example.com  |
-        | active          | yes                   |
-        | locked          | no                    |
-        | personal_email  | personal@example.com  |
+    Then the response status code should be 422
+      And the property message should contain "Email"
+      And a record does not exist with an employee_id of "123"
 
   Scenario: Attempt to update email to null
     Given the requester is authorized
@@ -746,35 +740,6 @@ Feature: User
         |   it                 |
         |   {idpName}          |
       And the uuid property should be a valid UUID
-
-  Scenario: Fetch a user with no primary email address after user's expiration date
-    Given a record does not exist with an employee_id of "123"
-      And the requester is authorized
-      And I provide the following valid data:
-        | property        | value                 |
-        | employee_id     | 123                   |
-        | first_name      | New                   |
-        | last_name       | Guy                   |
-        | username        | new_guy               |
-        | personal_email  | personal@example.com  |
-      And I request "/user" be created
-      And I wait until after the user new_guy expiration date
-    When I request "/user/123" be retrieved
-    Then the response status code should be 200
-      And the following data is returned:
-        | property         | value                     |
-        |   employee_id    |   123                     |
-        |   username       |   new_guy                 |
-        |   email          |   personal@example.com    |
-        |   personal_email |   personal@example.com    |
-        |   active         |   no                      |
-        |   locked         |   no                      |
-      And a record exists with an employee_id of "123"
-      And the following data should be stored:
-        | property            | value              |
-        | username            | new_guy            |
-        | active              | no                 |
-        | locked              | no                 |
 
   Scenario Outline: HR notification users
     Given I create a new user with a "active" property of "<active>"

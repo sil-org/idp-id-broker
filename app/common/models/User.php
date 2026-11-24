@@ -187,7 +187,6 @@ class User extends UserBase
             'personal_email',
             'hide',
             'groups',
-            'expires_on',
             'created_utc',
         ];
 
@@ -294,19 +293,6 @@ class User extends UserBase
             [
                 ['last_synced_utc', 'last_changed_utc', 'created_utc'],
                 'default', 'value' => MySqlDateTime::now(),
-            ],
-            // DEPRECATED: contingent users (no primary email, expiring) will be
-            // removed in the next major version, along with the `expires_on`
-            // default and the conditional `email` requirement below.
-            [
-                'expires_on',
-                'default',
-                'value' => $this->getExpiresOnInitialValue(),
-            ],
-            [
-                'email', 'required', 'when' => function ($model) {
-                    return $model->personal_email === null;
-                },
             ],
             [
                 'employee_id',
@@ -824,19 +810,11 @@ class User extends UserBase
     private function getInviteCcAddress(): string
     {
         $ccAddresses = [];
-        /*
-         * If both `personal_email` and `email` are valid, this is a normal invite
-         * scenario. Otherwise there's no need to CC, because `personal_email` will
-         * be used for the 'to' address.
-         */
-        if ($this->personal_email && $this->email) {
+        if ($this->personal_email) {
             $ccAddresses[] = $this->personal_email;
         }
         if (\Yii::$app->params['accountMailAdminsCcOnInvite']) {
-            $mailAdminEmails = [];
-            if (!empty($this->email)) {
-                $mailAdminEmails = MailAdmin::getEmailsFor($this->email);
-            }
+            $mailAdminEmails = MailAdmin::getEmailsFor($this->email);
             if (empty($mailAdminEmails)) {
                 $fallback = \Yii::$app->params['accountMailAdminsCcFallback'] ?? '';
                 $mailAdminEmails = $fallback === '' ? [] : [$fallback];
@@ -1165,21 +1143,9 @@ class User extends UserBase
             $this->review_profile_after = MySqlDateTime::relative('-1 day');
         }
 
-        if ($this->email === '') {
-            $this->email = null;
-        }
-
-        if ($this->getOldAttribute('email') !== null && $this->email === null) {
-            $this->addError('email', 'email cannot be removed');
+        if ($this->email === null || $this->email === '') {
+            $this->addError('email', 'email cannot be blank');
             return false;
-        }
-
-        if (!empty($this->email)) {
-            $this->expires_on = null;
-        }
-
-        if ($this->isExpired()) {
-            $this->deactivateExpiredUser();
         }
 
         if ($this->scenario == self::SCENARIO_NEW_USER
@@ -1202,20 +1168,11 @@ class User extends UserBase
     }
 
     /**
-     * @return string:null
-     * @deprecated contingent users will be removed in the next major version
-     */
-    public function getExpiresOnInitialValue()
-    {
-        return MySqlDateTime::relative(\Yii::$app->params['contingentUserDuration']);
-    }
-
-    /**
      * @return string
      */
     public function getEmailAddress(): string
     {
-        return $this->email ?? $this->personal_email ?? '';
+        return $this->email;
     }
 
     /**
@@ -1224,18 +1181,6 @@ class User extends UserBase
     public function isPrimaryAddress(string $address): bool
     {
         return mb_strtolower($address) === mb_strtolower($this->getEmailAddress());
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function afterFind()
-    {
-        if ($this->isExpired()) {
-            $this->deactivateExpiredUser();
-        }
-
-        parent::afterFind();
     }
 
     public function assessPassword(string $newPassword): bool
@@ -1411,44 +1356,6 @@ class User extends UserBase
         }
 
         return MySqlDateTime::formatDateForHumans($pw->created_utc);
-    }
-
-    /**
-     * @deprecated contingent users will be removed in the next major version
-     */
-    protected function isExpired(): bool
-    {
-        return $this->expires_on !== null && MySqlDateTime::isBefore($this->expires_on, time());
-    }
-
-    /**
-     * Attempts to deactivate an expired user. If not successful, an error is logged.
-     *
-     * @deprecated contingent users will be removed in the next major version
-     */
-    protected function deactivateExpiredUser(): void
-    {
-        if ($this->active == 'no') {
-            return;
-        }
-
-        $logAttributes = [
-            'action' => 'deactivate expired user',
-            'employeeId' => $this->employee_id,
-            'scenario' => $this->scenario,
-            'expires_on' => $this->expires_on,
-        ];
-
-        $this->active = 'no';
-        if (!$this->save(false, ['active'])) {
-            $logAttributes['status'] = 'error';
-            $logAttributes['error'] = $this->getFirstError('active');
-            Yii::error($logAttributes);
-            return;
-        }
-
-        $logAttributes['status'] = 'success';
-        Yii::warning($logAttributes);
     }
 
     /**

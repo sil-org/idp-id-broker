@@ -702,15 +702,6 @@ class FeatureContext extends YiiContext
         Assert::true(MySqlDateTime::isBefore($this->userFromDb->review_profile_after, time()));
     }
 
-    #[Given('the user record for :username has expired')]
-    public function theUserRecordForHasExpired($username)
-    {
-        $user = User::findByUsername($username);
-        $user->expires_on = '2000-01-01';
-        $user->scenario = User::SCENARIO_UPDATE_USER;
-        Assert::true($user->save());
-    }
-
     #[Given('there is a :username user in the database')]
     public function thereIsAUserInTheDatabase($username)
     {
@@ -797,16 +788,6 @@ class FeatureContext extends YiiContext
             $this->resBody['uuid'],
             '/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[1-4][0-9a-fA-F]{3}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/'
         );
-    }
-
-    #[Given('I wait until after the user :username expiration date')]
-    public function iWaitUntilAfterTheUserExpirationDate($username)
-    {
-        $this->userFromDb = User::findOne(['username' => $username]);
-        $earlier = MySqlDateTime::relative("-1 year");
-        $this->userFromDb->expires_on = MySqlDateTime::relative($earlier);
-        $this->userFromDb->scenario = User::SCENARIO_UPDATE_USER;
-        $this->userFromDb->save();
     }
 
     #[Given("The user's current password should not be marked as pwned")]

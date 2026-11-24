@@ -1361,26 +1361,37 @@ class EmailContext extends YiiContext
     }
 
 
-    #[Given('a specific user already exists with only a personal email address')]
-    public function aSpecificUserAlreadyExistsWithOnlyAPersonalEmailAddress(): void
+    #[Given('a specific user already exists whose primary email is also a recovery method')]
+    public function aSpecificUserAlreadyExistsWhosePrimaryEmailIsAlsoARecoveryMethod(): void
     {
-        $this->aSpecificUserAlreadyExistsWithOnlyThePersonalEmailAddress(self::PERSONAL_ONLY_EMAIL);
+        $this->aSpecificUserAlreadyExistsWhosePrimaryEmailIsAlsoARecoveryMethodWithAddress(self::PERSONAL_ONLY_EMAIL);
     }
 
-    #[Given('a specific user already exists with only the personal email address :address')]
-    public function aSpecificUserAlreadyExistsWithOnlyThePersonalEmailAddress($address): void
+    /**
+     * Method::findOrCreate() lowercases the recovery address, so a capitalized primary
+     * address yields a recovery method that differs from it only in case.
+     */
+    #[Given('a specific user already exists whose primary email :address is also a recovery method')]
+    public function aSpecificUserAlreadyExistsWhosePrimaryEmailIsAlsoARecoveryMethodWithAddress($address): void
     {
+        $existingUser = User::findByEmail($address);
+        if ($existingUser !== null) {
+            Assert::notSame($existingUser->delete(), false);
+        }
+
         $employeeId = uniqid();
         $user = new User([
             'employee_id' => strval($employeeId),
             'first_name' => 'Test',
             'last_name' => 'User',
             'username' => 'test_user_' . $employeeId,
-            'personal_email' => $address,
+            'email' => $address,
             'manager_email' => self::MANAGER_EMAIL,
         ]);
         $user->scenario = User::SCENARIO_NEW_USER;
         Assert::true($user->save(), \json_encode($user->getFirstErrors(), JSON_PRETTY_PRINT));
+
+        Method::findOrCreate($user->id, $address, true);
 
         $user->refresh();
         $this->tempUser = $user;

@@ -292,7 +292,6 @@ return [
         'accountMailAdminsCcOnInvite'   => Env::get('ACCOUNT_MAIL_ADMINS_CC_ON_INVITE', false),
         'authorizedRPOrigins'           => Env::getArray('RP_ORIGINS'),
         'authorizedTokens'              => Env::getArray('API_ACCESS_KEYS'),
-        'contingentUserDuration'        => Env::get('CONTINGENT_USER_DURATION', '+4 weeks'),
         'emailQueueBatchSize'           => $emailQueueBatchSize,
         'externalGroupsSyncSets'        => Env::getArrayFromPrefix('EXTERNAL_GROUPS_SYNC_'),
         'fromEmail'                     => $fromEmail,

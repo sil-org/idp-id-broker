@@ -622,23 +622,23 @@ Feature: Email
     Then a "mfa-disabled" email should have been sent to them
       And a "mfa-disabled" email should have been sent to recovery method "recovery@example.com"
 
-  Scenario: A user reached at their personal email is not emailed twice
-    Given a specific user already exists with only a personal email address
+  Scenario: A user whose primary email is also a recovery method is not emailed twice
+    Given a specific user already exists whose primary email is also a recovery method
       And that user has a password
       And I remove records of any emails that have been sent
     When that user gets a password
     Then exactly 1 "password-changed" email should have been sent to "personal_only@example.org"
 
-  Scenario: A user reached at a capitalized personal email is not emailed twice
-    Given a specific user already exists with only the personal email address "Personal_Only@Example.org"
+  Scenario: A user whose capitalized primary email is also a recovery method is not emailed twice
+    Given a specific user already exists whose primary email "Personal_Only@Example.org" is also a recovery method
       And that user has a password
       And I remove records of any emails that have been sent
     When that user gets a password
     Then exactly 1 "password-changed" email should have been sent to "Personal_Only@Example.org"
       And a "password-changed" email should NOT have been sent to recovery method "personal_only@example.org"
 
-  Scenario: Removing the recovery method for a capitalized personal email does not double-send
-    Given a specific user already exists with only the personal email address "Personal_Only@Example.org"
+  Scenario: Removing the recovery method matching a capitalized primary email does not double-send
+    Given a specific user already exists whose primary email "Personal_Only@Example.org" is also a recovery method
       And I remove records of any emails that have been sent
     When that user's recovery method "personal_only@example.org" is deleted
     Then exactly 1 "method-removed" email should have been sent to "Personal_Only@Example.org"
