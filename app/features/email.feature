@@ -710,3 +710,73 @@ Feature: Email
       And I remove records of any emails that have been sent
     When that user's recovery method "removed@example.com" is deleted
     Then exactly 1 "method-removed" email should have been sent to "removed@example.com"
+
+  Scenario Outline: Say whether the account is synchronized with another account in the invite email
+    Given we are configured to send invite emails
+      And the "passwordSyncedWith" email setting is <syncedWith>
+      And a specific user does NOT exist
+      And I remove records of any emails that have been sent
+    When that user is created
+    Then an "invite" email should have been sent to them
+      And that email should contain <expectedText>
+
+    Examples:
+      | syncedWith                    | expectedText                                                 |
+      | "your Example Google account" | "is synchronized with your Example Google account."          |
+      | empty                         | "unique and its password is not synchronized with any other" |
+
+  Scenario Outline: Say whether the account is synchronized with another account in the password-changed email
+    Given we are configured to send password-changed emails
+      And the "passwordSyncedWith" email setting is <syncedWith>
+      And a specific user already exists
+      And that user has a password
+      And I remove records of any emails that have been sent
+    When that user gets a password
+    Then a "password-changed" email should have been sent to them
+      And that email should contain <expectedText>
+
+    Examples:
+      | syncedWith                    | expectedText                                            |
+      | "your Example Google account" | "is synchronized with your Example Google account."     |
+      | empty                         | "is unique and will not be kept in sync with any other" |
+
+  Scenario Outline: Link to password-change instructions in the password expiry emails
+    Given we are configured to send password <expiringOrExpired> emails
+      And the "passwordChangeHelpUrl" email setting is <helpUrl>
+      And I remove records of any emails that have been sent
+      And no mfas exist
+      And a user already exists
+      And that user has a password that expires in <days> days
+    When I send password <expiringOrExpired> emails
+    Then a "password-<expiringOrExpired>" email should have been sent to them
+      And that email <shouldOrNot> contain "For detailed instructions, go to https://help.example.com/change-password"
+
+    Examples:
+      | expiringOrExpired | days | helpUrl                                    | shouldOrNot |
+      | expiring          | 5    | "https://help.example.com/change-password" | should      |
+      | expiring          | 5    | empty                                      | should NOT  |
+      | expired           | -1   | "https://help.example.com/change-password" | should      |
+      | expired           | -1   | empty                                      | should NOT  |
+
+  Scenario Outline: Only offer the MFA password extension to users who have no verified MFA and are not required to set it up
+    Given we are configured to send password <expiringOrExpired> emails
+      And I remove records of any emails that have been sent
+      And no mfas exist
+      And a user already exists
+      And that user <isOrNot> required to set up MFA
+      And that user has <mfaState>
+      And that user has a password that expires in <days> days
+    When I send password <expiringOrExpired> emails
+    Then a "password-<expiringOrExpired>" email should have been sent to them
+      And that email <shouldOrNot> contain "If you enable 2-Step Verification, your password expiration will be extended"
+
+    Examples:
+      | expiringOrExpired | days | isOrNot | mfaState                 | shouldOrNot |
+      | expiring          | 5    | is NOT  | no MFA                   | should      |
+      | expiring          | 5    | is NOT  | an unverified MFA option | should      |
+      | expiring          | 5    | is NOT  | a verified MFA option    | should NOT  |
+      | expiring          | 5    | is      | no MFA                   | should NOT  |
+      | expired           | -1   | is NOT  | no MFA                   | should      |
+      | expired           | -1   | is NOT  | an unverified MFA option | should      |
+      | expired           | -1   | is NOT  | a verified MFA option    | should NOT  |
+      | expired           | -1   | is      | no MFA                   | should NOT  |

@@ -11,6 +11,7 @@ use yii\helpers\Html as yHtml;
  * @var string $helpCenterUrl
  * @var string $idpDisplayName
  * @var string $passwordProfileUrl
+ * @var string $passwordSyncedWith  Optional. Provided by environment variable PASSWORD_SYNCED_WITH.
  * @var string $supportEmail
  * @var string $supportName
  * @var bool   $isMfaEnabled
@@ -30,8 +31,12 @@ use yii\helpers\Html as yHtml;
 </p>
 <p>
     Please remember that this account will be your primary means for logging into corporate
-    applications. It is also important to note that this account (username and password) is unique and will not be kept
-    in sync with any other accounts you have.
+    applications. It is also important to note that this account (username and password)
+<?php if (!empty($passwordSyncedWith)) : ?>
+    is synchronized with <?= yHtml::encode($passwordSyncedWith) ?>.
+<?php else : ?>
+    is unique and will not be kept in sync with any other accounts you have.
+<?php endif ?>
 </p>
 <?php
 if (!$hasRecoveryMethods) {

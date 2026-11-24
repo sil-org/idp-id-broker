@@ -445,6 +445,8 @@ class User extends UserBase
             'email' => $this->getEmailAddress(),
             'passwordExpiresUtc' => null, // Entry needed even if null.
             'isMfaEnabled' => count($this->mfas) > 0 ? true : false,
+            // Users who must set up MFA anyway get no "enable MFA to extend your password" pitch.
+            'offerMfaExtension' => $this->getVerifiedMfaOptionsCount() === 0 && $this->require_mfa !== 'yes',
             'mfaOptions' => $this->getVerifiedMfaOptions(),
             'numRemainingCodes' => $this->countMfaBackupCodes(),
             'managerEmail' => $this->manager_email,
