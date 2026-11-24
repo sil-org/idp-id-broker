@@ -505,7 +505,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Update an MFA label'
+      description: >-
+        Update an MFA label.
+
+        Deprecated: takes the owner's `employee_id` in the request body. Removed in v9 in favor of `PUT /user/{employee_id}/mfa/{id}`, which takes `employee_id` in the path.
+      deprecated: true
       operationId: PUT_mfa-id
       requestBody:
         content:
@@ -547,7 +551,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Delete an MFA configuration'
+      description: >-
+        Delete an MFA configuration.
+
+        Deprecated: takes the owner's `employee_id` in the request body. Removed in v9 in favor of `DELETE /user/{employee_id}/mfa/{id}`, which takes `employee_id` in the path.
+      deprecated: true
       operationId: DELETE_mfa-id
       requestBody:
         content:
@@ -597,7 +605,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Verify the value provided for this MFA device.'
+      description: >-
+        Verify the value provided for this MFA device.
+
+        Deprecated: takes the owner's `employee_id` in the request body. Removed in v9 in favor of `POST /user/{employee_id}/mfa/{id}/verify`, which takes `employee_id` in the path.
+      deprecated: true
       operationId: POST_mfa-id-verify
       requestBody:
         content:
@@ -658,7 +670,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Verify the registration of a new mfa webauthn credential.'
+      description: >-
+        Verify the registration of a new mfa webauthn credential.
+
+        Deprecated: takes the owner's `employee_id` in the request body. Removed in v9 in favor of `POST /user/{employee_id}/mfa/{id}/verify/registration`, which takes `employee_id` in the path.
+      deprecated: true
       operationId: POST_mfa-id-verify-registration
       requestBody:
         content:
@@ -723,7 +739,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Update the label of a MFA webauthn credential.'
+      description: >-
+        Update the label of a MFA webauthn credential.
+
+        Deprecated: takes the owner's `employee_id` in the request body. Removed in v9 in favor of `PUT /user/{employee_id}/mfa/{mfaId}/webauthn/{webauthnId}`, which takes `employee_id` in the path.
+      deprecated: true
       operationId: PUT_mfa-mfaId-webauthn-webauthnId
       requestBody:
         content:
@@ -773,8 +793,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
       description: >-
-        Delete a webauthn credential from an MFA. If it is the last credential,
-        the whole MFA will be deleted.
+        Delete a webauthn credential from an MFA. If it is the last credential, the whole MFA will be deleted.
+
+        Deprecated: takes the owner's `employee_id` in the request body. Removed in v9 in favor of `DELETE /user/{employee_id}/mfa/{mfaId}/webauthn/{webauthnId}`, which takes `employee_id` in the path.
+      deprecated: true
       operationId: DELETE_mfa-mfaId-webauthn-webauthnId
       requestBody:
         content:
@@ -858,7 +880,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Retrieve a specific, verified recovery method.'
+      description: >-
+        Retrieve a specific, verified recovery method.
+
+        Deprecated: takes the owner's `employee_id` in the request body. Removed in v9 in favor of `GET /user/{employee_id}/method/{uid}`, which takes `employee_id` in the path.
+      deprecated: true
       operationId: GET_method-uid
       requestBody:
         content:
@@ -890,8 +916,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
       description: >-
-        Delete a specific recovery method. Deleting a verified method notifies
-        the user, their remaining recovery methods, and the removed address.
+        Delete a specific recovery method. Deleting a verified method notifies the user, their remaining recovery methods, and the removed address.
+
+        Deprecated: takes the owner's `employee_id` in the request body. Removed in v9 in favor of `DELETE /user/{employee_id}/method/{uid}`, which takes `employee_id` in the path.
+      deprecated: true
       operationId: DELETE_method-uid
       requestBody:
         content:
@@ -987,7 +1015,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      description: 'Resend the method verification email'
+      description: >-
+        Resend the method verification email.
+
+        Deprecated: takes the owner's `employee_id` in the request body. Removed in v9 in favor of `PUT /user/{employee_id}/method/{uid}/resend`, which takes `employee_id` in the path.
+      deprecated: true
       operationId: PUT_method-uid-resend
       requestBody:
         content:
