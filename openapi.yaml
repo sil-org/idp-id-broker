@@ -303,6 +303,288 @@ paths:
       required: true
       schema:
         type: string
+  /user/{employee_id}/mfa/{id}:
+    put:
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaResponse'
+        '404':
+          description: 'User not found for given `employee_id`, or MFA record not found for that user'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'The server encountered an error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: 'Update an MFA label'
+      operationId: PUT_user-employee_id-mfa-id
+      requestBody:
+        content:
+          application/json:
+            example:
+              label: 'My blue USB key'
+            schema:
+              properties:
+                label:
+                  type: string
+              required:
+              - label
+              type: object
+        required: true
+    delete:
+      responses:
+        '204':
+          description: 'Successful deletion of record'
+        '404':
+          description: 'User not found for given `employee_id`, or MFA record not found for that user'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Unable to delete the MFA record'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: 'Delete an MFA configuration'
+      operationId: DELETE_user-employee_id-mfa-id
+    parameters:
+    - name: employee_id
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /user/{employee_id}/mfa/{id}/verify:
+    post:
+      responses:
+        '200':
+          description: 'Value provided passed verification'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaResponse'
+        '400':
+          description: >-
+            Value provided failed verification or was unacceptable for
+            some other reason.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'No user found with that `employee_id`, or no MFA record found with that `id` and `employee_id`.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 'Too many failed attempts for this MFA record recently.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: 'Verify the value provided for this MFA device.'
+      operationId: POST_user-employee_id-mfa-id-verify
+      requestBody:
+        content:
+          application/json:
+            example:
+              value: 01234987
+            schema:
+              properties:
+                value:
+                  type: string
+              required:
+              - value
+              type: object
+        required: true
+      parameters:
+      - name: rpOrigin
+        in: query
+        description: 'The Relying Party origin url (only needed for WebAuthn)'
+        schema:
+          default: ''
+          type: string
+    parameters:
+    - name: employee_id
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /user/{employee_id}/mfa/{id}/verify/registration:
+    post:
+      responses:
+        '200':
+          description: 'Value provided passed verification'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaResponse'
+        '400':
+          description: >-
+            Value provided failed verification or was unacceptable for
+            some other reason.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'No user found with that `employee_id`, or no MFA record found with that `id` and `employee_id`.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 'Too many failed attempts for this MFA record recently.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: 'Verify the registration of a new mfa webauthn credential.'
+      operationId: POST_user-employee_id-mfa-id-verify-registration
+      requestBody:
+        content:
+          application/json:
+            example:
+              value: 01234987
+              label: Yubikey
+            schema:
+              properties:
+                value:
+                  type: string
+                label:
+                  type: string
+              required:
+              - value
+              - label
+              type: object
+        required: true
+      parameters:
+      - name: rpOrigin
+        in: query
+        required: true
+        description: 'The Relying Party origin url (only needed for WebAuthn)'
+        schema:
+          default: ''
+          type: string
+    parameters:
+    - name: employee_id
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /user/{employee_id}/mfa/{mfaId}/webauthn/{webauthnId}:
+    put:
+      responses:
+        '200':
+          description: 'Webauthn label successfully updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebauthnResponse'
+        '400':
+          description: 'Missing or blank label value'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'No user found with that `employee_id`, no MFA record found with that `mfa_id`
+            for that user, or no webauthn record found with that `id` and that `mfa_id`.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: 'Update the label of a MFA webauthn credential.'
+      operationId: PUT_user-employee_id-mfa-mfaId-webauthn-webauthnId
+      requestBody:
+        content:
+          application/json:
+            example:
+              label: 'My First Security Key'
+            schema:
+              properties:
+                label:
+                  type: string
+              required:
+              - label
+              type: object
+        required: true
+    delete:
+      responses:
+        '204':
+          description: 'Successful deletion of record'
+        '403':
+          description: 'The MFA record was not of type webauthn'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: >-
+            No user found with that `employee_id`, no MFA record found with
+            that `mfa_id` for that user, or no webauthn record found with that
+            `id` and that `mfa_id`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Unable to delete the webauthn credential or the MFA record'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: >-
+        Delete a webauthn credential from an MFA. If it is the last credential,
+        the whole MFA will be deleted.
+      operationId: DELETE_user-employee_id-mfa-mfaId-webauthn-webauthnId
+    parameters:
+    - name: employee_id
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: webauthnId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: mfaId
+      in: path
+      required: true
+      schema:
+        type: string
   /user/{employee_id}/method:
     get:
       responses:
@@ -324,6 +606,84 @@ paths:
       operationId: GET_user-employee_id-method
     parameters:
     - name: employee_id
+      in: path
+      required: true
+      schema:
+        type: string
+  /user/{employee_id}/method/{uid}:
+    get:
+      responses:
+        '200':
+          description: 'Recovery method found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MethodResponse'
+        '404':
+          description: 'User not found or method not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: 'Retrieve a specific, verified recovery method.'
+      operationId: GET_user-employee_id-method-uid
+    delete:
+      responses:
+        '204':
+          description: 'Recovery method found and deleted'
+        '404':
+          description: 'User not found or method not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Delete failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: >-
+        Delete a specific recovery method. Deleting a verified method notifies
+        the user, their remaining recovery methods, and the removed address.
+      operationId: DELETE_user-employee_id-method-uid
+    parameters:
+    - name: employee_id
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: uid
+      in: path
+      required: true
+      schema:
+        type: string
+  /user/{employee_id}/method/{uid}/resend:
+    put:
+      responses:
+        '204':
+          description: 'Method found and email sent'
+        '400':
+          description: 'Method already verified'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'User not found or method not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: 'Resend the method verification email'
+      operationId: PUT_user-employee_id-method-uid-resend
+    parameters:
+    - name: employee_id
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: uid
       in: path
       required: true
       schema:
@@ -502,328 +862,6 @@ paths:
         schema:
           default: ''
           type: string
-  /mfa/{id}:
-    put:
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MfaResponse'
-        '400':
-          description: 'Missing employee_id'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'User not found for given `employee_id`, or MFA record not found for that user'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'The server encountered an error'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      description: 'Update an MFA label'
-      operationId: PUT_mfa-id
-      requestBody:
-        content:
-          application/json:
-            example:
-              employee_id: '12345'
-              label: 'My blue USB key'
-            schema:
-              properties:
-                employee_id:
-                  type: string
-                label:
-                  type: string
-              required:
-              - employee_id
-              - label
-              type: object
-        required: true
-    delete:
-      responses:
-        '204':
-          description: 'Successful deletion of record'
-        '400':
-          description: '`employee_id` was not provided'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'User not found for given `employee_id`, or MFA record not found for that user'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Unable to delete the MFA record'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      description: 'Delete an MFA configuration'
-      operationId: DELETE_mfa-id
-      requestBody:
-        content:
-          application/json:
-            example:
-              employee_id: '12345'
-            schema:
-              properties:
-                employee_id:
-                  type: string
-              required:
-              - employee_id
-              type: object
-        required: true
-    parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: string
-  /mfa/{id}/verify:
-    post:
-      responses:
-        '200':
-          description: 'Value provided passed verification'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MfaResponse'
-        '400':
-          description: >-
-            Value provided failed verification or was unacceptable for
-            some other reason (such as a missing `employee_id`).
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'No user found with that `employee_id`, or no MFA record found with that `id` and `employee_id`.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '429':
-          description: 'Too many failed attempts for this MFA record recently.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      description: 'Verify the value provided for this MFA device.'
-      operationId: POST_mfa-id-verify
-      requestBody:
-        content:
-          application/json:
-            example:
-              employee_id: '12345'
-              value: 01234987
-            schema:
-              properties:
-                employee_id:
-                  type: string
-                value:
-                  type: string
-              required:
-              - employee_id
-              - value
-              type: object
-        required: true
-      parameters:
-      - name: rpOrigin
-        in: query
-        description: 'The Relying Party origin url (only needed for WebAuthn)'
-        schema:
-          default: ''
-          type: string
-    parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: string
-  /mfa/{id}/verify/registration:
-    post:
-      responses:
-        '200':
-          description: 'Value provided passed verification'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MfaResponse'
-        '400':
-          description: >-
-            Value provided failed verification or was unacceptable for
-            some other reason (such as a missing `employee_id`).
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'No user found with that `employee_id`, or no MFA record found with that `id` and `employee_id`.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '429':
-          description: 'Too many failed attempts for this MFA record recently.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      description: 'Verify the registration of a new mfa webauthn credential.'
-      operationId: POST_mfa-id-verify-registration
-      requestBody:
-        content:
-          application/json:
-            example:
-              employee_id: '12345'
-              value: 01234987
-              label: Yubikey
-            schema:
-              properties:
-                employee_id:
-                  type: string
-                value:
-                  type: string
-                label:
-                  type: string
-              required:
-              - employee_id
-              - value
-              - label
-              type: object
-        required: true
-      parameters:
-      - name: rpOrigin
-        in: query
-        required: true
-        description: 'The Relying Party origin url (only needed for WebAuthn)'
-        schema:
-          default: ''
-          type: string
-    parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: string
-  /mfa/{mfaId}/webauthn/{webauthnId}:
-    put:
-      responses:
-        '200':
-          description: 'Webauthn label successfully updated'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WebauthnResponse'
-        '400':
-          description: 'Missing or blank label value or missing employee_id'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'No user found with that `employee_id`, no MFA record found with that `mfa_id`
-            for that user, or no webauthn record found with that `id` and that `mfa_id`.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Internal server error'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      description: 'Update the label of a MFA webauthn credential.'
-      operationId: PUT_mfa-mfaId-webauthn-webauthnId
-      requestBody:
-        content:
-          application/json:
-            example:
-              employee_id: '12345'
-              label: 'My First Security Key'
-            schema:
-              properties:
-                employee_id:
-                  type: string
-                label:
-                  type: string
-              required:
-              - employee_id
-              - label
-              type: object
-        required: true
-    delete:
-      responses:
-        '204':
-          description: 'Successful deletion of record'
-        '400':
-          description: 'Missing employee_id'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: 'The MFA record was not of type webauthn'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: >-
-            No user found with that `employee_id`, no MFA record found with
-            that `mfa_id` for that user, or no webauthn record found with that
-            `id` and that `mfa_id`.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Unable to delete the webauthn credential or the MFA record'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      description: >-
-        Delete a webauthn credential from an MFA. If it is the last credential,
-        the whole MFA will be deleted.
-      operationId: DELETE_mfa-mfaId-webauthn-webauthnId
-      requestBody:
-        content:
-          application/json:
-            example:
-              employee_id: abc123
-            schema:
-              properties:
-                employee_id:
-                  type: string
-              required:
-              - employee_id
-              type: object
-        required: true
-    parameters:
-    - name: webauthnId
-      in: path
-      required: true
-      schema:
-        type: string
-    - name: mfaId
-      in: path
-      required: true
-      schema:
-        type: string
   /method:
     post:
       responses:
@@ -867,75 +905,6 @@ paths:
             schema:
               $ref: '#/components/schemas/Method'
         required: true
-  /method/{uid}:
-    get:
-      responses:
-        '200':
-          description: 'Recovery method found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MethodResponse'
-        '404':
-          description: 'User not found or method not found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      description: 'Retrieve a specific, verified recovery method.'
-      operationId: GET_method-uid
-      requestBody:
-        content:
-          application/json:
-            example:
-              employee_id: '12345'
-            schema:
-              properties:
-                employee_id:
-                  type: string
-              required:
-              - employee_id
-              type: object
-        required: true
-    delete:
-      responses:
-        '204':
-          description: 'Recovery method found and deleted'
-        '404':
-          description: 'User not found or method not found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Delete failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      description: >-
-        Delete a specific recovery method. Deleting a verified method notifies
-        the user, their remaining recovery methods, and the removed address.
-      operationId: DELETE_method-uid
-      requestBody:
-        content:
-          application/json:
-            example:
-              employee_id: '12345'
-            schema:
-              properties:
-                employee_id:
-                  type: string
-              required:
-              - employee_id
-              type: object
-        required: true
-    parameters:
-    - name: uid
-      in: path
-      required: true
-      schema:
-        type: string
   /method/{uid}/verify:
     put:
       responses:
@@ -986,44 +955,6 @@ paths:
                   type: string
               required:
               - code
-              type: object
-        required: true
-    parameters:
-    - name: uid
-      in: path
-      required: true
-      schema:
-        type: string
-  /method/{uid}/resend:
-    put:
-      responses:
-        '204':
-          description: 'Method found and email sent'
-        '400':
-          description: 'Method already verified'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'User not found or method not found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      description: 'Resend the method verification email'
-      operationId: PUT_method-uid-resend
-      requestBody:
-        content:
-          application/json:
-            example:
-              employee_id: '12345'
-            schema:
-              properties:
-                employee_id:
-                  type: string
-              required:
-              - employee_id
               type: object
         required: true
     parameters:

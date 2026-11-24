@@ -60,13 +60,14 @@ class MfaController extends BaseRestController
     /**
      * Verify value with MFA backend
      * @param int $id
+     * @param string $employeeId
      * @param string $type (optional) If not blank, it must be `registration`, referring to verifying a webauthn registration
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      * @throws TooManyRequestsHttpException
      * @return null
      */
-    public function actionVerify(int $id, string $type = "")
+    public function actionVerify(int $id, string $employeeId, string $type = "")
     {
         $req = \Yii::$app->request;
         $value = $req->getBodyParam('value');
@@ -76,11 +77,6 @@ class MfaController extends BaseRestController
 
         $label = $req->getBodyParam('label');
         $label = $label ?: '';
-
-        $employeeId = $req->getBodyParam('employee_id');
-        if ($employeeId == null) {
-            throw new BadRequestHttpException("employee_id is required", 1794377755);
-        }
 
         $user = User::findOne(['employee_id' => $employeeId]);
         if ($user == null) {
@@ -161,17 +157,13 @@ class MfaController extends BaseRestController
      * Find an MFA by id and employee_id
      *
      * @param int $id
+     * @param string $employeeId
      * @return Mfa|null
-     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
+     * @throws ForbiddenHttpException
      */
-    protected function getRequestedMfa($id)
+    protected function getRequestedMfa($id, string $employeeId)
     {
-        $employeeId = \Yii::$app->request->getBodyParam('employee_id');
-        if ($employeeId == null) {
-            throw new BadRequestHttpException("employee_id is required", 1794377756);
-        }
-
         $user = User::findOne(['employee_id' => $employeeId]);
         if ($user == null) {
             \Yii::error([
@@ -206,15 +198,16 @@ class MfaController extends BaseRestController
     /**
      * Delete MFA record
      * @param int $id
+     * @param string $employeeId
      * @return null
      * @throws \Throwable
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      * @throws ServerErrorHttpException
      */
-    public function actionDelete(int $id)
+    public function actionDelete(int $id, string $employeeId)
     {
-        $mfa = $this->getRequestedMfa($id);
+        $mfa = $this->getRequestedMfa($id, $employeeId);
 
         if ($mfa->delete() === false) {
             \Yii::error([
@@ -234,15 +227,16 @@ class MfaController extends BaseRestController
      * Delete one u2f/webauthn credential from an MFA record
      * @param int $mfaId
      * @param int $webauthnId
+     * @param string $employeeId
      * @return null
      * @throws \Throwable
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      * @throws ServerErrorHttpException
      */
-    public function actionDeleteCredential(int $mfaId, int $webauthnId)
+    public function actionDeleteCredential(int $mfaId, int $webauthnId, string $employeeId)
     {
-        $mfa = $this->getRequestedMfa($mfaId);
+        $mfa = $this->getRequestedMfa($mfaId, $employeeId);
 
         if ($mfa->type != Mfa::TYPE_WEBAUTHN) {
             throw new ForbiddenHttpException("May not delete a credential on a $mfa->type mfa type", 1658237110);
@@ -266,6 +260,7 @@ class MfaController extends BaseRestController
 
     /**
      * @param int $id
+     * @param string $employeeId
      * @return Mfa|null
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
@@ -273,9 +268,9 @@ class MfaController extends BaseRestController
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function actionUpdate(int $id)
+    public function actionUpdate(int $id, string $employeeId)
     {
-        $mfa = $this->getRequestedMfa($id);
+        $mfa = $this->getRequestedMfa($id, $employeeId);
 
         $label = \Yii::$app->request->getBodyParam('label');
         if ($label === null) {
@@ -301,6 +296,7 @@ class MfaController extends BaseRestController
     /**
      * @param int $mfaId
      * @param int $webauthnId
+     * @param string $employeeId
      * @return MfaWebauthn
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
@@ -308,10 +304,10 @@ class MfaController extends BaseRestController
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function actionUpdateWebauthn(int $mfaId, int $webauthnId)
+    public function actionUpdateWebauthn(int $mfaId, int $webauthnId, string $employeeId)
     {
         // validate that the parent MFA records exists and has the Employee ID provided in the request
-        $this->getRequestedMfa($mfaId);
+        $this->getRequestedMfa($mfaId, $employeeId);
 
         $webauthn = MfaWebauthn::findOne(['id' => $webauthnId, 'mfa_id' => $mfaId]);
         if ($webauthn === null) {

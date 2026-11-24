@@ -68,24 +68,26 @@ return [
                  */
                 'GET    user/<employeeId:\w+>/mfa'                 => 'mfa/list',
                 'POST   mfa'                                       => 'mfa/create',
-                'PUT    mfa/<id:\d+>'                              => 'mfa/update',
-                'PUT    mfa/<mfaId:\d+>/webauthn/<webauthnId:\d+>' => 'mfa/update-webauthn',
-                'POST   mfa/<id:\d+>/verify'                       => 'mfa/verify',
-                'POST   mfa/<id:\d+>/verify/'                      => 'mfa/verify',
-                'POST   mfa/<id:\d+>/verify/<type>'                => 'mfa/verify',
-                'DELETE mfa/<id:\d+>'                              => 'mfa/delete',
-                'DELETE mfa/<mfaId:\d+>/webauthn/<webauthnId:\d+>' => 'mfa/delete-credential',
+
+                'PUT    user/<employeeId:\w+>/mfa/<id:\d+>'                              => 'mfa/update',
+                'PUT    user/<employeeId:\w+>/mfa/<mfaId:\d+>/webauthn/<webauthnId:\d+>' => 'mfa/update-webauthn',
+                'POST   user/<employeeId:\w+>/mfa/<id:\d+>/verify'                       => 'mfa/verify',
+                'POST   user/<employeeId:\w+>/mfa/<id:\d+>/verify/'                      => 'mfa/verify',
+                'POST   user/<employeeId:\w+>/mfa/<id:\d+>/verify/<type>'                => 'mfa/verify',
+                'DELETE user/<employeeId:\w+>/mfa/<id:\d+>'                              => 'mfa/delete',
+                'DELETE user/<employeeId:\w+>/mfa/<mfaId:\d+>/webauthn/<webauthnId:\d+>' => 'mfa/delete-credential',
 
                 /*
                  * Method routes
                  */
                 'GET     user/<employeeId:\w+>/method'            => 'method/list',
-                'GET     method/' . UID_ROUTE_PATTERN             => 'method/view',
                 'POST    method'                                  => 'method/create',
                 'PUT     method/' . UID_ROUTE_PATTERN             => 'method/update',
-                'PUT     method/' . UID_ROUTE_PATTERN . '/resend' => 'method/resend',
                 'PUT     method/' . UID_ROUTE_PATTERN . '/verify' => 'method/verify',
-                'DELETE  method/' . UID_ROUTE_PATTERN             => 'method/delete',
+
+                'GET     user/<employeeId:\w+>/method/' . UID_ROUTE_PATTERN             => 'method/view',
+                'PUT     user/<employeeId:\w+>/method/' . UID_ROUTE_PATTERN . '/resend' => 'method/resend',
+                'DELETE  user/<employeeId:\w+>/method/' . UID_ROUTE_PATTERN             => 'method/delete',
 
                 /*
                  * Reset routes

@@ -43,6 +43,14 @@ class MfaContext extends \FeatureContext
      */
     private $totpSecret;
 
+    /**
+     * Send a request for an existing MFA, addressed under its owner's path
+     */
+    private function requestMfa(string $subPath, string $action): void
+    {
+        $this->iRequestTheResourceBe('/user/' . $this->tempEmployeeId . '/mfa/' . $subPath, $action);
+    }
+
     #[Given('the user has a verified :mfaType MFA')]
     public function iGiveThatUserAVerifiedMfa($mfaType)
     {
@@ -207,16 +215,21 @@ class MfaContext extends \FeatureContext
         ];
 
         $this->cleanRequestBody();
-        $this->setRequestBody('employee_id', $this->tempEmployeeId);
         $this->setRequestBody('value', $reqValue);
         $this->mfa = $mfa;
     }
 
 
+    #[When('I request that MFA at :resource be :action')]
+    public function iRequestThatMfaAtBe(string $resource, string $action): void
+    {
+        $this->iRequestTheResourceBe(str_replace('{id}', $this->mfa->id, $resource), $action);
+    }
+
     #[When('I update the MFA')]
     public function iUpdateTheMfa()
     {
-        $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id, self::UPDATED);
+        $this->requestMfa($this->mfa->id, self::UPDATED);
     }
 
 
@@ -225,7 +238,7 @@ class MfaContext extends \FeatureContext
     {
         $rpId = getenv('MFA_WEBAUTHN_rpId');
         $this->iProvideAFieldQueryPropertyOfValue('rpOrigin', $rpId);
-        $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/webauthn/' . $this->mfaWebauthn->id, self::UPDATED);
+        $this->requestMfa($this->mfa->id . '/webauthn/' . $this->mfaWebauthn->id, self::UPDATED);
     }
 
     #[When('I request to verify (one of) the code(s)')]
@@ -233,12 +246,11 @@ class MfaContext extends \FeatureContext
     {
         $dataForTableNode = [
             ['property', 'value'],
-            ['employee_id', '123'],
             ['value', $this->backupCodes[0]],
         ];
 
         $this->iProvideTheFollowingValidData(new TableNode($dataForTableNode));
-        $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify', self::CREATED);
+        $this->requestMfa($this->mfa->id . '/verify', self::CREATED);
     }
 
     #[When('I request to verify the webauthn Mfa registration')]
@@ -246,7 +258,7 @@ class MfaContext extends \FeatureContext
     {
         $rpId = getenv('MFA_WEBAUTHN_rpId');
         $this->iProvideAFieldQueryPropertyOfValue('rpOrigin', $rpId);
-        $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify/registration', self::CREATED);
+        $this->requestMfa($this->mfa->id . '/verify/registration', self::CREATED);
     }
 
     #[When('I request to verify the webauthn Mfa registration with a label of :label')]
@@ -255,7 +267,7 @@ class MfaContext extends \FeatureContext
         $rpId = getenv('MFA_WEBAUTHN_rpId');
         $this->iProvideAFieldQueryPropertyOfValue('rpOrigin', $rpId);
         $this->setRequestBody('label', $label);
-        $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify/registration', self::CREATED);
+        $this->requestMfa($this->mfa->id . '/verify/registration', self::CREATED);
     }
 
     #[Then(':num codes should be stored')]
@@ -267,31 +279,18 @@ class MfaContext extends \FeatureContext
     #[When('I request to delete the MFA')]
     public function iRequestToDeleteTheMfa()
     {
-        $dataForTableNode = [
-            ['property', 'value'],
-            ['employee_id', '123'],
-        ];
-
         $rpId = getenv('MFA_WEBAUTHN_rpId');
         $this->iProvideAFieldQueryPropertyOfValue('rpOrigin', $rpId);
-        $this->iProvideTheFollowingValidData(new TableNode($dataForTableNode));
-        $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id, self::DELETED);
+        $this->cleanRequestBody();
+        $this->requestMfa($this->mfa->id, self::DELETED);
     }
 
 
     #[When('I request to delete the webauthn entry of the MFA with a webauthn_id of :webauthnId')]
     public function iRequestToDeleteTheWebauthnEntryOfTheMfaWithAWebauthnIDOf($webauthnId)
     {
-        $dataForTableNode = [
-            ['property', 'value'],
-            ['employee_id', '123'],
-        ];
-
-        $this->iProvideTheFollowingValidData(new TableNode($dataForTableNode));
-        $this->iRequestTheResourceBe(
-            '/mfa/' . $this->mfa->id . '/webauthn/' . $webauthnId,
-            self::DELETED
-        );
+        $this->cleanRequestBody();
+        $this->requestMfa($this->mfa->id . '/webauthn/' . $webauthnId, self::DELETED);
     }
 
 
@@ -344,9 +343,8 @@ class MfaContext extends \FeatureContext
     {
         $otp = TOTP::createFromSecret($this->totpSecret, new Clock());
 
-        $this->setRequestBody('employee_id', '123');
         $this->setRequestBody('value', $otp->now());
-        $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify', self::CREATED);
+        $this->requestMfa($this->mfa->id . '/verify', self::CREATED);
 
         $this->mfa = Mfa::findOne(['id' => $this->getResponseBody()['id']]);
     }
@@ -356,7 +354,6 @@ class MfaContext extends \FeatureContext
     {
         $rpId = getenv('MFA_WEBAUTHN_rpId');
         $this->iProvideAFieldQueryPropertyOfValue('rpOrigin', $rpId);
-        $this->setRequestBody('employee_id', $this->tempEmployeeId);
         $this->setRequestBody('value', [
             'id' => 'invalid',
             'rawId' => 'invalid',
@@ -367,7 +364,7 @@ class MfaContext extends \FeatureContext
                 'signature' => 'invalid',
             ],
         ]);
-        $this->iRequestTheResourceBe('/mfa/' . $this->mfa->id . '/verify', self::CREATED);
+        $this->requestMfa($this->mfa->id . '/verify', self::CREATED);
     }
 
     #[Then(':num failed attempt(s) should be stored')]
