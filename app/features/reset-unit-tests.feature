@@ -35,14 +35,14 @@ Feature: Password Reset
     And a "reset-self" email should be sent to "recovery@example.com"
     And no other emails should be sent
 
-  Scenario Outline: Create a password reset for a user with only a personal email
-    Given there is a user in the database with only a personal email "<personalEmail>"
+  Scenario Outline: Create a password reset for a user whose primary email matches a recovery email in any case
+    Given there is a user in the database whose primary email "<primaryEmail>" is also a lowercase password recovery email
     When the user requests a password reset
-    Then a "reset-self" email should be sent to "<personalEmail>"
+    Then a "reset-self" email should be sent to "<primaryEmail>"
     And no other emails should be sent
 
     Examples:
-      | personalEmail             |
+      | primaryEmail              |
       | personal_only@example.org |
       | Personal_Only@Example.org |
 

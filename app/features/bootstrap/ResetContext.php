@@ -168,10 +168,11 @@ class ResetContext extends UnitTestsContext
         Assert::notEq($toName, $this->tempUser->getDisplayName(), 'user name on to line');
     }
 
-    #[Given('there is a user in the database with only a personal email :email')]
-    public function thereIsAUserInTheDatabaseWithOnlyAPersonalEmail($email): void
+    #[Given('there is a user in the database whose primary email :email is also a lowercase password recovery email')]
+    public function thereIsAUserWhosePrimaryEmailIsAlsoALowercaseRecoveryEmail($email): void
     {
-        $this->tempUser = $this->createNewUserInDatabase('unit_test', ['email' => null, 'personal_email' => $email]);
+        $this->tempUser = $this->createNewUserInDatabase('unit_test', ['email' => $email]);
+        $this->createMethod(mb_strtolower($email), 1, $this->tempUser);
     }
 
     #[Given('the user\'s primary email is also a password recovery email')]
