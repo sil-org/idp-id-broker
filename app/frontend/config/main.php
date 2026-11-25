@@ -68,6 +68,9 @@ return [
                  */
                 'GET    user/<employeeId:\w+>/mfa'                 => 'mfa/list',
                 'POST   mfa'                                       => 'mfa/create',
+
+                // Deprecated: these take the owner's employee_id in the request body. Removed in v9
+                // in favor of user/<employeeId>/mfa/..., which take it in the path.
                 'PUT    mfa/<id:\d+>'                              => 'mfa/update',
                 'PUT    mfa/<mfaId:\d+>/webauthn/<webauthnId:\d+>' => 'mfa/update-webauthn',
                 'POST   mfa/<id:\d+>/verify'                       => 'mfa/verify',
@@ -80,11 +83,14 @@ return [
                  * Method routes
                  */
                 'GET     user/<employeeId:\w+>/method'            => 'method/list',
-                'GET     method/' . UID_ROUTE_PATTERN             => 'method/view',
                 'POST    method'                                  => 'method/create',
                 'PUT     method/' . UID_ROUTE_PATTERN             => 'method/update',
-                'PUT     method/' . UID_ROUTE_PATTERN . '/resend' => 'method/resend',
                 'PUT     method/' . UID_ROUTE_PATTERN . '/verify' => 'method/verify',
+
+                // Deprecated: these take the owner's employee_id in the request body. Removed in v9
+                // in favor of user/<employeeId>/method/<uid>..., which take it in the path.
+                'GET     method/' . UID_ROUTE_PATTERN             => 'method/view',
+                'PUT     method/' . UID_ROUTE_PATTERN . '/resend' => 'method/resend',
                 'DELETE  method/' . UID_ROUTE_PATTERN             => 'method/delete',
 
                 /*
