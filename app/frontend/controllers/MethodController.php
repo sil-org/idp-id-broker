@@ -43,14 +43,13 @@ class MethodController extends BaseRestController
     /**
      * Retrieve the Method record referenced by the uid and employee_id
      * @param string $uid
+     * @param string $employeeId
      * @param bool $verifiedOnly Limit query to verified methods only
      * @return Method
      * @throws NotFoundHttpException
      */
-    protected function getRequestedMethod($uid, $verifiedOnly = false)
+    protected function getRequestedMethod($uid, string $employeeId, $verifiedOnly = false)
     {
-        $employeeId = \Yii::$app->request->getBodyParam('employee_id');
-
         $user = User::findOne(['employee_id' => $employeeId]);
 
         $query = ['uid' => $uid, 'user_id' => ($user->id ?? null)];
@@ -73,12 +72,13 @@ class MethodController extends BaseRestController
     /**
      * View single Recovery Method
      * @param string $uid
+     * @param string $employeeId
      * @return Method
      * @throws NotFoundHttpException
      */
-    public function actionView($uid)
+    public function actionView($uid, string $employeeId)
     {
-        return $this->getRequestedMethod($uid, true);
+        return $this->getRequestedMethod($uid, $employeeId, true);
     }
 
     /**
@@ -198,14 +198,15 @@ class MethodController extends BaseRestController
      * Delete method
      *
      * @param string $uid
+     * @param string $employeeId
      * @return \stdClass
      * @throws NotFoundHttpException
      * @throws ServerErrorHttpException
      * @throws \Throwable
      */
-    public function actionDelete($uid)
+    public function actionDelete($uid, string $employeeId)
     {
-        $method = $this->getRequestedMethod($uid);
+        $method = $this->getRequestedMethod($uid, $employeeId);
 
         if (!$method->delete()) {
             throw new ServerErrorHttpException('Unable to delete method', 1540673326);
@@ -217,14 +218,15 @@ class MethodController extends BaseRestController
 
     /**
      * @param string $uid
+     * @param string $employeeId
      * @return \stdClass
      * @throws NotFoundHttpException
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function actionResend($uid)
+    public function actionResend($uid, string $employeeId)
     {
-        $method = $this->getRequestedMethod($uid);
+        $method = $this->getRequestedMethod($uid, $employeeId);
 
         if ($method->isVerified()) {
             throw new BadRequestHttpException(\Yii::t('app', 'Method already verified'));

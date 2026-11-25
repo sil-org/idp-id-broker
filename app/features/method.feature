@@ -33,7 +33,7 @@ Feature: Recovery Method API
 
   Scenario: Retrieve a specific Method record
     Given user with employee id 123 has a verified Method "email@example.com"
-    When I send a "GET" to "/method/{uid}" with a valid uid
+    When I send a "GET" to "/user/123/method/{uid}" with a valid uid
     Then the response status code should be 200
       And the following data is returned:
         | property      | value                 |
@@ -91,7 +91,7 @@ Feature: Recovery Method API
 
   Scenario: Resend a method verification
     Given user with employee id 123 has an unverified Method "unverified@example.com"
-    When I send a "PUT" to "/method/{uid}/resend" with a valid uid
+    When I send a "PUT" to "/user/123/method/{uid}/resend" with a valid uid
     Then the response status code should be 204
       And a method record exists with a value of "unverified@example.com"
       And the following method data should be stored:
@@ -116,8 +116,28 @@ Feature: Recovery Method API
 
   Scenario: Delete a Method
     Given user with employee id 123 has an unverified Method "email@example.com"
-    When I send a "DELETE" to "/method/{uid}" with a valid uid
+    When I send a "DELETE" to "/user/123/method/{uid}" with a valid uid
     Then the response status code should be 204
+    When I request "/user/123/method" be retrieved
+    Then I should receive 0 records
+
+  Scenario: Try to retrieve an unverified Method record
+    Given user with employee id 123 has an unverified Method "email@example.com"
+    When I send a "GET" to "/user/123/method/{uid}" with a valid uid
+    Then the response status code should be 404
+
+  Scenario: Try to retrieve a Method record under another user's path
+    Given another user exists with employee id "456"
+      And user with employee id 123 has a verified Method "email@example.com"
+    When I send a "GET" to "/user/456/method/{uid}" with a valid uid
+    Then the response status code should be 404
+
+  Scenario: Try to delete a Method under another user's path
+    Given another user exists with employee id "456"
+      And user with employee id 123 has an unverified Method "email@example.com"
+    When I send a "DELETE" to "/user/456/method/{uid}" with a valid uid
+    Then the response status code should be 404
+      And a method record exists with a value of "email@example.com"
 
   Scenario: Verify a Method with expired verification code
     Given user with employee id 123 has an unverified Method "unverified@example.com"

@@ -90,6 +90,26 @@ class FeatureContext extends YiiContext
         Assert::notNull($this->testUser, 'Creation of the test user failed or the test is accessing the wrong database');
     }
 
+    /**
+     * Add a second user without changing which user the scenario is about. This replaces the request body,
+     * so use it before any step that provides request data.
+     */
+    #[Given('another user exists with employee id :employeeId')]
+    public function anotherUserExistsWithEmployeeId($employeeId)
+    {
+        $this->iProvideTheFollowingValidData(new TableNode([
+            ['property', 'value'],
+            ['employee_id', $employeeId],
+            ['first_name', 'Other'],
+            ['last_name', 'User'],
+            ['display_name', 'Other User'],
+            ['username', 'other_user_' . $employeeId],
+            ['email', 'other_user_' . $employeeId . '@example.org'],
+        ]));
+        $this->iRequestTheResourceBe('/user', self::CREATED);
+        $this->theResponseStatusCodeShouldBe(200);
+    }
+
     #[Then('I should receive :numRecords record(s)')]
     public function iShouldReceiveRecords($numRecords)
     {

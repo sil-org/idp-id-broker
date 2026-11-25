@@ -159,7 +159,6 @@ Feature: MFA
     Given the user has a verified "backupcode" MFA
       And I provide the following valid data:
         | property    | value        |
-        | employee_id | 123          |
         | label       | A New Label  |
     When I update the MFA
     Then the response status code should be 200
@@ -173,7 +172,6 @@ Feature: MFA
     Given the user has a verified "backupcode" MFA
     And I provide the following valid data:
       | property    | value        |
-      | employee_id | 123          |
       | label       |              |
     When I update the MFA
     Then the response status code should be 200
@@ -187,7 +185,6 @@ Feature: MFA
     Given the user has a mfaWebauthn with a key_handle_hash of "KHH"
     And I provide the following valid data:
       | property    | value        |
-      | employee_id | 123          |
       | label       | A New Label  |
     When I update the mfaWebauthn
     Then the response status code should be 200
@@ -201,7 +198,6 @@ Feature: MFA
     Given the user has a mfaWebauthn with a key_handle_hash of "KHH"
     And I provide the following valid data:
       | property    | value        |
-      | employee_id | 123          |
       | label       |              |
     When I update the mfaWebauthn
     Then the response status code should be 400
@@ -285,31 +281,39 @@ Feature: MFA
       And the response body should contain "User not found"
 
     Examples:
-      | resource                   | action  |
-      | /mfa                       | created |
-      | /mfa/1                     | updated |
-      | /mfa/1                     | deleted |
-      | /mfa/1/verify              | created |
-      | /mfa/1/verify/registration | created |
-      | /mfa/1/webauthn/1          | updated |
-      | /mfa/1/webauthn/1          | deleted |
+      | resource                            | action  |
+      | /mfa                                | created |
+      | /user/999/mfa/1                     | updated |
+      | /user/999/mfa/1                     | deleted |
+      | /user/999/mfa/1/verify              | created |
+      | /user/999/mfa/1/verify/registration | created |
+      | /user/999/mfa/1/webauthn/1          | updated |
+      | /user/999/mfa/1/webauthn/1          | deleted |
 
-  Scenario Outline: Attempt to act upon an MFA without providing an employee_id
+  Scenario: Attempt to create an MFA without providing an employee_id
     Given I provide the following valid data:
       | property    | value      |
       | type        | backupcode |
       | label       | My label   |
-      | value       | 123456     |
-    When I request "<resource>" be <action>
+    When I request "/mfa" be created
     Then the response status code should be 400
       And the response body should contain "employee_id is required"
 
+  Scenario Outline: Attempt to act upon an MFA under another user's path
+    Given another user exists with employee id "456"
+      And the user has a verified "backupcode" MFA
+      And I provide the following valid data:
+        | property    | value      |
+        | employee_id | 123        |
+        | label       | My label   |
+        | value       | 123456     |
+    When I request that MFA at "/user/456/mfa/{id}<suffix>" be <action>
+    Then the response status code should be 404
+      And 10 codes should be stored
+
     Examples:
-      | resource                   | action  |
-      | /mfa                       | created |
-      | /mfa/1                     | updated |
-      | /mfa/1                     | deleted |
-      | /mfa/1/verify              | created |
-      | /mfa/1/verify/registration | created |
-      | /mfa/1/webauthn/1          | updated |
-      | /mfa/1/webauthn/1          | deleted |
+      | suffix      | action  |
+      |             | updated |
+      |             | deleted |
+      | /verify     | created |
+      | /webauthn/1 | deleted |
