@@ -1168,7 +1168,6 @@ components:
         deactivated_utc: null
         manager_email: the.boss@example.com
         personal_email: my.email@example.com
-        hide: 'no'
         member: []
         mfa:
           prompt: 'yes'
@@ -1243,12 +1242,6 @@ components:
         manager_email:
           type: string
         personal_email:
-          type: string
-        hide:
-          deprecated: true
-          enum:
-          - 'yes'
-          - 'no'
           type: string
         member:
           type: array
@@ -1379,12 +1372,6 @@ components:
           type: string
         personal_email:
           type: string
-        hide:
-          deprecated: true
-          enum:
-          - 'yes'
-          - 'no'
-          type: string
         groups:
           type: string
       required:
@@ -1421,12 +1408,6 @@ components:
         manager_email:
           type: string
         personal_email:
-          type: string
-        hide:
-          deprecated: true
-          enum:
-          - 'yes'
-          - 'no'
           type: string
         groups:
           type: string

@@ -24,7 +24,6 @@ use Yii;
  * @property string $review_profile_after
  * @property string|null $last_login_utc
  * @property string|null $manager_email
- * @property string $hide
  * @property string|null $groups
  * @property string $groups_external
  * @property string|null $personal_email
@@ -62,7 +61,7 @@ class UserBase extends \yii\db\ActiveRecord
         return [
             [['uuid', 'employee_id', 'first_name', 'last_name', 'username', 'active', 'locked', 'last_changed_utc', 'last_synced_utc', 'review_profile_after', 'nag_for_mfa_after', 'nag_for_method_after'], 'required'],
             [['current_password_id'], 'integer'],
-            [['groups', 'active', 'locked', 'require_mfa', 'hide'], 'string'],
+            [['groups', 'active', 'locked', 'require_mfa'], 'string'],
             [['last_changed_utc', 'last_synced_utc', 'review_profile_after', 'last_login_utc', 'expires_on', 'nag_for_mfa_after', 'nag_for_method_after', 'created_utc', 'deactivated_utc', 'token_expiry_utc'], 'safe'],
             [['uuid'], 'string', 'max' => 64],
             [['employee_id', 'first_name', 'last_name', 'display_name', 'username', 'email', 'manager_email', 'groups_external', 'personal_email', 'token_hash'], 'string', 'max' => 255],
@@ -96,7 +95,6 @@ class UserBase extends \yii\db\ActiveRecord
             'review_profile_after' => Yii::t('app', 'Review Profile After'),
             'last_login_utc' => Yii::t('app', 'Last Login Utc'),
             'manager_email' => Yii::t('app', 'Manager Email'),
-            'hide' => Yii::t('app', 'Hide'),
             'groups' => Yii::t('app', 'Groups'),
             'groups_external' => Yii::t('app', 'Groups External'),
             'personal_email' => Yii::t('app', 'Personal Email'),

@@ -19,7 +19,6 @@ Feature: User
         | email           | shep_clark@example.org              |
         | manager_email   | boss_man@example.org                |
         | require_mfa     | yes                                 |
-        | hide            | yes                                 |
     When I request "/user" be created
     Then the response status code should be 200
       And the following data is returned:
@@ -33,7 +32,6 @@ Feature: User
         | active          | yes                                 |
         | locked          | no                                  |
         | manager_email   | boss_man@example.org                |
-        | hide            | yes                                 |
         | profile_review  | no                                  |
       And the uuid property should be a valid UUID
       And the following data is not returned:
@@ -55,7 +53,6 @@ Feature: User
         | manager_email       | boss_man@example.org  |
         | require_mfa         | yes                   |
         | personal_email      | NULL                  |
-        | hide                | yes                   |
         | groups              | NULL                  |
         | deactivated_utc     | NULL                  |
       And last_changed_utc should be stored as now UTC
@@ -92,7 +89,6 @@ Feature: User
         | username        | shep_clark            |
         | email           | shep_clark@example.org|
         | manager_email   | w_clark@example.org   |
-        | hide            | yes                   |
       And I request "/user" be created
       And the response status code should be 200
       And a record exists with an employee_id of "123"
@@ -108,7 +104,6 @@ Feature: User
         | active              | yes                   |
         | locked              | no                    |
         | require_mfa         | no                    |
-        | hide                | yes                   |
       And I change the <property> to <value>
     When I request "/user/123" be updated
     Then the response status code should be 200
@@ -132,8 +127,6 @@ Feature: User
       | personal_email  | my@example.org     |
       | require_mfa     | no                 |
       | require_mfa     | yes                |
-      | hide            | no                 |
-      | hide            | yes                |
       | groups          | mensa,hackers      |
 
   Scenario: update the last_login_utc of an existing user
@@ -157,7 +150,6 @@ Feature: User
         | display_name    | Shep Clark            |
         | username        | shep_clark            |
         | email           | shep_clark@example.org|
-        | hide            | yes                   |
       And I request "/user" be created
       And the response status code should be 200
       And I change the active to no
@@ -729,7 +721,6 @@ Feature: User
         |   email          |   john_connor@example.org |
         |   active         |   yes                     |
         |   locked         |   no                      |
-        |   hide           |   no                      |
         |   profile_review |   no                      |
         |   manager_email  |   kyle_reese@example.org  |
         |   personal_email |   john_connor@example.com |
