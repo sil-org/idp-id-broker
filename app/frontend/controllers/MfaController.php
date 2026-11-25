@@ -201,7 +201,7 @@ class MfaController extends BaseRestController
      * @param string $employeeId
      * @return null
      * @throws \Throwable
-     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      * @throws ServerErrorHttpException
      */
@@ -230,7 +230,7 @@ class MfaController extends BaseRestController
      * @param string $employeeId
      * @return null
      * @throws \Throwable
-     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      * @throws ServerErrorHttpException
      */
@@ -262,7 +262,7 @@ class MfaController extends BaseRestController
      * @param int $id
      * @param string $employeeId
      * @return Mfa|null
-     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      * @throws ServerErrorHttpException
      * @throws \Throwable

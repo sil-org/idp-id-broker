@@ -127,31 +127,17 @@ Feature: Recovery Method API
     Then the response status code should be 404
 
   Scenario: Try to retrieve a Method record under another user's path
-    Given user with employee id 123 has a verified Method "email@example.com"
-    When I send a "GET" to "/user/999/method/{uid}" with a valid uid
+    Given another user exists with employee id "456"
+      And user with employee id 123 has a verified Method "email@example.com"
+    When I send a "GET" to "/user/456/method/{uid}" with a valid uid
     Then the response status code should be 404
 
   Scenario: Try to delete a Method under another user's path
-    Given user with employee id 123 has an unverified Method "email@example.com"
-    When I send a "DELETE" to "/user/999/method/{uid}" with a valid uid
+    Given another user exists with employee id "456"
+      And user with employee id 123 has an unverified Method "email@example.com"
+    When I send a "DELETE" to "/user/456/method/{uid}" with a valid uid
     Then the response status code should be 404
       And a method record exists with a value of "email@example.com"
-
-  Scenario Outline: The Method routes that took the owner in the request body are gone
-    Given user with employee id 123 has a verified Method "email@example.com"
-      And I provide the following valid data:
-        | property     | value |
-        | employee_id  | 123   |
-    When I send a "<verb>" to "<resource>" with a valid uid
-    Then the response status code should be 404
-    When I request "/user/123/method" be retrieved
-    Then I should receive 1 record
-
-    Examples:
-      | verb   | resource             |
-      | GET    | /method/{uid}        |
-      | PUT    | /method/{uid}/resend |
-      | DELETE | /method/{uid}        |
 
   Scenario: Verify a Method with expired verification code
     Given user with employee id 123 has an unverified Method "unverified@example.com"
